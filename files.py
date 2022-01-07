@@ -1,6 +1,4 @@
-import matplotlib.pyplot as plt
 import csv
-
 
 def output_file(p,U,cons,dist_1,dist_l,pref,name):
     csv_rows = []
@@ -20,21 +18,15 @@ def output_file(p,U,cons,dist_1,dist_l,pref,name):
         writer.writerows(csv_rows)
     return None
 
-def simple_output_file(p,U,name):
-    csv_rows = []
+def simple_output_file(p,y,name):
     
-    header = ["p","Up"]
-    csv_rows.append(header)
+    header = ["p","y(p)"]
+    csv_rows = [header]
     for i in range(len(p)):
-        el = [p[i],U[i]]
+        el = [p[i],y[i]]
         csv_rows.append(el)
         
     with open(name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
-    return None
-
-
-def graf_generator(p,U,cons,name):
-    print()
     return None

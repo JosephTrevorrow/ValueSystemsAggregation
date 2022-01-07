@@ -4,7 +4,8 @@ import pandas as pd
 def PMatrix(df_row):
     """
     This function computes the P matrix of the formalisation.
-    INPUT:
+    INPUT: pd.DataFrame object
+    RETURN: P matrix
     """
     rel = df_row['rel']/(df_row['rel']+df_row['nonrel'])
     per = df_row['nonrel']/(df_row['rel']+df_row['nonrel'])
@@ -12,44 +13,54 @@ def PMatrix(df_row):
     return np.array(P)
 
 def JMatrixs(df_row):
+    """
+    This function computes the J matrices of the formalisation.
+    INPUT: pd.DataFrame object
+    RETURN: J+ and J- matrices
+    """
     J_p = [[df_row['a_adp_rel'],df_row['a_div_rel']],[df_row['a_adp_nonrel'],df_row['a_div_nonrel']]]
     J_n = [[-df_row['a_adp_rel'],-df_row['a_div_rel']],[-df_row['a_adp_nonrel'],-df_row['a_div_nonrel']]]
     return np.array(J_p),np.array(J_n)
 
 def Weights(df,n_countries,weights = 0):
+    """
+    This function computes the weight vector of the formalisation.
+    INPUT: df -- pd.DataFrame object ; n_countries -- int ;
+           weights -- int (weights' set up option:
+           · if weights = 0, we consider no weights
+           · if weights = 1, we consider the population of each country that participated in the study (scenario not contemplated in the paper)
+           · if weights = 2), we consider the total population of the country
+    RETURN: np.array with weights 
+    """
     w = []
     n_total = 0
-    if weights == 1:
+    if weights == 1: # population of each country that participated in the study
         for i in range(n_countries):
             n_participants = df.iloc[i]['rel'] + df.iloc[i]['nonrel']
             n_total += n_participants
             w.append(n_participants)
-        w = np.array(w)
+        w = np.array(w) # vector without normalisation
         w_norm = []
-        for i in range(n_countries):
-            #print(w[i])
+        for i in range(n_countries): # normalizing w
             w_norm.append(w[i] / n_total)
-            #print(w_norm[i])
         return np.array(w_norm)
-    elif weights == 2:
+    elif weights == 2: # total population of the country
         for i in range(n_countries):
             n_participants = df.iloc[i]['population']
             n_total += n_participants
             w.append(n_participants)
-        w = np.array(w)
+        w = np.array(w) # vector without normalisation
         w_norm = []
-        for i in range(n_countries):
-            #print(w[i])
+        for i in range(n_countries): # normalizing w
             w_norm.append(w[i] / n_total)
-            #print(w_norm[i])
         return np.array(w_norm)
-    else:
+    else: # no weights, i.e. w = 1
         for i in range(n_countries):
             w.append(1)
         return np.array(w)
 
 
-def FormalisationObjects(filename = 'AAMAS2022.csv',delimiter=',',weights = 0):
+def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
 
     df = pd.read_csv(filename, delimiter=delimiter)
     n_countries = df.shape[0] # number of rows
@@ -81,13 +92,6 @@ def IMatrix(dim = 2):
         I.append(I_row)
     return np.array(I)
 
-def BMatrix(w, n_val = 2, n_actions = 2 ):
-    I = IMatrix(dim = 2*n_val*n_actions)
-    B = np.array(w[0]*I)
-    for i in range(1,len(w)):
-        B = np.concatenate((B,w[i]*I))
-    return B
-
 def Vectorisation(M):
     vector = []
     for i in range(M.shape[0]):
@@ -95,43 +99,8 @@ def Vectorisation(M):
             vector.append(M[i][j])
     return vector
 
-def BVector(J_list, w):
-    b = []
-    for i in range(len(w)):
-        j_p = Vectorisation(J_list[i][0])
-        j_n = Vectorisation(J_list[i][1])
-        for k in range(len(j_p)):
-            b.append(w[i]*j_p[k])
-        for k in range(len(j_n)):
-            b.append(w[i]*j_n[k])
-        
-    return np.array(b)
 
-def CMatrix(w, n_val = 2):
-    I = IMatrix(dim = n_val*n_val)
-    C = np.array(w[0]*I)
-    for i in range(1,len(w)):
-        C = np.concatenate((C,w[i]*I))
-    return C
-
-def CVector(P_list, w):
-    c = []
-    for i in range(len(w)):
-        p = Vectorisation(P_list[i])
-        for k in range(len(p)):
-            c.append(w[i]*p[k])
-
-    return np.array(c)
-        
-def FormalisationMatrix(P_list,J_list,w):
-    B = BMatrix(w, n_val = J_list[0][0].shape[0], n_actions = J_list[0][0].shape[1] )
-    b = BVector(J_list, w)
-    C = CMatrix(w, n_val = P_list[0][0].shape[0])
-    c = CVector(P_list, w)
-
-    return B,b,C,c
-
-def BMatrix2(w, n_val = 2, n_actions = 2, p = 2):
+def BMatrix(w, n_val = 2, n_actions = 2, p = 2):
     I = IMatrix(dim = 2*n_val*n_actions)
     B = np.array((w[0]**(1/p))*I)
     for i in range(1,len(w)):
@@ -139,7 +108,7 @@ def BMatrix2(w, n_val = 2, n_actions = 2, p = 2):
     return B
 
 
-def BVector2(J_list, w, p = 2):
+def BVector(J_list, w, p = 2):
     b = []
     for i in range(len(w)):
         j_p = Vectorisation(J_list[i][0])
@@ -151,14 +120,14 @@ def BVector2(J_list, w, p = 2):
         
     return np.array(b)
 
-def CMatrix2(w, n_val = 2, p = 2):
+def CMatrix(w, n_val = 2, p = 2):
     I = IMatrix(dim = n_val*n_val)
     C = np.array((w[0]**(1/p))*I)
     for i in range(1,len(w)):
         C = np.concatenate((C,(w[i]**(1/p))*I))
     return C
 
-def CVector2(P_list, w, p = 2):
+def CVector(P_list, w, p = 2):
     c = []
     for i in range(len(w)):
         pref = Vectorisation(P_list[i])
@@ -167,13 +136,13 @@ def CVector2(P_list, w, p = 2):
 
     return np.array(c)
         
-def FormalisationMatrix2(P_list,J_list,w,p = 2,v=True):
+def FormalisationMatrix(P_list,J_list,w,p = 2,v=True):
     if v:
-        A = CMatrix2(w, n_val = P_list[0][0].shape[0],p=p)
-        b = CVector2(P_list, w,p=p)
+        A = CMatrix(w, n_val = P_list[0][0].shape[0],p=p)
+        b = CVector(P_list, w,p=p)
     else:
-        A = BMatrix2(w, n_val = J_list[0][0].shape[0], n_actions = J_list[0][0].shape[1],p=p)
-        b = BVector2(J_list, w,p=p)
+        A = BMatrix(w, n_val = J_list[0][0].shape[0], n_actions = J_list[0][0].shape[1],p=p)
+        b = BVector(J_list, w,p=p)
         
     return A,b
 
@@ -183,6 +152,4 @@ def FormalisationMatrix2(P_list,J_list,w,p = 2,v=True):
 
 if __name__ == '__main__':
     P_list,J_list,w,country_dict = FormalisationObjects()
-    B,b,C,c = FormalisationMatrix(P_list,J_list,w)
-
-    print(c)
+    A,b = FormalisationMatrix(P_list,J_list,w)
