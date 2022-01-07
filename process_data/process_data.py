@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Sep 20 17:10:55 2021
 
-@author: ROGER
-"""
 
 """
-In this file we will read the raw data from EVS2017.sav file and we will process 
-the data according to the article "Encoding ethics and moral values".
+In this file we read the raw data from EVS2017.sav file and we process 
+the data according to the section 6 of the article.
 """
 
 import pandas as pd
 import csv
 
-#df = pd.read_spss("EVS2017.sav")
 
-#%%
 
 def a_adp(element):
     """
@@ -51,6 +44,7 @@ def a_div(element):
     except:
         return None
 
+    
 
 def process_participant(dataframe,caseno):
     """
@@ -76,10 +70,11 @@ def process_participant(dataframe,caseno):
     except:
         religious = None
 
+    # we compute a_ad and a_dv
     action_adp = a_adp(dataframe_row)
     action_div = a_div(dataframe_row)
     
-    if religious == None or action_adp == None or action_div == None:
+    if religious == None:
         return None
     else:
         return (religious,action_adp,action_div)
@@ -89,77 +84,13 @@ def process_country(dataframe,country):
     Process information for each country
     INPUT: dataframe (pandas dataframe with the results of the EVS 2017)
            country (code of the european country, e.g. ES for Spain)
-    Return: dict
+    Return: dict with # of religious and non-religious citizens, 
+            a_rl(ad), a_pr(ad), a_rl(dv) and a_pr(dv) 
     """
     df = dataframe[dataframe['c_abrv']==country]
     n_row = df.shape[0]
-    n_religious = 0
-    n_nonreligious = 0
-    sum_a_adp_rel = 0
-    sum_a_adp_nonrel = 0
-    sum_a_div_rel = 0
-    sum_a_div_nonrel = 0
-    for i in range(0,n_row):
-        caseno = df.iloc[i]['caseno']
-        tuple_ = process_participant(df,caseno)
-        if tuple_:
-            if tuple_[0]:
-                n_religious += 1
-                sum_a_adp_rel += tuple_[1]
-                sum_a_div_rel += tuple_[2]
-            else:
-                n_nonreligious += 1
-                sum_a_adp_nonrel += tuple_[1]
-                sum_a_div_nonrel += tuple_[2]
-        else:
-            continue
-        
-    return {'rel':n_religious,'nonrel':n_nonreligious,
-            'a_adp_rel':sum_a_adp_rel/n_religious,'a_adp_nonrel':sum_a_adp_nonrel/n_nonreligious,
-            'a_div_rel':sum_a_div_rel/n_religious,'a_div_nonrel':sum_a_div_nonrel/n_nonreligious}
-    
-
-def process_participant_v2(dataframe,caseno):
-    """
-    In this function we count the number of religious or non-religious 
-    participants per country according to the proceeding Serramià et al. describe
-    INPUT: dataframe (pandas dataframe with the results of the EVS 2017)
-           country (code of the european country, e.g. ES for Spain)
-           caseno (number of case per country)
-    Return: tuple (tuple with three values: religious: True if religious
-                        adp: float from -1,1
-                        div: float from -1,1)
-    """
-    #religious or not v6 in EVS2017
-    dataframe_row = dataframe[dataframe['caseno']==caseno].iloc[0]
-    religiousness = dataframe_row['v6']
-    try:
-        if religiousness == 'not at all important' or religiousness == 'not important':
-            religious = False
-        elif religiousness == 'quite important' or religiousness == 'very important':
-            religious = True
-        else:
-            religious = None
-    except:
-        religious = None
-
-    action_adp = a_adp(dataframe_row)
-    action_div = a_div(dataframe_row)
-    
-    if religious == None:
-        return None
-    else:
-        return (religious,action_adp,action_div)
-    
-def process_country_v2(dataframe,country):
-    """
-    Process information for each country
-    INPUT: dataframe (pandas dataframe with the results of the EVS 2017)
-           country (code of the european country, e.g. ES for Spain)
-    Return: dict
-    """
-    df = dataframe[dataframe['c_abrv']==country]
-    n_row = df.shape[0]
+    # setting counters to compute the mean of each judgement value:
+    # a_rl(ad), a_pr(ad), a_rl(dv) and a_pr(dv) 
     n_religious = 0
     n_nonreligious = 0
     n_rel_adp = 0
@@ -170,24 +101,26 @@ def process_country_v2(dataframe,country):
     sum_a_adp_nonrel = 0
     sum_a_div_rel = 0
     sum_a_div_nonrel = 0
+
     for i in range(0,n_row):
         caseno = df.iloc[i]['caseno']
-        tuple_ = process_participant_v2(df,caseno)
+        tuple_ = process_participant(df,caseno) # information of the case
         if tuple_:
-            if tuple_[0]:
+            if tuple_[0]: # True for religious citizens
                 n_religious += 1
-                if tuple_[1] != None:
+                #ignore missing data
+                if tuple_[1] != None: # adopt judgement
                     n_rel_adp += 1
                     sum_a_adp_rel += tuple_[1]
-                if tuple_[2] != None:
+                if tuple_[2] != None: # divorce judgement
                     n_rel_div += 1
                     sum_a_div_rel += tuple_[2]
-            else:
+            else: # non-religious citizens
                 n_nonreligious += 1
-                if tuple_[1] != None:
+                if tuple_[1] != None: # adopt judgement
                     n_nonrel_adp += 1
                     sum_a_adp_nonrel += tuple_[1]
-                if tuple_[2] != None:
+                if tuple_[2] != None: # divorce judgement
                     n_nonrel_div += 1
                     sum_a_div_nonrel += tuple_[2]
         else:
@@ -200,10 +133,10 @@ def process_country_v2(dataframe,country):
     
 if __name__ == '__main__':
     df = pd.read_spss("EVS2017.sav")
-    #process_country(df,'AL')
+    # we create a dictionary to store the data per country
     dictionary = {}
     for country in list(df['c_abrv'].unique()):
-        dict_ = process_country_v2(df[['c_abrv','caseno','v6','v82','v155']],country)
+        dict_ = process_country(df[['c_abrv','caseno','v6','v82','v155']],country)
         dictionary.update({country:dict_})
         
     columns = ['country']
@@ -217,7 +150,8 @@ if __name__ == '__main__':
             csv_rows2.append(dictionary[country][item])
         csv_rows.append(csv_rows2)
     
-    with open('AAMAS2022.csv', 'w', newline='') as csvfile:
+    # we store the data in a file
+    with open('processed_data.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
     

@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 
 def PMatrix(df_row):
+    """
+    This function computes the P matrix of the formalisation.
+    INPUT:
+    """
     rel = df_row['rel']/(df_row['rel']+df_row['nonrel'])
     per = df_row['nonrel']/(df_row['rel']+df_row['nonrel'])
     P = [[0,rel],[per,0]]
