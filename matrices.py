@@ -61,6 +61,15 @@ def Weights(df,n_countries,weights = 0):
 
 
 def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
+    """
+    This function computes the matrices P, J+ and J- and the weight vector of the formalisation.
+    INPUT: filename -- str ; delimiter -- str ;
+           weights -- int (weights' set up option:
+           · if weights = 0, we consider no weights
+           · if weights = 1, we consider the population of each country that participated in the study (scenario not contemplated in the paper)
+           · if weights = 2), we consider the total population of the country
+    RETURN: np.array with weights 
+    """
 
     df = pd.read_csv(filename, delimiter=delimiter)
     n_countries = df.shape[0] # number of rows
@@ -68,7 +77,7 @@ def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
     J_list = []
     P_list = []
     country_dict = {}
-    for i in range(n_countries):
+    for i in range(n_countries): #compute array of matrices for every country
         country = df.iloc[i]['country']
         country_dict.update({i:country})
         P = PMatrix(df.iloc[i])
@@ -80,7 +89,12 @@ def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
     return P_list,J_list,w,country_dict
 
 
-def IMatrix(dim = 2):
+def IMatrix(dim = 2): 
+    """
+    This function computes the identity matrix.
+    INPUT: dim -- int 
+    RETURN: np.array shape = dim x dim
+    """
     I = []
     for i in range(dim):
         I_row = []
@@ -93,6 +107,11 @@ def IMatrix(dim = 2):
     return np.array(I)
 
 def Vectorisation(M):
+    """
+    This function vectorize any matrix.
+    INPUT: M (matrix)
+    RETURN: np.array shape = dim x dim
+    """
     vector = []
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
@@ -101,6 +120,12 @@ def Vectorisation(M):
 
 
 def BMatrix(w, n_val = 2, n_actions = 2, p = 2):
+    """
+    This function computes the B matrix.
+    INPUT: w (weights), n_val -- int (number of values), n_actions -- int (number of actions),
+           p -- int
+    RETURN: np.array shape = 2·n_val·n_actions·n_countres x 2·n_val·n_actions
+    """
     I = IMatrix(dim = 2*n_val*n_actions)
     B = np.array((w[0]**(1/p))*I)
     for i in range(1,len(w)):
@@ -109,6 +134,11 @@ def BMatrix(w, n_val = 2, n_actions = 2, p = 2):
 
 
 def BVector(J_list, w, p = 2):
+    """
+    This function computes the b vector.
+    INPUT: J_list (list of J matrices), w (weights), p -- int
+    RETURN: np.array shape = 2·n_val·n_actions·n_countres x 1
+    """
     b = []
     for i in range(len(w)):
         j_p = Vectorisation(J_list[i][0])
@@ -121,6 +151,11 @@ def BVector(J_list, w, p = 2):
     return np.array(b)
 
 def CMatrix(w, n_val = 2, p = 2):
+    """
+    This function computes the C matrix.
+    INPUT: w (weights), n_val -- int (number of values), p -- int
+    RETURN: np.array shape = n_val·n_val·n_countres x n_val·n_val
+    """
     I = IMatrix(dim = n_val*n_val)
     C = np.array((w[0]**(1/p))*I)
     for i in range(1,len(w)):
@@ -128,6 +163,11 @@ def CMatrix(w, n_val = 2, p = 2):
     return C
 
 def CVector(P_list, w, p = 2):
+    """
+    This function computes the c vector.
+    INPUT: P_list (list of P matrices), w (weights), p -- int
+    RETURN: np.array shape = n_val·n_val·n_countres x 1
+    """
     c = []
     for i in range(len(w)):
         pref = Vectorisation(P_list[i])
@@ -137,6 +177,14 @@ def CVector(P_list, w, p = 2):
     return np.array(c)
         
 def FormalisationMatrix(P_list,J_list,w,p = 2,v=True):
+    """
+    This function computes the A matrix and b vector of the lp-regression problem,
+    i.e. minimizing ||Ax-b||_p problem.
+    INPUT: P_list (list of P matrices), J_list (list of J matrices), w (weights), 
+           p -- int, v -- boolean (parameter, when v = True, we solve the prefference aggregation
+           over moral values, when v = False, we solve the aggregation of moral values)
+    RETURN: A,b
+    """
     if v:
         A = CMatrix(w, n_val = P_list[0][0].shape[0],p=p)
         b = CVector(P_list, w,p=p)
@@ -145,9 +193,6 @@ def FormalisationMatrix(P_list,J_list,w,p = 2,v=True):
         b = BVector(J_list, w,p=p)
         
     return A,b
-
-
-
 
 
 if __name__ == '__main__':

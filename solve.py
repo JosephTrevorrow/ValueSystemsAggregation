@@ -216,7 +216,6 @@ if __name__ == '__main__':
         for i in np.arange(1 + incr, p, incr):
             A,b = FormalisationMatrix(P_list,J_list,w,i,args.v)
             x, r, u = Lp(A, b, i)
-            #print_consensus(x)
             dist = np.linalg.norm(cons - x, i)
             if (dist > best):
                 print('Not improving anymore, stopping!'.format(i))
@@ -259,5 +258,4 @@ if __name__ == '__main__':
 
         if args.o:
             np.savetxt(args.o, cons, fmt='%.20f')
-    
     
