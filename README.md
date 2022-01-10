@@ -8,6 +8,11 @@ Dependencies
 ----------
  - [Python 3](https://www.python.org/downloads/)
  - [Julia](https://julialang.org/downloads/) and [PyJulia](https://pyjulia.readthedocs.io/en/latest/installation.html)
+ - [Pandas](https://pandas.pydata.org/)
+ - [Csv library](https://docs.python.org/3/library/csv.html)
+ - [Numpy](https://numpy.org/)
+ - [CVXPY](https://www.cvxpy.org/)
+ - [ECOS](https://web.stanford.edu/~boyd/papers/ecos.html) (Embedded within CVXPY)
 
 Dataset
 ----------
@@ -37,4 +42,4 @@ optional arguments:
 
 Acknowledgements
 ----------
-This repository contains the [implementation of the pIRLS algorithm](https://github.com/fast-algos/pIRLS) ([article](https://papers.nips.cc/paper/2019/hash/46c7cb50b373877fb2f8d5c4517bb969-Abstract.html)). Both articles should be cited when citing our work.
+This repository contains the [implementation of the pIRLS algorithm](https://github.com/fast-algos/pIRLS) ([article](https://papers.nips.cc/paper/2019/hash/46c7cb50b373877fb2f8d5c4517bb969-Abstract.html)). This article should be cited when citing our work.
