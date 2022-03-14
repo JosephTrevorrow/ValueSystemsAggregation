@@ -20,7 +20,7 @@ All experiments consider the European Values Study 2017: Integrated Dataset (EVS
 
 Execution
 ----------
-Our single-norm approach must be executed by means of the [`single_norm.py`](single_norm.py) Python script, i.e.,
+Our approach must be executed by means of the [`solve.py`](solve.py) Python script, i.e.,
 ```
 usage: solve.py [-h] [-p P] [-e E] [-f F] [-w W] [-i I] [-o O] [-v] [-l] [-t]
                 [-g G]
