@@ -75,7 +75,8 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     x = np.linalg.inv(A.T @ W @ A) @ A.T @ W @ b  # initial LS solution
     for i in range(max_iter):
         W_ = np.diag(np.power(np.maximum(np.abs(b - A @ x), D), p - 2))
-        x_ = np.linalg.inv(A.T @ W_ @ A) @ A.T @ W_ @ b  # reweighted LS solution
+        # reweighted LS solution
+        x_ = np.linalg.inv(A.T @ W_ @ A) @ A.T @ W_ @ b
         e_ = sum(abs(x - x_))
         if e_ < e:
             break
@@ -91,12 +92,16 @@ def Lp(A, b, p):
     if p >= 2:  # pIRLS implementation (NIPS 2019)
         from julia import Main
         # from julia import IRLSmod
-        Main.include(os.path.dirname(os.path.realpath(__file__)) + '/IRLS-pNorm.jl')
+        Main.include(
+            os.path.dirname(
+                os.path.realpath(__file__)) +
+            '/IRLS-pNorm.jl')
         # constraints needed for pIRLS (empty)
         C = np.zeros_like(A)
         d = np.zeros_like(b)
         epsilon = 1e-10
-        cons, it = Main.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
+        cons, it = Main.pNorm(epsilon, A, b.reshape(-1, 1),
+                              p, C, d.reshape(-1, 1))
         # cons, it = IRLS.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
         r = np.abs(A @ cons - b)
         return cons, r, np.linalg.norm(r, p)
@@ -110,21 +115,43 @@ if __name__ == '__main__':
     parser.add_argument('-m', type=int, default=2, help='m')
     parser.add_argument('-p', type=float, default=2, help='p')
     parser.add_argument('-e', type=float, default=1e-4, help='e')
-    parser.add_argument('-f', type=str, default='data.csv', help='CSV file with data')
-    parser.add_argument('-w', type=int, default=0, help='1 people participated in the study and 2 population of each country')
-    parser.add_argument('-i', type=str, help='computes equivalent p given an input consensus')
+    parser.add_argument(
+        '-f',
+        type=str,
+        default='data.csv',
+        help='CSV file with data')
+    parser.add_argument(
+        '-w',
+        type=int,
+        default=0,
+        help='1 people participated in the study and 2 population of each country')
+    parser.add_argument(
+        '-i',
+        type=str,
+        help='computes equivalent p given an input consensus')
     parser.add_argument('-o', type=str, help='write consensus to file')
-    parser.add_argument('-v', help='computes the preference aggregation', action='store_true')
+    parser.add_argument(
+        '-v',
+        help='computes the preference aggregation',
+        action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true')
-    parser.add_argument('-t', help='compute the threshold p', action='store_true')
-    parser.add_argument('-g', type=str, default='none', help='store results in csv')
+    parser.add_argument(
+        '-t',
+        help='compute the threshold p',
+        action='store_true')
+    parser.add_argument(
+        '-g',
+        type=str,
+        default='none',
+        help='store results in csv')
     args = parser.parse_args()
 
     p = args.p
     n = args.n
     m = args.m
 
-    P_list, J_list, w, country_dict = FormalisationObjects(filename=args.f, delimiter=',', weights=args.w)
+    P_list, J_list, w, country_dict = FormalisationObjects(
+        filename=args.f, delimiter=',', weights=args.w)
 
     if args.l:
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
@@ -141,7 +168,7 @@ if __name__ == '__main__':
             A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)
             cons, _, _, = Lp(A, b, p)
             dist_p = np.linalg.norm(cons - cons_inf, p)
-            du = dist_p/dist_1inf
+            du = dist_p / dist_1inf
             print('U{:.2f} = {:.4f}'.format(p, du))
             if du < args.e:
                 print(' (ΔU/U1 = {:.4f} < {})'.format(du, args.e))
@@ -179,7 +206,14 @@ if __name__ == '__main__':
             dist_pl_list.append(dist_pl)
             print('{:.2f} \t \t {:.4f}'.format(p, ub))
 
-        output_file(p_list, u_list, cons_list, dist_1p_list, dist_pl_list, args.v, args.g)
+        output_file(
+            p_list,
+            u_list,
+            cons_list,
+            dist_1p_list,
+            dist_pl_list,
+            args.v,
+            args.g)
         # simple_output_file(p_list, u_list, 'copy' + args.g)
         # simple_output_file(p_list, dist_1p_list, 'dist_1' + args.g)
         # simple_output_file(p_list, dist_pl_list, 'dist_inf' + args.g)
@@ -203,9 +237,14 @@ if __name__ == '__main__':
             else:
                 print('p = {:.2f}'.format(i))
                 print('Distance L1<-->L{:.2f} = {:.4f}'.format(i, dist_1p))
-                print('Distance L{:.2f}<-->L{:.2f} = {:.4f}'.format(i, p, dist_pl))
-                print('Difference (L1<-->L{:.2f}) - (L{:.2f}<-->L{:.2f}) = {:.4f}'.format(i, i, p, abs(dist_1p - dist_pl)))
-                print('Current best difference (L1<-->L{:.2f}) - (L{:.2f}<-->L{:.2f}) = {:.4f}'.format(i, i, p, diff))
+                print(
+                    'Distance L{:.2f}<-->L{:.2f} = {:.4f}'.format(i, p, dist_pl))
+                print(
+                    'Difference (L1<-->L{:.2f}) - (L{:.2f}<-->L{:.2f}) = {:.4f}'.format(
+                        i, i, p, abs(
+                            dist_1p - dist_pl)))
+                print(
+                    'Current best difference (L1<-->L{:.2f}) - (L{:.2f}<-->L{:.2f}) = {:.4f}'.format(i, i, p, diff))
                 if abs(dist_1p - dist_pl) < diff:
                     diff = abs(dist_1p - dist_pl)
                     best_p = i

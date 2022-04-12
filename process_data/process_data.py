@@ -25,7 +25,7 @@ def a_adp(element):
         int_value = category_dic[element['v82']]
         value = -(int_value - 3) / 2
         return value
-    except:
+    except BaseException:
         return None
 
 
@@ -44,7 +44,7 @@ def a_div(element):
             int_value = int(element['v155'])
         value = (int_value - 5.5) / 4.5
         return value
-    except:
+    except BaseException:
         return None
 
 
@@ -69,7 +69,7 @@ def process_participant(dataframe, caseno):
             religious = True
         else:
             religious = None
-    except:
+    except BaseException:
         religious = None
 
     # we compute a_ad and a_dv
@@ -144,7 +144,8 @@ if __name__ == '__main__':
     # we create a dictionary to store the data per country
     dictionary = {}
     for country in list(df['c_abrv'].unique()):
-        dict_ = process_country(df[['c_abrv', 'caseno', 'v6', 'v82', 'v155']], country)
+        dict_ = process_country(
+            df[['c_abrv', 'caseno', 'v6', 'v82', 'v155']], country)
         dictionary.update({country: dict_})
     columns = ['country']
     for key in dictionary[country].keys():

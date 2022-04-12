@@ -163,9 +163,9 @@ def BVector(J_list, w, p=2):
         j_p = Vectorisation(J_list[i][0])
         j_n = Vectorisation(J_list[i][1])
         for k in range(len(j_p)):
-            b.append((w[i]**(1/p))*j_p[k])
+            b.append((w[i]**(1 / p)) * j_p[k])
         for k in range(len(j_n)):
-            b.append((w[i]**(1/p))*j_n[k])
+            b.append((w[i]**(1 / p)) * j_n[k])
     return np.array(b)
 
 
@@ -210,7 +210,8 @@ def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
         A = CMatrix(w, n_val=P_list[0][0].shape[0], p=p)
         b = CVector(P_list, w, p=p)
     else:
-        A = BMatrix(w, n_val=J_list[0][0].shape[0], n_actions=J_list[0][0].shape[1], p=p)
+        A = BMatrix(w, n_val=J_list[0][0].shape[0],
+                    n_actions=J_list[0][0].shape[1], p=p)
         b = BVector(J_list, w, p=p)
     return A, b
 
