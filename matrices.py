@@ -1,16 +1,18 @@
 import numpy as np
 import pandas as pd
 
+
 def PMatrix(df_row):
     """
     This function computes the P matrix of the formalisation.
     INPUT: pd.DataFrame object
     RETURN: P matrix
     """
-    rel = df_row['rel']/(df_row['rel']+df_row['nonrel'])
-    per = df_row['nonrel']/(df_row['rel']+df_row['nonrel'])
-    P = [[0,rel],[per,0]]
+    rel = df_row['rel'] / (df_row['rel'] + df_row['nonrel'])
+    per = df_row['nonrel'] / (df_row['rel'] + df_row['nonrel'])
+    P = [[0, rel], [per, 0]]
     return np.array(P)
+
 
 def JMatrixs(df_row):
     """
@@ -18,11 +20,30 @@ def JMatrixs(df_row):
     INPUT: pd.DataFrame object
     RETURN: J+ and J- matrices
     """
-    J_p = [[df_row['a_adp_rel'],df_row['a_div_rel']],[df_row['a_adp_nonrel'],df_row['a_div_nonrel']]]
-    J_n = [[-df_row['a_adp_rel'],-df_row['a_div_rel']],[-df_row['a_adp_nonrel'],-df_row['a_div_nonrel']]]
-    return np.array(J_p),np.array(J_n)
+    J_p = [
+        [
+            df_row['a_adp_rel'],
+            df_row['a_div_rel']
+        ],
+        [
+            df_row['a_adp_nonrel'],
+            df_row['a_div_nonrel']
+        ]
+    ]
+    J_n = [
+        [
+            -df_row['a_adp_rel'],
+            -df_row['a_div_rel']
+        ],
+        [
+            -df_row['a_adp_nonrel'],
+            -df_row['a_div_nonrel']
+        ]
+    ]
+    return np.array(J_p), np.array(J_n)
 
-def Weights(df,n_countries,weights = 0):
+
+def Weights(df, n_countries, weights=0):
     """
     This function computes the weight vector of the formalisation.
     INPUT: df -- pd.DataFrame object ; n_countries -- int ;
@@ -30,37 +51,37 @@ def Weights(df,n_countries,weights = 0):
            · if weights = 0, we consider no weights
            · if weights = 1, we consider the population of each country that participated in the study (scenario not contemplated in the paper)
            · if weights = 2), we consider the total population of the country
-    RETURN: np.array with weights 
+    RETURN: np.array with weights
     """
     w = []
     n_total = 0
-    if weights == 1: # population of each country that participated in the study
+    if weights == 1:  # population of each country that participated in the study
         for i in range(n_countries):
             n_participants = df.iloc[i]['rel'] + df.iloc[i]['nonrel']
             n_total += n_participants
             w.append(n_participants)
-        w = np.array(w) # vector without normalisation
+        w = np.array(w)  # vector without normalisation
         w_norm = []
-        for i in range(n_countries): # normalizing w
+        for i in range(n_countries):  # normalizing w
             w_norm.append(w[i] / n_total)
         return np.array(w_norm)
-    elif weights == 2: # total population of the country
+    elif weights == 2:  # total population of the country
         for i in range(n_countries):
             n_participants = df.iloc[i]['population']
             n_total += n_participants
             w.append(n_participants)
-        w = np.array(w) # vector without normalisation
+        w = np.array(w)  # vector without normalisation
         w_norm = []
-        for i in range(n_countries): # normalizing w
+        for i in range(n_countries):  # normalizing w
             w_norm.append(w[i] / n_total)
         return np.array(w_norm)
-    else: # no weights, i.e. w = 1
+    else:  # no weights, i.e. w = 1
         for i in range(n_countries):
             w.append(1)
         return np.array(w)
 
 
-def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
+def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
     """
     This function computes the matrices P, J+ and J- and the weight vector of the formalisation.
     INPUT: filename -- str ; delimiter -- str ;
@@ -68,43 +89,41 @@ def FormalisationObjects(filename = 'data.csv',delimiter=',',weights = 0):
            · if weights = 0, we consider no weights
            · if weights = 1, we consider the population of each country that participated in the study (scenario not contemplated in the paper)
            · if weights = 2), we consider the total population of the country
-    RETURN: np.array with weights 
+    RETURN: np.array with weights
     """
-
     df = pd.read_csv(filename, delimiter=delimiter)
-    n_countries = df.shape[0] # number of rows
-
+    n_countries = df.shape[0]  # number of rows
     J_list = []
     P_list = []
     country_dict = {}
-    for i in range(n_countries): #compute array of matrices for every country
+    for i in range(n_countries):  # compute array of matrices for every country
         country = df.iloc[i]['country']
-        country_dict.update({i:country})
+        country_dict.update({i: country})
         P = PMatrix(df.iloc[i])
-        J_p,J_n = JMatrixs(df.iloc[i])
+        J_p, J_n = JMatrixs(df.iloc[i])
         P_list.append(P)
-        J_list.append((J_p,J_n))
+        J_list.append((J_p, J_n))
+    w = Weights(df, n_countries, weights)
+    return P_list, J_list, w, country_dict
 
-    w = Weights(df,n_countries,weights)
-    return P_list,J_list,w,country_dict
 
-
-def IMatrix(dim = 2): 
+def IMatrix(dim=2):
     """
     This function computes the identity matrix.
-    INPUT: dim -- int 
+    INPUT: dim -- int
     RETURN: np.array shape = dim x dim
     """
     I = []
     for i in range(dim):
         I_row = []
         for j in range(dim):
-            if i==j:
+            if i == j:
                 I_row.append(1)
             else:
                 I_row.append(0)
         I.append(I_row)
     return np.array(I)
+
 
 def Vectorisation(M):
     """
@@ -119,21 +138,21 @@ def Vectorisation(M):
     return vector
 
 
-def BMatrix(w, n_val = 2, n_actions = 2, p = 2):
+def BMatrix(w, n_val=2, n_actions=2, p=2):
     """
     This function computes the B matrix.
     INPUT: w (weights), n_val -- int (number of values), n_actions -- int (number of actions),
            p -- int
     RETURN: np.array shape = 2·n_val·n_actions·n_countres x 2·n_val·n_actions
     """
-    I = IMatrix(dim = 2*n_val*n_actions)
-    B = np.array((w[0]**(1/p))*I)
-    for i in range(1,len(w)):
-        B = np.concatenate((B,(w[i]**(1/p))*I))
+    I = IMatrix(dim=2 * n_val * n_actions)
+    B = np.array((w[0] ** (1 / p)) * I)
+    for i in range(1, len(w)):
+        B = np.concatenate((B, (w[i] ** (1 / p)) * I))
     return B
 
 
-def BVector(J_list, w, p = 2):
+def BVector(J_list, w, p=2):
     """
     This function computes the b vector.
     INPUT: J_list (list of J matrices), w (weights), p -- int
@@ -147,22 +166,23 @@ def BVector(J_list, w, p = 2):
             b.append((w[i]**(1/p))*j_p[k])
         for k in range(len(j_n)):
             b.append((w[i]**(1/p))*j_n[k])
-        
     return np.array(b)
 
-def CMatrix(w, n_val = 2, p = 2):
+
+def CMatrix(w, n_val=2, p=2):
     """
     This function computes the C matrix.
     INPUT: w (weights), n_val -- int (number of values), p -- int
     RETURN: np.array shape = n_val·n_val·n_countres x n_val·n_val
     """
-    I = IMatrix(dim = n_val*n_val)
-    C = np.array((w[0]**(1/p))*I)
-    for i in range(1,len(w)):
-        C = np.concatenate((C,(w[i]**(1/p))*I))
+    I = IMatrix(dim=n_val * n_val)
+    C = np.array((w[0] ** (1 / p)) * I)
+    for i in range(1, len(w)):
+        C = np.concatenate((C, (w[i] ** (1 / p)) * I))
     return C
 
-def CVector(P_list, w, p = 2):
+
+def CVector(P_list, w, p=2):
     """
     This function computes the c vector.
     INPUT: P_list (list of P matrices), w (weights), p -- int
@@ -172,29 +192,29 @@ def CVector(P_list, w, p = 2):
     for i in range(len(w)):
         pref = Vectorisation(P_list[i])
         for k in range(len(pref)):
-            c.append((w[i]**(1/p))*pref[k])
+            c.append((w[i] ** (1 / p)) * pref[k])
 
     return np.array(c)
-        
-def FormalisationMatrix(P_list,J_list,w,p = 2,v=True):
+
+
+def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
     """
     This function computes the A matrix and b vector of the lp-regression problem,
     i.e. minimizing ||Ax-b||_p problem.
-    INPUT: P_list (list of P matrices), J_list (list of J matrices), w (weights), 
+    INPUT: P_list (list of P matrices), J_list (list of J matrices), w (weights),
            p -- int, v -- boolean (parameter, when v = True, we solve the prefference aggregation
            over moral values, when v = False, we solve the aggregation of moral values)
     RETURN: A,b
     """
     if v:
-        A = CMatrix(w, n_val = P_list[0][0].shape[0],p=p)
-        b = CVector(P_list, w,p=p)
+        A = CMatrix(w, n_val=P_list[0][0].shape[0], p=p)
+        b = CVector(P_list, w, p=p)
     else:
-        A = BMatrix(w, n_val = J_list[0][0].shape[0], n_actions = J_list[0][0].shape[1],p=p)
-        b = BVector(J_list, w,p=p)
-        
-    return A,b
+        A = BMatrix(w, n_val=J_list[0][0].shape[0], n_actions=J_list[0][0].shape[1], p=p)
+        b = BVector(J_list, w, p=p)
+    return A, b
 
 
 if __name__ == '__main__':
-    P_list,J_list,w,country_dict = FormalisationObjects()
-    A,b = FormalisationMatrix(P_list,J_list,w)
+    P_list, J_list, w, country_dict = FormalisationObjects()
+    A, b = FormalisationMatrix(P_list, J_list, w)
