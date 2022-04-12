@@ -107,24 +107,6 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
     return P_list, J_list, w, country_dict
 
 
-def IMatrix(dim=2):
-    """
-    This function computes the identity matrix.
-    INPUT: dim -- int
-    RETURN: np.array shape = dim x dim
-    """
-    I = []
-    for i in range(dim):
-        I_row = []
-        for j in range(dim):
-            if i == j:
-                I_row.append(1)
-            else:
-                I_row.append(0)
-        I.append(I_row)
-    return np.array(I)
-
-
 def Vectorisation(M):
     """
     This function vectorize any matrix.
@@ -145,7 +127,7 @@ def BMatrix(w, n_val=2, n_actions=2, p=2):
            p -- int
     RETURN: np.array shape = 2·n_val·n_actions·n_countres x 2·n_val·n_actions
     """
-    I = IMatrix(dim=2 * n_val * n_actions)
+    I = np.identity(2 * n_val * n_actions)
     B = np.array((w[0] ** (1 / p)) * I)
     for i in range(1, len(w)):
         B = np.concatenate((B, (w[i] ** (1 / p)) * I))
@@ -175,7 +157,7 @@ def CMatrix(w, n_val=2, p=2):
     INPUT: w (weights), n_val -- int (number of values), p -- int
     RETURN: np.array shape = n_val·n_val·n_countres x n_val·n_val
     """
-    I = IMatrix(dim=n_val * n_val)
+    I = np.identity(n_val * n_val)
     C = np.array((w[0] ** (1 / p)) * I)
     for i in range(1, len(w)):
         C = np.concatenate((C, (w[i] ** (1 / p)) * I))
