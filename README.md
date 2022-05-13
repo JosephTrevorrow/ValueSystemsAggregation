@@ -1,8 +1,9 @@
 Towards Pluralistic Value Alignment: Aggregating Value Systems Through ℓp-Regression
 ===================
-This repository contains the implementation of all the algorithms and data of the experimental section of
+This repository contains the implementation of all the algorithms and data of the experimental section of the paper
 "Towards Pluralistic Value Alignment: Aggregating Value Systems Through ℓp-Regression"
-by Roger Lera-Leri, Filippo Bistaffa, Marc Serramia, Maite Lopez-Sanchez, and Juan A. Rodríguez-Aguilar.
+presented by Roger Lera-Leri, Filippo Bistaffa, Marc Serramia, Maite Lopez-Sanchez, and Juan A. Rodríguez-Aguilar, 
+in Proceedings of International Conference on Autonomous Agents and Multi-Agent Systems. 780-788
 
 Dependencies
 ----------
