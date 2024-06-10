@@ -1,8 +1,10 @@
 import argparse as ap
 import numpy as np
 import os
-from matrices import FormalisationObjects, FormalisationMatrix
+from matrices import FormalisationObjects, FormalisationMatrix, FormalisePPref
 from files import output_file
+
+os.system('pip install pycall')
 
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
@@ -144,6 +146,14 @@ if __name__ == '__main__':
         type=str,
         default='none',
         help='store results in csv')
+
+    parser.add_argument(
+        '-pv',
+        type=str,
+        default='p_pref_values.csv',
+        help='compute the per agent p value preference values',
+    )
+
     args = parser.parse_args()
 
     p = args.p
@@ -267,6 +277,10 @@ if __name__ == '__main__':
                 print('Distance = {:.4f}'.format(dist))
                 print('Current best distance = {:.4f}'.format(best))
                 best = dist
+
+    elif args.pv != 'none':
+        pref_dict = formalisePPref(filename=args.pv)
+
 
     else:
         if p == 2:

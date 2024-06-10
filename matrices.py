@@ -2,6 +2,23 @@ import numpy as np
 import pandas as pd
 
 
+def FormalisePPref(filename='data.csv', delimiter=',', weights=0):
+    """
+    This function imports P value preferences for each agent in a dictionary.
+    Weights can be considered or not.
+    :param filename:
+    :param delimiter:
+    :param weights:
+    :return: P Preference Dict
+    """
+    df = pd.read_csv(filename, delimiter=delimiter)
+    n_countries = df.shape[0]  # number of rows
+    pref_dict = {}
+    for i in range(n_countries):  # compute array of matrices for every country
+        country = df.iloc[i]['country']
+        # TODO: Select P value for each country and store in P_dict
+    return pref_dict
+
 def PMatrix(df_row):
     """
     This function computes the P matrix of the formalisation.
@@ -184,7 +201,7 @@ def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
     This function computes the A matrix and b vector of the lp-regression problem,
     i.e. minimizing ||Ax-b||_p problem.
     INPUT: P_list (list of P matrices), J_list (list of J matrices), w (weights),
-           p -- int, v -- boolean (parameter, when v = True, we solve the prefference aggregation
+           p -- int, v -- boolean (parameter, when v = True, we solve the preference aggregation
            over moral values, when v = False, we solve the aggregation of moral values)
     RETURN: A,b
     """
