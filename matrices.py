@@ -1,24 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
-def FormalisePPref(filename='data.csv', delimiter=',', weights=0):
-    """
-    This function imports P value preferences for each agent in a dictionary.
-    Weights can be considered or not.
-    :param filename:
-    :param delimiter:
-    :param weights:
-    :return: P Preference Dict
-    """
-    df = pd.read_csv(filename, delimiter=delimiter)
-    n_countries = df.shape[0]  # number of rows
-    pref_dict = {}
-    for i in range(n_countries):  # compute array of matrices for every country
-        country = df.iloc[i]['country']
-        # TODO: Select P value for each country and store in P_dict
-    return pref_dict
-
 def PMatrix(df_row):
     """
     This function computes the P matrix of the formalisation.
@@ -27,8 +9,13 @@ def PMatrix(df_row):
     """
     rel = df_row['rel'] / (df_row['rel'] + df_row['nonrel'])
     per = df_row['nonrel'] / (df_row['rel'] + df_row['nonrel'])
-    P = [[0, rel], [per, 0]]
-    return np.array(P)
+    p = [[0, rel], [per, 0]]
+    """
+    p example: [ [0, 0.5], 
+                 [0.5, 0], ]
+    Preference matrix of the country for considering values (Columns 2/3 Table 3 in paper)
+    """
+    return np.array(p)
 
 
 def JMatrixs(df_row):
@@ -113,6 +100,9 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
     J_list = []
     P_list = []
     country_dict = {}
+    """
+    Note that this is a list of all matrices, not a sum of all matrices.
+    """
     for i in range(n_countries):  # compute array of matrices for every country
         country = df.iloc[i]['country']
         country_dict.update({i: country})
@@ -122,6 +112,7 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
         J_list.append((J_p, J_n))
     w = Weights(df, n_countries, weights)
     return P_list, J_list, w, country_dict
+
 
 
 def Vectorisation(M):
@@ -212,6 +203,11 @@ def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
         A = BMatrix(w, n_val=J_list[0][0].shape[0],
                     n_actions=J_list[0][0].shape[1], p=p)
         b = BVector(J_list, w, p=p)
+    """
+    In this case, A and b correspond to the matrices described in Theorem 5.1 of the paper.
+    A = $[w_1^{1/p}*I...w_N^{1/p}*I]$
+    b = $[w_1^{1/p}*T_1...w_N^{1/p}*T_N]$
+    """
     return A, b
 
 

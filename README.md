@@ -43,3 +43,15 @@ optional arguments:
 Acknowledgements
 ----------
 This repository contains the [implementation of the pIRLS algorithm](https://github.com/fast-algos/pIRLS) ([article](https://papers.nips.cc/paper/2019/hash/46c7cb50b373877fb2f8d5c4517bb969-Abstract.html)). This article should be cited when citing our work.
+
+Running the code
+----------
+- Install requirements: `pip install -r requirements.txt`
+- To run locally with PyJulia compatability issues
+  - Run `python-jl -m pip install IPython` to install IPython in Julia
+  - Run your command as usual using `python-jl -m IPython` instead of `python`
+
+As an example: `python-jl -m IPython  solve.py -f toy_data.csv -v true -g results.csv` wil:
+- Load the toy_data.csv file
+- Compute the preference aggregation
+- Store the results in results.csv

@@ -1,14 +1,44 @@
 import argparse as ap
 import numpy as np
 import os
-from matrices import FormalisationObjects, FormalisationMatrix, FormalisePPref
+from matrices import FormalisationObjects, FormalisationMatrix
 from files import output_file
+import pandas as pd
 
 os.system('pip install pycall')
 
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
+# TODO: Add weights to the P value consensus
+def PValConsensus(pref_dict, weights):
+    """
+    This function computes the P value consensus.
+    We use the mean for now, as the space is simply 1D.
+    :param pref_dict: P value preferences for each agent
+    :param weights: weights' set up option:
+    """
+    p_values = list(pref_dict.values())
+    p = np.mean(p_values)
+    return p
+
+def FormalisePPref(filename='data.csv', delimiter=',', weights=0):
+    """
+    This function imports P value preferences for each agent in a dictionary.
+    Weights can be considered or not.
+    :param filename:
+    :param delimiter:
+    :param weights:
+    :return: P Preference Dict
+    """
+    df = pd.read_csv(filename, delimiter=delimiter)
+    n_countries = df.shape[0]  # number of rows
+    pref_dict = {}
+    for i in range(n_countries):  # compute array of matrices for every country
+        country = df.iloc[i]['country']
+        p_pref = df.iloc[i]['p_pref']
+        pref_dict.update({country: p_pref})
+    return pref_dict
 
 def print_consensus(cons):
     print('Rs =')
@@ -150,7 +180,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pv',
         type=str,
-        default='p_pref_values.csv',
+        default='none',
         help='compute the per agent p value preference values',
     )
 
@@ -279,8 +309,12 @@ if __name__ == '__main__':
                 best = dist
 
     elif args.pv != 'none':
-        pref_dict = formalisePPref(filename=args.pv)
-
+        print("DEBUG INFO: Entering FormalisePPref")
+        # Formalises a PPref dictionary from appropriate file
+        # and computes the P value consensus (mean for 1D)
+        pref_dict = FormalisePPref(filename=args.pv, weights=w)
+        # TODO: Implement some voting system (multi-dimensional)
+        p = PValConsensus(pref_dict, w)
 
     else:
         if p == 2:
