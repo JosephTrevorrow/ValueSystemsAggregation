@@ -145,12 +145,12 @@ if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-n', type=int, default=7, help='n')
     parser.add_argument('-m', type=int, default=2, help='m')
-    parser.add_argument('-p', type=float, default=2, help='p')
+    parser.add_argument('-p', type=float, default=10, help='p')
     parser.add_argument('-e', type=float, default=1e-4, help='e')
     parser.add_argument(
         '-f',
         type=str,
-        default='data.csv',
+        default='toy_data.csv',
         help='CSV file with data')
     parser.add_argument(
         '-w',
@@ -165,6 +165,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
+        default=False,
         action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true')
     parser.add_argument(
@@ -174,7 +175,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-g',
         type=str,
-        default='none',
+        default='results.csv',
         help='store results in csv')
 
     parser.add_argument(
