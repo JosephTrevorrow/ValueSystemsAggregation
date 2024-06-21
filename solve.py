@@ -10,35 +10,6 @@ os.system('pip install pycall')
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
-# TODO: Add weights to the P value consensus
-def PValConsensus(pref_dict, weights):
-    """
-    This function computes the P value consensus.
-    We use the mean for now, as the space is simply 1D.
-    :param pref_dict: P value preferences for each agent
-    :param weights: weights' set up option:
-    """
-    p_values = list(pref_dict.values())
-    p = np.mean(p_values)
-    return p
-
-def FormalisePPref(filename='data.csv', delimiter=',', weights=0):
-    """
-    This function imports P value preferences for each agent in a dictionary.
-    Weights can be considered or not.
-    :param filename:
-    :param delimiter:
-    :param weights:
-    :return: P Preference Dict
-    """
-    df = pd.read_csv(filename, delimiter=delimiter)
-    n_countries = df.shape[0]  # number of rows
-    pref_dict = {}
-    for i in range(n_countries):  # compute array of matrices for every country
-        country = df.iloc[i]['country']
-        p_pref = df.iloc[i]['p_pref']
-        pref_dict.update({country: p_pref})
-    return pref_dict
 
 def print_consensus(cons):
     print('Rs =')
@@ -151,7 +122,7 @@ if __name__ == '__main__':
         '-f',
         type=str,
         default='toy_data.csv',
-        help='CSV file with data')
+        help='CSV file with personal data')
     parser.add_argument(
         '-w',
         type=int,
@@ -177,12 +148,19 @@ if __name__ == '__main__':
         type=str,
         default='results.csv',
         help='store results in csv')
-
+    
+    parser.add_argument(
+        '-pf',
+        type=str,
+        default='principle_file.csv',
+        help='CSV file with principle data'
+    )    
     parser.add_argument(
         '-pv',
-        type=str,
-        default='none',
-        help='compute the per agent p value preference values',
+        type=bool,
+        default=False, 
+        # default=True,
+        help='Compute the P value consensus aggregation method'
     )
 
     args = parser.parse_args()
@@ -193,6 +171,11 @@ if __name__ == '__main__':
 
     P_list, J_list, w, country_dict = FormalisationObjects(
         filename=args.f, delimiter=',', weights=args.w)
+    
+    # If the user has selected the P value aggregation method, then the following code will run.
+    if args.pv == True and args.pf != 'none':
+        PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
+            filename=args.pf, delimiter=',', weights=args. w)
 
     if args.l:
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
@@ -309,13 +292,54 @@ if __name__ == '__main__':
                 print('Current best distance = {:.4f}'.format(best))
                 best = dist
 
-    elif args.pv != 'none':
-        print("DEBUG INFO: Entering FormalisePPref")
-        # Formalises a PPref dictionary from appropriate file
-        # and computes the P value consensus (mean for 1D)
-        pref_dict = FormalisePPref(filename=args.pv, weights=w)
-        # TODO: Implement some voting system (multi-dimensional)
-        p = PValConsensus(pref_dict, w)
+    elif args.pv == True:
+        print("DEBUG INFO: Aggregating on Agent Principle")
+        # TODO: Run the aggreagted method for only the PP and PVA values.
+        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, 1, args.v)
+        cons_1, _, ua = L1(A, b)
+        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, np.inf, args.v)
+        cons_l, _, _, = Linf(A, b)
+        dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
+        dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
+        p = 1
+        print('{:.2f} \t \t {:.4f}'.format(p, ua))
+        incr = 0.1
+        p_list = [1.0]
+        u_list = [ua]
+        cons_list = [cons_1]
+        dist_1p_list = [dist_1p]
+        dist_pl_list = [dist_pl]
+
+        while p < args.p:
+            p += incr
+            A, b = FormalisationMatrix(PP_list, PJ_list, Pw, p, args.v)
+            cons, _, ub = Lp(A, b, p)
+            p_list.append(p)
+            u_list.append(ub)
+            cons_list.append(cons)
+            dist_1p = np.linalg.norm(cons_1 - cons, p)
+            dist_pl = np.linalg.norm(cons_l - cons, p)
+            dist_1p_list.append(dist_1p)
+            dist_pl_list.append(dist_pl)
+            print('{:.2f} \t \t {:.4f}'.format(p, ub))
+
+        output_file(
+            p_list,
+            u_list,
+            cons_list,
+            dist_1p_list,
+            dist_pl_list,
+            args.v,
+            args.g)
+        
+        # TODO: Force a P value to be chosen by finding 1) the average preference values (for one principle over the other) using mean
+        # 2) Finding the value of P that is closest to the average value and storing in variable
+
+        
+
+        # TODO: Run the aggregation method for the P value that has been found, and print this consensus to a csv.
+
+
 
     else:
         if p == 2:
@@ -346,3 +370,4 @@ if __name__ == '__main__':
         print(np.vstack((h, b[:len(h)], np.roll(b, -1)[:len(h)])))
         if args.o:
             np.savetxt(args.o, cons, fmt='%.20f')
+np.savetxt(args.o, cons, fmt='%.20f')
