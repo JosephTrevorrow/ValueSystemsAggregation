@@ -136,7 +136,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
-        default=False,
+        default=True,
         action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true')
     parser.add_argument(
@@ -146,19 +146,20 @@ if __name__ == '__main__':
     parser.add_argument(
         '-g',
         type=str,
-        default='results.csv',
+        default='none',
+        #default='results.csv',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default='principle_file.csv',
+        default='toy_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        default=False, 
+        default=True, 
         # default=True,
         help='Compute the P value consensus aggregation method'
     )
@@ -294,10 +295,11 @@ if __name__ == '__main__':
 
     elif args.pv == True:
         print("DEBUG INFO: Aggregating on Agent Principle")
-        # TODO: Run the aggreagted method for only the PP and PVA values.
-        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, 1, args.v)
+        
+        # True is passed to the FormalisationMatrix function to indicate that the aggregation is being done on the agent principle
+        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, 1, True)
         cons_1, _, ua = L1(A, b)
-        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, np.inf, args.v)
+        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, np.inf, True)
         cons_l, _, _, = Linf(A, b)
         dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
         dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
@@ -312,7 +314,72 @@ if __name__ == '__main__':
 
         while p < args.p:
             p += incr
-            A, b = FormalisationMatrix(PP_list, PJ_list, Pw, p, args.v)
+            A, b = FormalisationMatrix(PP_list, PJ_list, Pw, p, True)
+            cons, _, ub = Lp(A, b, p)
+            p_list.append(p)
+            u_list.append(ub)
+            cons_list.append(cons)
+            dist_1p = np.linalg.norm(cons_1 - cons, p)
+            dist_pl = np.linalg.norm(cons_l - cons, p)
+            dist_1p_list.append(dist_1p)
+            dist_pl_list.append(dist_pl)
+            print('{:.2f} \t \t {:.4f}'.format(p, ub))
+
+        output_file(
+            p_list, # The list of P values aggreagted by
+            u_list, # The Up values for each P value
+            cons_list, # The consensus for each P value
+            dist_1p_list, # The distance from the consensus achieved for p=1 and the one for current p
+            dist_pl_list, # The distance from the consensus achieved for p=inf and the one for current p
+            True,
+            "consensus_principles.csv")
+        
+        print("DEBUG INFO: Aggregating on Agent Value")
+
+        con_vals = [0,0]
+        for j in range(2):
+            con_vals[j] = sum(i[j+1] for i in cons_list) / len(cons_list)
+        print("DEBUG: Con vals are: ",con_vals)
+        
+
+        
+        con_p = 1.0 
+        best_dist = 999
+        for j in range(len(cons_list)):
+            dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
+            dist = sum(dist)
+            if dist < best_dist:
+                best_dist = dist
+                # to convert from ordinal list num to corresponding p
+                con_p = (j/10)+1
+
+        print("DEBUG: Nearest P is: ", con_p)
+
+
+        # TODO: Run the aggregation method for the P value that has been found, and print this consensus to a csv.
+        ## the starter args and formalisation as before
+        
+
+        p = con_p
+        ## The same as in elif args.g
+        A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
+        cons_1, _, ua = L1(A, b)
+        A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
+        cons_l, _, _, = Linf(A, b)
+        dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
+        dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
+        p = 1
+        print('{:.2f} \t \t {:.4f}'.format(p, ua))
+        incr = 0.1
+        p_list = [1.0]
+        u_list = [ua]
+        cons_list = [cons_1]
+        dist_1p_list = [dist_1p]
+        dist_pl_list = [dist_pl]
+
+        while p < args.p:
+            p += incr
+            A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)
             cons, _, ub = Lp(A, b, p)
             p_list.append(p)
             u_list.append(ub)
@@ -331,15 +398,6 @@ if __name__ == '__main__':
             dist_pl_list,
             args.v,
             args.g)
-        
-        # TODO: Force a P value to be chosen by finding 1) the average preference values (for one principle over the other) using mean
-        # 2) Finding the value of P that is closest to the average value and storing in variable
-
-        
-
-        # TODO: Run the aggregation method for the P value that has been found, and print this consensus to a csv.
-
-
 
     else:
         if p == 2:
@@ -370,4 +428,3 @@ if __name__ == '__main__':
         print(np.vstack((h, b[:len(h)], np.roll(b, -1)[:len(h)])))
         if args.o:
             np.savetxt(args.o, cons, fmt='%.20f')
-np.savetxt(args.o, cons, fmt='%.20f')
