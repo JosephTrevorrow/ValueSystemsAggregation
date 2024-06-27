@@ -121,7 +121,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='toy_data.csv',
+        #default='toy_data.csv',
+        default='toy_principles.csv',
         help='CSV file with personal data')
     parser.add_argument(
         '-w',
@@ -132,17 +133,19 @@ if __name__ == '__main__':
         '-i',
         type=str,
         help='computes equivalent p given an input consensus')
-    parser.add_argument('-o', type=str, help='write consensus to file')
+    parser.add_argument('-o', type=str, help='write consensus to file', default="consensus.csv")
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
-        default=True,
+        default=False,
         action='store_true')
-    parser.add_argument('-l', help='compute the limit p', action='store_true')
+    parser.add_argument('-l', help='compute the limit p', action='store_true', default=False)
     parser.add_argument(
         '-t',
         help='compute the threshold p',
-        action='store_true')
+        action='store_true',
+        default=True
+        )
     parser.add_argument(
         '-g',
         type=str,
@@ -159,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pv',
         type=bool,
-        default=True, 
+        default=False, 
         # default=True,
         help='Compute the P value consensus aggregation method'
     )
@@ -250,6 +253,13 @@ if __name__ == '__main__':
         cons_l, r_l, u_l = Linf(A, b)
         diff = np.inf
         incr = 0.1
+
+        p_list = [1.0]
+        u_list = [ua]
+        cons_list = [cons_1]
+        dist_1p_list = [dist_1p]
+        dist_pl_list = [dist_pl]
+
         for i in np.arange(1 + incr, p, incr):
             A, b = FormalisationMatrix(P_list, J_list, w, i, args.v)
             cons, r, u = Lp(A, b, i)
