@@ -8,6 +8,7 @@ executing         2.0.1
 ipython           8.18.1
 jedi              0.19.1
 julia             0.6.2
+matplotlib
 matplotlib-inline 0.1.7
 numpy             2.0.0
 osqp              0.6.7

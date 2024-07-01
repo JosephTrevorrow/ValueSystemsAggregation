@@ -55,15 +55,15 @@ def simple_output_file(p, y, name):
         writer.writerows(csv_rows)
     return None
 
-def limit_output(p, y, name):
+def limit_output(p, dist_p_list, dist_inf_list, diff_list, name):
     """
     This function writes the values computed finding the limit P, and transition points (-t True)
     INPUT: p -- int, y -- list (measure), name -- str (name of the file)
     """
-    header = ["p", "y(p)"]
+    header = ["p", "Dist_p", "Dist_inf", "Diff"]
     csv_rows = [header]
     for i in range(len(p)):
-        el = [p[i], y[i]]
+        el = [p[i], dist_p_list[i], dist_inf_list[i], diff_list[i]]
         csv_rows.append(el)
     with open(name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)

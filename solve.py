@@ -2,7 +2,7 @@ import argparse as ap
 import numpy as np
 import os
 from matrices import FormalisationObjects, FormalisationMatrix
-from files import output_file
+from files import output_file, limit_output
 import pandas as pd
 
 os.system('pip install pycall')
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         '-f',
         type=str,
         #default='toy_data.csv',
-        default='toy_principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
         '-w',
@@ -144,26 +144,26 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=True
+        default=False
         )
     parser.add_argument(
         '-g',
         type=str,
-        default='none',
-        #default='results.csv',
+        #default='none',
+        default='results.csv',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default='toy_principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        default=False, 
-        # default=True,
+        #default=False, 
+        default=False,
         help='Compute the P value consensus aggregation method'
     )
 
@@ -178,6 +178,7 @@ if __name__ == '__main__':
     
     # If the user has selected the P value aggregation method, then the following code will run.
     if args.pv == True and args.pf != 'none':
+        print("DEBUG: Formalising PP_List and PJ_List")
         PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
             filename=args.pf, delimiter=',', weights=args. w)
 
@@ -254,11 +255,10 @@ if __name__ == '__main__':
         diff = np.inf
         incr = 0.1
 
-        p_list = [1.0]
-        u_list = [ua]
-        cons_list = [cons_1]
-        dist_1p_list = [dist_1p]
-        dist_pl_list = [dist_pl]
+        p_list = []
+        dist_p_list = []
+        dist_inf_list = []
+        diff_list = []
 
         for i in np.arange(1 + incr, p, incr):
             A, b = FormalisationMatrix(P_list, J_list, w, i, args.v)
@@ -283,7 +283,19 @@ if __name__ == '__main__':
                 if abs(dist_1p - dist_pl) < diff:
                     diff = abs(dist_1p - dist_pl)
                     best_p = i
+                p_list.append(i)
+                dist_p_list.append(dist_1p)
+                dist_inf_list.append(dist_pl)
+                diff_list.append(abs(dist_1p - dist_pl))  
         print('Transition point: {:.2f}'.format(best_p))
+
+        limit_output(
+            p_list,
+            dist_p_list,
+            dist_inf_list,
+            diff_list,
+            "limits.csv"
+        )
 
     elif args.i:
         cons = np.genfromtxt(args.i)
@@ -335,6 +347,7 @@ if __name__ == '__main__':
             dist_pl_list.append(dist_pl)
             print('{:.2f} \t \t {:.4f}'.format(p, ub))
 
+        print("DEBUG: Writing principle aggregation to consensus_principles.csv")
         output_file(
             p_list, # The list of P values aggreagted by
             u_list, # The Up values for each P value
@@ -344,14 +357,16 @@ if __name__ == '__main__':
             True,
             "consensus_principles.csv")
         
-        print("DEBUG INFO: Aggregating on Agent Value")
-
-        con_vals = [0,0]
-        for j in range(2):
-            con_vals[j] = sum(i[j+1] for i in cons_list) / len(cons_list)
-        print("DEBUG: Con vals are: ",con_vals)
+        print("DEBUG INFO: Finding best P")
         
-
+        ## Defining a cut point to drop all rows where there are P's that are higher than this
+        cut_point = 3.8
+        cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
+        print("DEBUG: cut_list length is: ", len(cut_list))
+        con_vals = [0, 0]
+        for j in range(2):
+            con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
+        print("DEBUG: Con vals are: ",con_vals)
         
         con_p = 1.0 
         best_dist = 999
@@ -364,12 +379,8 @@ if __name__ == '__main__':
                 con_p = (j/10)+1
 
         print("DEBUG: Nearest P is: ", con_p)
-
-
-        # TODO: Run the aggregation method for the P value that has been found, and print this consensus to a csv.
-        ## the starter args and formalisation as before
         
-
+        print("DEBUG: Running Value Aggregation with P = ", con_p)
         p = con_p
         ## The same as in elif args.g
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
@@ -400,6 +411,7 @@ if __name__ == '__main__':
             dist_pl_list.append(dist_pl)
             print('{:.2f} \t \t {:.4f}'.format(p, ub))
 
+        print("DEBUG: Saving to file, ", args.g)
         output_file(
             p_list,
             u_list,
