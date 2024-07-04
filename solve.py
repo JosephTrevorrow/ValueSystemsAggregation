@@ -112,6 +112,7 @@ def Lp(A, b, p):
         return IRLS(A, b, p)
 
 
+### TODO: Make a new arguement that allows user to compute preference aggregation using principles
 if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-n', type=int, default=7, help='n')
@@ -121,8 +122,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        #default='toy_data.csv',
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_data.csv',
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
         '-w',
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
-        default=False,
+        default=True,
         action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true', default=False)
     parser.add_argument(
@@ -156,7 +157,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pf',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_principles.csv',
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
