@@ -4,6 +4,9 @@ import os
 from matrices import FormalisationObjects, FormalisationMatrix
 from files import output_file, limit_output
 import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+import math
 
 os.system('pip install pycall')
 
@@ -18,6 +21,46 @@ def print_consensus(cons):
     else:
         print(cons.reshape((2 * m, m)))
 
+
+def fill_prinicples(personal_vals, principle_vals) -> pd.DataFrame:
+    """
+    This function takes in the principle and personal value data, and performs clustering on the personal data.
+    It then fills in any missing principle values with the mean of the cluster.  
+    """
+    print("DEBUG: Filling in missing principle values")
+    personal_data = pd.read_csv(personal_vals)
+    principle_data = pd.read_csv(principle_vals)
+    # Perform clustering on personal data
+    X = personal_data.drop('country', axis=1).values
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(scaler.fit_transform(X))
+    # TODO: use the elbow method to pick number of clusters
+    kmeans = KMeans(n_clusters=3)
+    kmeans.fit(df_scaled)
+    labels = kmeans.labels_
+    print(labels)
+
+    cluster_averages = []
+    for i in range(kmeans.n_clusters):
+        cluster_countries = personal_data['country'][labels == i]
+        principle_values = principle_data[principle_data['country'].isin(cluster_countries)]
+        # Drop all values that don't have principles
+        principle_values = principle_values.dropna()
+        cluster_average = principle_values.drop('country', axis=1).values.mean(axis=0)
+        cluster_averages.append(cluster_average)
+
+    for index, row in principle_data.iterrows():
+        if math.isnan(row['rel']):
+            # Get the personal value system for the country
+            personal_value = personal_data.loc[personal_data['country'] == row['country']]
+            scaled_personal_value = scaler.transform(personal_value.drop('country', axis=1).values)
+            cluster = kmeans.predict(scaled_personal_value)[0]  # [0] to get the single value
+            keys = ['rel', 'nonrel', 'a_adp_rel', 'a_div_rel', 'a_adp_nonrel', 'a_div_nonrel']
+            for i, key in enumerate(keys):
+                value = cluster_averages[cluster][i]
+                principle_data.at[index, key] = value
+
+    return principle_data
 
 def L1(A, b):
     import cvxpy as cp
@@ -180,6 +223,10 @@ if __name__ == '__main__':
     
     # If the user has selected the P value aggregation method, then the following code will run.
     if args.pv == True and args.pf != 'none':
+        # Solve missing principle values
+        print("DEBUG: Filling in missing principle values")
+        fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
+
         print("DEBUG: Formalising PP_List and PJ_List")
         PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
             filename=args.pf, delimiter=',', weights=args. w)
@@ -382,7 +429,7 @@ if __name__ == '__main__':
 
         print("DEBUG: Nearest P is: ", con_p)
         
-        print("DEBUG: Running Value Aggregation with P = ", con_p)
+        print("DEBUG: Running Aggregation with P = ", con_p)
         p = con_p
         ## The same as in elif args.g
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
