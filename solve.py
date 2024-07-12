@@ -17,26 +17,47 @@ def print_consensus(cons):
     else:
         print(cons.reshape((2 * m, m)))
 
-# TODO: Unfinished. need to pass in only 1 row rather than iterating through all
-def make_decision(p_list, u_list,  cons_list, dist_1p_list, dist_pl_list) -> str:
+def make_decision(cons_prefs, cons_actions,) -> str:
     """
     This function computes a simple decision based on the consensus value system
     $(P[v_1,v_2]*a_{v_1}(i))+(P[v_2,v_1]*a_{v_2}(i))$
+
+    cons_prefs: array that maps to [p, ub, cons, dist_1p, dist_pl]
+    cons_actions: array that maps to [p, ub, cons, dist_1p, dist_pl]
+    cons in this case is in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel], and similar for actions
     """
-    decision = []
-    decision.append((p_list[0] * cons_list[0]) + (p_list[1] * cons_list[1]))
+    adp = (cons_prefs[2][1] * cons_actions[2][1]) + (cons_prefs[2][2] * cons_list[2][2])
+    div = 1 - adp
+    decision = [adp, div]
     return decision
 
 # TODO: Unfinished
-def compute_justification(agent_ID, personal_vals, prinicple_vals, ) -> str:
+def compute_justification(agent_ID, personal_vals, prinicple_vals, cons_row, decision) -> str:
     """
     This function takes in an agents ID and consensus personal+principle value systems and returns a text understanding of their justification
     This function takes in the consensus personal+principle value systems and constructs a string justification 
+
+    agent_ID: the ID of the agent, leave as None if group justification wanted
+    personal_vals: original personal values dataframe
+    principle_vals: original principle values dataframe
+    cons_row: the row in the aggregation that matches the consensus
+    decision: 
     """
     justification = []
+    principle_explainer = [
+        "which is justified as the principle most representative of the group attempts to maximise the total happiness of the group",
+        "which is justified as the principle most representative of the group attempts to maximise equality"
+    ]
     
     # Get consensus items (used for both)
+    cons_principle_val = cons_row[1] * 100
+    if cons_principle_val < 50:
+        cons_principle = "utilitarianism"
+        cons_principle_val = 100 - cons_principle_val  
+    else: 
+        cons_principle = "egalitarianism"
     
+    # Get final decision made
 
 
     if agent_ID != None:
@@ -51,7 +72,8 @@ def compute_justification(agent_ID, personal_vals, prinicple_vals, ) -> str:
             principle = "egalitarianism"
         justification.append("You Prefer ", principle, " ", principle_percentage, "% of the time.")
 
-        
+        justification.append("The consenus princple prefers ", cons_principle, " ", cons_principle_val,".")
+
 
     else:
         # General (outsider) justification
@@ -103,10 +125,14 @@ def fill_prinicples(personal_vals, principle_vals) -> pd.DataFrame:
 
     return principle_data
 
-def aggregate_values(aggregation_type, filename):
+def aggregate_values(aggregation_type, filename, con_p=0.0):
     """
     We run aggregation of the action value matrices and store in a file
     """
+    
+    consensus_vals = []
+    print("DEBUG: CON_P IS ", con_p)
+
     ## The same as in elif args.g
     A, b = FormalisationMatrix(P_list, J_list, w, 1, aggregation_type)
     cons_1, _, ua = L1(A, b)
@@ -135,6 +161,9 @@ def aggregate_values(aggregation_type, filename):
         dist_1p_list.append(dist_1p)
         dist_pl_list.append(dist_pl)
         print('{:.2f} \t \t {:.4f}'.format(p, ub))
+        if math.isclose(p, float(con_p), rel_tol=1e-9):
+            print("DEBUG: P and con_P equal")
+            consensus_vals = [p, ub, cons, dist_1p, dist_pl]
 
     print("DEBUG: Saving to file, ", filename)
     output_file(
@@ -146,13 +175,8 @@ def aggregate_values(aggregation_type, filename):
         aggregation_type,
         filename)
     
-    return p_list, u_list,  cons_list, dist_1p_list, dist_pl_list
+    return p_list, u_list,  cons_list, dist_1p_list, dist_pl_list, consensus_vals
     
-def aggregate_preference_values():
-    """
-    We run an aggregation of the prefernce matrices and store in a file
-    """
-
 
 def L1(A, b):
     """
@@ -483,7 +507,7 @@ if __name__ == '__main__':
     # Aggregate using principle values
     elif args.pv == True:
         print("DEBUG INFO: Aggregating on Agent Principle")
-        p_list, _,  cons_list, _, _ = aggregate_values(True, "consensus_principles.csv")
+        p_list, _,  cons_list, _, _, _= aggregate_values(True, "consensus_principles.csv")
         
         print("DEBUG INFO: Finding best P")
         ## Defining a cut point to drop all rows where there are P's that are higher than this
@@ -510,10 +534,12 @@ if __name__ == '__main__':
 
         # TODO: you arent running aggregation with con_p
         print("DEBUG: Running Aggregation with P = ", con_p)
-        agg_action_p_list, _, agg_action_cons_list, _, _, = aggregate_values(False, "aggregated_action_values.csv")
-        agg_pref_p_list, _, agg_pref_cons_list, _, _, = aggregate_values(True, "aggregated_preference_values.csv")
-        con_principle_row = 
-        con_preference_row = 
+        agg_action_p_list, _, agg_action_cons_list, _, _, cons_actions = aggregate_values(False, "aggregated_action_values.csv", con_p=con_p)
+        agg_pref_p_list, _, agg_pref_cons_list, _, _, cons_prefs = aggregate_values(True, "aggregated_preference_values.csv", con_p=con_p)
+
+        decision = make_decision(cons_prefs, cons_actions)
+        print("Decision made at ratio: ", decision[0], " to ", decision[1])
+
         # Check if explanation needed, if so, run
         if args.ex != None:
             compute_justification(args.ex, cons_list, )
