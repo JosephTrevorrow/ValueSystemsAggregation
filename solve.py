@@ -17,7 +17,7 @@ def print_consensus(cons):
     else:
         print(cons.reshape((2 * m, m)))
 
-def make_decision(cons_prefs, cons_actions,) -> str:
+def make_decision(cons_prefs, cons_actions) -> str:
     """
     This function computes a simple decision based on the consensus value system
     $(P[v_1,v_2]*a_{v_1}(i))+(P[v_2,v_1]*a_{v_2}(i))$
@@ -32,22 +32,28 @@ def make_decision(cons_prefs, cons_actions,) -> str:
     return decision
 
 # TODO: Unfinished
-def compute_justification(agent_ID, personal_vals, prinicple_vals, cons_row, decision) -> str:
+def compute_justification(agent_ID, personal_vals, principle_vals, cons_row, decision) -> str:
     """
     This function takes in an agents ID and consensus personal+principle value systems and returns a text understanding of their justification
     This function takes in the consensus personal+principle value systems and constructs a string justification 
 
     agent_ID: the ID of the agent, leave as None if group justification wanted
-    personal_vals: original personal values dataframe
-    principle_vals: original principle values dataframe
+    personal_vals: original personal values file
+    principle_vals: original principle values file
     cons_row: the row in the aggregation that matches the consensus
-    decision: 
+    decision: list [adp, div] that represents the decision made as a ratio of 2 scores
     """
     justification = []
-    principle_explainer = [
-        "which is justified as the principle most representative of the group attempts to maximise the total happiness of the group",
-        "which is justified as the principle most representative of the group attempts to maximise equality"
-    ]
+    principle_explainer = {
+        "util_justification": "which is justified as the principle most representative of the group attempts to maximise the total happiness of the group",
+        "egal_justification": "which is justified as the principle most representative of the group attempts to maximise equality"
+    }
+
+    personal_data = pd.read_csv(personal_vals)
+    principle_data = pd.read_csv(principle_vals)
+
+    print("DEBUG: priciple vals are: " + principle_vals)
+    print("DEBUG: personal_vals are: " + personal_vals)
     
     # Get consensus items (used for both)
     cons_principle_val = cons_row[1] * 100
@@ -57,14 +63,10 @@ def compute_justification(agent_ID, personal_vals, prinicple_vals, cons_row, dec
     else: 
         cons_principle = "egalitarianism"
     
-    # Get final decision made
-
-
     if agent_ID != None:
         # Agent specific Justification
-        
         # Get whether the agent prefered util/egal
-        principle_percentage = prinicple_vals.iloc[agent_ID]["rel"]*100
+        principle_percentage = principle_vals.iloc[agent_ID]["rel"]*100
         if principle_percentage < 50:
             principle = "utilitarianism"
             principle_percentage = 100 - principle_percentage  
@@ -72,7 +74,9 @@ def compute_justification(agent_ID, personal_vals, prinicple_vals, cons_row, dec
             principle = "egalitarianism"
         justification.append("You Prefer ", principle, " ", principle_percentage, "% of the time.")
 
-        justification.append("The consenus princple prefers ", cons_principle, " ", cons_principle_val,".")
+        justification.append("The consenus princple prefers ", cons_principle, " ", cons_principle_val,"%.")
+
+        justification.append("The decision has been made to ")
 
 
     else:
@@ -542,7 +546,11 @@ if __name__ == '__main__':
 
         # Check if explanation needed, if so, run
         if args.ex != None:
-            compute_justification(args.ex, cons_list, )
+            compute_justification(agent_ID=0, 
+                                  personal_vals=args.f, 
+                                  principle_vals=args.pf
+                                  cons_row=,
+                                  decision=)
     else:
         if p == 2:
             A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)
