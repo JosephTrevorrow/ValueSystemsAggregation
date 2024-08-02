@@ -85,7 +85,7 @@ def Weights(df, n_countries, weights=0):
         return np.array(w)
 
 
-def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
+def FormalisationObjects(filename='data.csv', delimiter=',', weights=0, df=None):
     """
     This function computes the matrices P, J+ and J- and the weight vector of the formalisation.
     INPUT: filename -- str ; delimiter -- str ;
@@ -95,7 +95,10 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
            · if weights = 2), we consider the total population of the country
     RETURN: np.array with weights
     """
-    df = pd.read_csv(filename, delimiter=delimiter)
+    if df is not None:
+        df = df
+    else:   
+        df = pd.read_csv(filename, delimiter=delimiter)
     n_countries = df.shape[0]  # number of rows
     J_list = []
     P_list = []
@@ -107,13 +110,15 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0):
         country = df.iloc[i]['country']
         country_dict.update({i: country})
         P = PMatrix(df.iloc[i])
-        J_p, J_n = JMatrixs(df.iloc[i])
+        try:
+            J_p, J_n = JMatrixs(df.iloc[i])
+            J_list.append((J_p, J_n))
+        except:
+            print("Could not find JMatrix")
         P_list.append(P)
-        J_list.append((J_p, J_n))
+
     w = Weights(df, n_countries, weights)
     return P_list, J_list, w, country_dict
-
-
 
 def Vectorisation(M):
     """

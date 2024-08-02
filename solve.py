@@ -129,7 +129,12 @@ def fill_prinicples(personal_vals, principle_vals) -> pd.DataFrame:
 
     return principle_data
 
-def aggregate_values(aggregation_type, filename, con_p=0.0):
+def aggregate_values(aggregation_type, filename, con_p=0.0, 
+                     P_list=None, 
+                     J_list=None, 
+                     w=None,
+                     principle_val=1
+                     ):
     """
     We run aggregation of the action value matrices and store in a file
     """
@@ -153,7 +158,8 @@ def aggregate_values(aggregation_type, filename, con_p=0.0):
     dist_1p_list = [dist_1p]
     dist_pl_list = [dist_pl]
 
-    while p < args.p:
+    # ATM this just returns you the P val consensus, not the action consensus
+    while p < principle_val:
         p += incr
         A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
         cons, _, ub = Lp(A, b, p)
@@ -179,7 +185,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0):
         aggregation_type,
         filename)
     
-    return p_list, u_list,  cons_list, dist_1p_list, dist_pl_list, consensus_vals
+    return cons_list
     
 
 def L1(A, b):
@@ -369,7 +375,7 @@ if __name__ == '__main__':
         # Solve missing principle values
         fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
         PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
-            filename=args.pf, delimiter=',', weights=args. w)
+            filename=args.pf, delimiter=',', weights=args.w)
 
     # Compute the limit P
     if args.l:
@@ -545,12 +551,8 @@ if __name__ == '__main__':
         print("Decision made at ratio: ", decision[0], " to ", decision[1])
 
         # Check if explanation needed, if so, run
-        if args.ex != None:
-            compute_justification(agent_ID=0, 
-                                  personal_vals=args.f, 
-                                  principle_vals=args.pf
-                                  cons_row=,
-                                  decision=)
+        #if args.ex != None:
+            # Compute justification
     else:
         if p == 2:
             A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)
