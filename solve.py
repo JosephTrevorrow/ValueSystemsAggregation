@@ -149,7 +149,9 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     cons_l, _, _, = Linf(A, b)
     dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
     dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
-    p = 1
+    
+    p = principle_val
+    
     print('{:.2f} \t \t {:.4f}'.format(p, ua))
     incr = 0.1
     p_list = [1.0]
@@ -159,6 +161,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     dist_pl_list = [dist_pl]
 
     # ATM this just returns you the P val consensus, not the action consensus
+    """
     while p < principle_val:
         p += incr
         A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
@@ -174,7 +177,20 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
         if math.isclose(p, float(con_p), rel_tol=1e-9):
             print("DEBUG: P and con_P equal")
             consensus_vals = [p, ub, cons, dist_1p, dist_pl]
-
+    """
+    A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
+    cons, _, ub = Lp(A, b, p)
+    p_list.append(p)
+    u_list.append(ub)
+    cons_list.append(cons)
+    dist_1p = np.linalg.norm(cons_1 - cons, p)
+    dist_pl = np.linalg.norm(cons_l - cons, p)
+    dist_1p_list.append(dist_1p)
+    dist_pl_list.append(dist_pl)
+    print('{:.2f} \t \t {:.4f}'.format(p, ub))
+    if math.isclose(p, float(con_p), rel_tol=1e-9):
+        print("DEBUG: P and con_P equal")
+        consensus_vals = [p, ub, cons, dist_1p, dist_pl]
     print("DEBUG: Saving to file, ", filename)
     output_file(
         p_list,

@@ -11,19 +11,24 @@ from matrices import FormalisationObjects, FormalisationMatrix
 example_1_personal_data = None
 example_1_principle_data = None
 
-#Unfinished
 def satisfaction(cons_vals: list, action_cons_vals: list) -> None:
     """
     This function will calculate satisfaction for each agent in the simulation
     """
     satisfaction = {}
-    for i in len(example_1_personal_data):
+    print("DEBUG: Consensus values for each test\n", cons_vals)
+    for i in range(len(example_1_personal_data)):
         agent_id = example_1_personal_data.iloc[i]['country']
         # personal data rel - consensus val rel
-        satisfaction.update(agent_id : example_1_personal_data.iloc[i][rel] - cons_vals[i][1])
+        sat = 0
+        for j in range(len(cons_vals)):
+            print("DEBUG: Agent ", agent_id, " personal data ", example_1_personal_data.iloc[i]["rel"], " consensus val ", cons_vals[0][j][1])
+            sat += example_1_personal_data.iloc[i]["rel"] - cons_vals[0][j][1]
+        print("DEBUG: Satisfaction for agent ", agent_id, " is ", sat)
+        satisfaction.update({agent_id : sat})    
 
-        
-
+    print("DEBUG: Satisfaction for each agent\n", satisfaction)
+    return satisfaction
 
 def run_experiment() -> None:
     """
@@ -63,24 +68,37 @@ if __name__ == '__main__':
     # read in data
     data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/agent_data.csv')
     
-    # Put while loop here
-    sample_data = data.sample(n=4)
-    
-    # Extract values and action judgements for eg. 1
-    # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
-    example_1_personal_data = sample_data[['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort']]
-    example_1_personal_data.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'}, inplace=True)
-    
-    example_1_principle_data = sample_data[['agent_id','pp', 'pp_1']]
-    example_1_principle_data.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'}, inplace=True)
+    iterations = 1
+    i = 0
+    while i < iterations:
+        # Put while loop here
+        sample_data = data.sample(n=4)
+        
+        # Extract values and action judgements for eg. 1
+        # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
+        sample = sample_data[['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort']]
+        example_1_personal_data = sample.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'})
+        
+        sample = sample_data[['agent_id','pp', 'pp_1']]
+        example_1_principle_data = sample.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'})
 
-    """ Add other examples here:
-    example_1_personal_data = sample_data[['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort']]
-    example_1_personal_data.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'}, inplace=True)
-    
-    example_1_principle_data = sample_data[['agent_id','pp', 'pp_1']]
-    example_1_principle_data.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'}, inplace=True)
-    """
+        """ Add other examples here:
+        example_1_personal_data = sample_data[['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort']]
+        example_1_personal_data.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'})
+        
+        example_1_principle_data = sample_data[['agent_id','pp', 'pp_1']]
+        example_1_principle_data.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'})
+        """
 
-    print("DEBUG: Testing with the following sample\n", sample_data)
-    run_experiment(sample_data)
+        print("DEBUG: Testing with the following sample\n", example_1_personal_data)
+        run_experiment()
+
+        # Store in a file results
+        # Write to csv
+        example_1_personal_data.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/example_1_personal_data.csv', index=True)
+
+        # Reset data
+        example_1_personal_data = None
+        example_1_principle_data = None
+
+        i+=1
