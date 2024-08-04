@@ -5,29 +5,27 @@ The file will track satisfaction for each agent and store in a results csv file.
 
 import pandas as pd
 import solve
+import csv
 from matrices import FormalisationObjects, FormalisationMatrix
     
 # Global variables
 example_1_personal_data = None
 example_1_principle_data = None
 
-def satisfaction(cons_vals: list, action_cons_vals: list) -> None:
+def satisfaction(cons_vals: list, action_cons_vals: list):
     """
     This function will calculate satisfaction for each agent in the simulation
     """
     satisfaction = {}
-    print("DEBUG: Consensus values for each test\n", cons_vals)
     for i in range(len(example_1_personal_data)):
         agent_id = example_1_personal_data.iloc[i]['country']
         # personal data rel - consensus val rel
         sat = 0
         for j in range(len(cons_vals)):
-            print("DEBUG: Agent ", agent_id, " personal data ", example_1_personal_data.iloc[i]["rel"], " consensus val ", cons_vals[0][j][1])
+            # Check to see if this matches the action taken
             sat += example_1_personal_data.iloc[i]["rel"] - cons_vals[0][j][1]
-        print("DEBUG: Satisfaction for agent ", agent_id, " is ", sat)
         satisfaction.update({agent_id : sat})    
 
-    print("DEBUG: Satisfaction for each agent\n", satisfaction)
     return satisfaction
 
 def run_experiment() -> None:
@@ -52,17 +50,16 @@ def run_experiment() -> None:
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
-        print("DEBUG: Results for example 1\n", cons_vals)
         action_cons_vals.append(solve.aggregate_values(aggregation_type=False, 
                                         filename="test.csv", 
                                         P_list=P_list, 
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
-        print("DEBUG: Results for example 1\n", action_cons_vals)
 
     # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
-    satisfaction(cons_vals=cons_vals, action_cons_vals=action_cons_vals)
+    scores = satisfaction(cons_vals=cons_vals, action_cons_vals=action_cons_vals)
+    return scores
 
 if __name__ == '__main__':
     # read in data
@@ -91,11 +88,16 @@ if __name__ == '__main__':
         """
 
         print("DEBUG: Testing with the following sample\n", example_1_personal_data)
-        run_experiment()
+        experiment_1_scores = run_experiment()
 
         # Store in a file results
         # Write to csv
-        example_1_personal_data.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/example_1_personal_data.csv', index=True)
+        headers = experiment_1_scores.keys()
+        print("DEBUG: Headers\n", headers)
+        with open('test4.csv', 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames = headers)
+            writer.writeheader()
+            writer.writerows([experiment_1_scores])
 
         # Reset data
         example_1_personal_data = None
