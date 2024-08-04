@@ -74,37 +74,29 @@ if __name__ == '__main__':
                               ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
                               ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown']
         ]
+        experiment_scores = []
         # Loop through each example case
         for situation in example_data_names:
             # Extract values and action judgements for eg. 1
             # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
             sample = sample_data[situation]
-            example_1_personal_data = sample.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'})
+            example_1_personal_data = sample.rename(columns={'agent_id': 'country', situation[1]: 'rel', situation[2] : 'nonrel', situation[3] : 'a_adp_rel', situation[4] : 'a_div_rel', situation[5] : 'a_adp_nonrel', situation[6] : 'a_div_nonrel'})
             
             # TODO: Change principles from staying the same to changing
             sample = sample_data[['agent_id','pp', 'pp_1']]
             example_1_principle_data = sample.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'})
 
-            """ Add other examples here:
-            example_1_personal_data = sample_data[['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort']]
-            example_1_personal_data.rename(columns={'agent_id': 'country', 'P_1': 'rel', 'P_1_1' : 'nonrel', 'a_enjoy_camp' : 'a_adp_rel', 'a_enjoy_resort' : 'a_div_rel', 'a_budget_camp' : 'a_adp_nonrel', 'a_budget_resort' : 'a_div_nonrel'})
-            
-            example_1_principle_data = sample_data[['agent_id','pp', 'pp_1']]
-            example_1_principle_data.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'})
-            """
-
             print("DEBUG: Testing with the following sample\n", example_1_personal_data)
-            experiment_1_scores = run_experiment()
+            experiment_scores.append(run_experiment())
 
 
         # Store in a file results
-        # Write to csv
-        headers = experiment_1_scores.keys()
+        headers = experiment_scores[0].keys()
         print("DEBUG: Headers\n", headers)
         with open('test4.csv', 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames = headers)
             writer.writeheader()
-            writer.writerows([experiment_1_scores])
+            writer.writerows(experiment_scores)
 
         # Reset data
         example_1_personal_data = None
