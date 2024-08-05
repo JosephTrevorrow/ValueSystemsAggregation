@@ -9,21 +9,21 @@ import csv
 from matrices import FormalisationObjects, FormalisationMatrix
     
 # Global variables
-example_1_personal_data = None
-example_1_principle_data = None
+personal_data = None
+principle_data = None
 
 def satisfaction(cons_vals: list, action_cons_vals: list):
     """
     This function will calculate satisfaction for each agent in the simulation
     """
     satisfaction = {}
-    for i in range(len(example_1_personal_data)):
-        agent_id = example_1_personal_data.iloc[i]['country']
+    for i in range(len(personal_data)):
+        agent_id = personal_data.iloc[i]['country']
         # personal data rel - consensus val rel
         sat = 0
         for j in range(len(cons_vals)):
             # Check to see if this matches the action taken
-            sat += example_1_personal_data.iloc[i]["rel"] - cons_vals[0][j][1]
+            sat += personal_data.iloc[i]["rel"] - cons_vals[0][j][1]
         satisfaction.update({agent_id : sat})    
 
     return satisfaction
@@ -33,13 +33,15 @@ def run_experiment() -> None:
     Data is prepared for the sim by using matrices files mimicing original solve.py
     """
     P_list, J_list, w, country_dict = FormalisationObjects(
-    filename=None, delimiter=',', df=example_1_personal_data)
+    filename=None, delimiter=',', df=personal_data)
 
     # Solve missing principle values
     #fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
     
+    print("DEBUG: Principle data\n", principle_data)
     PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
-        filename=None, delimiter=',', df=example_1_principle_data)
+        filename=None, delimiter=',', df=principle_data)
+    
     cons_vals = []
     action_cons_vals = []
     for p in [1, 10]:
@@ -68,38 +70,42 @@ if __name__ == '__main__':
     iterations = 1
     i = 0
     while i < iterations:
-        # Put while loop here
         sample_data = data.sample(n=4)
         example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
-                              ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
-                              ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown']
+                            ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
+                            ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown']
         ]
+        example_principle_names = [['agent_id', 'pp_1', 'pp_1_1'],
+                                ['agent_id', 'pp_2', 'pp_2_1'],
+                                ['agent_id', 'pp_3', 'pp_3_1']
+        ]
+
         experiment_scores = []
         # Loop through each example case
-        for situation in example_data_names:
+        for (situation, principles) in zip(example_data_names, example_principle_names):
             # Extract values and action judgements for eg. 1
             # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
             sample = sample_data[situation]
-            example_1_personal_data = sample.rename(columns={'agent_id': 'country', situation[1]: 'rel', situation[2] : 'nonrel', situation[3] : 'a_adp_rel', situation[4] : 'a_div_rel', situation[5] : 'a_adp_nonrel', situation[6] : 'a_div_nonrel'})
+            personal_data = sample.rename(columns={'agent_id': 'country', situation[1]: 'rel', situation[2] : 'nonrel', situation[3] : 'a_adp_rel', situation[4] : 'a_div_rel', situation[5] : 'a_adp_nonrel', situation[6] : 'a_div_nonrel'})
             
             # TODO: Change principles from staying the same to changing
-            sample = sample_data[['agent_id','pp', 'pp_1']]
-            example_1_principle_data = sample.rename(columns={'agent_id': 'country', 'pp': 'rel', 'pp_1' : 'nonrel'})
+            sample = sample_data[principles]
+            print("DEBUG: Sample\n", sample)
+            principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-            print("DEBUG: Testing with the following sample\n", example_1_personal_data)
+            print("DEBUG: Testing with the following sample\n", personal_data)
             experiment_scores.append(run_experiment())
 
-
-        # Store in a file results
-        headers = experiment_scores[0].keys()
-        print("DEBUG: Headers\n", headers)
-        with open('test4.csv', 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames = headers)
-            writer.writeheader()
-            writer.writerows(experiment_scores)
-
         # Reset data
-        example_1_personal_data = None
-        example_1_principle_data = None
+        personal_data = None
+        principle_data = None
 
         i+=1
+    
+    # Store in a file results
+    headers = experiment_scores[0].keys()
+    print("DEBUG: Headers\n", headers)
+    with open('test4.csv', 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = headers)
+        writer.writeheader()
+        writer.writerows(experiment_scores)
