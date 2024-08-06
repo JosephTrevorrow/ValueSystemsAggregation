@@ -23,7 +23,7 @@ def satisfaction(cons_vals: list, action_cons_vals: list):
         sat = 0
         for j in range(len(cons_vals)):
             # Check to see if this matches the action taken
-            sat += personal_data.iloc[i]["rel"] - cons_vals[0][j][1]
+            sat += personal_data.iloc[i]["rel"] - cons_vals[j][1]
         satisfaction.update({agent_id : sat})    
 
     return satisfaction
@@ -56,22 +56,18 @@ def run_experiment() -> None:
             # get voted principle
             p = solve.voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, principle_data)
         # filename is what you save data as
-        print("DEBUG: Running con_vals")
         cons_vals.append(solve.aggregate_values(aggregation_type=True, 
                                         filename="test.csv", 
                                         P_list=P_list, 
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
-        print("DEBUG: Running action_cons_vals")
         action_cons_vals.append(solve.aggregate_values(aggregation_type=False, 
                                         filename="test_action.csv", 
                                         P_list=P_list, 
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
-        print("DEBUG: Consensus values\n", cons_vals)
-        print("DEBUG: Action consensus values\n", action_cons_vals)
         # TODO: Do something with decision.
         decisions.append(solve.make_decision(cons_vals[-1], action_cons_vals[-1]))
 

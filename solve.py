@@ -124,7 +124,9 @@ def make_decision(cons_prefs, cons_actions) -> str:
     cons_prefs in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel]
     cons_actions in format [rel_adp_p, rel_div_p, nonrel_adp_p, nonrel_div_p]
     """
-    adp = (cons_prefs[0][1] * cons_actions[0][1]) + (cons_prefs[0][2] * cons_list[0][2])
+    print("DEBUG: Cons vals in make decision: ", cons_prefs)
+    print("DEBUG: Cons actions in make decision: ", cons_actions)
+    adp = (cons_prefs[1] * cons_actions[1]) + (cons_prefs[2] * cons_actions[2])
     div = 1 - adp
     decision = [adp, div]
     return decision
