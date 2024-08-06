@@ -39,25 +39,41 @@ def run_experiment() -> None:
     #fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
     
     print("DEBUG: Principle data\n", principle_data)
+    # Note: Could not find JMatrix is printed for preference data (there is no action judgement data)
     PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
         filename=None, delimiter=',', df=principle_data)
     
     cons_vals = []
     action_cons_vals = []
-    for p in [1, 10]:
+    
+    decisions = []
+
+    for p in [1, 10, "t", "p"]:
         # Run simulation for example 1 p = 1
+        if p == "t":
+            p = solve.transition_point(P_list, J_list, w, country_dict)
+        elif p == "p":
+            # get voted principle
+            p = solve.voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, principle_data)
+        # filename is what you save data as
+        print("DEBUG: Running con_vals")
         cons_vals.append(solve.aggregate_values(aggregation_type=True, 
                                         filename="test.csv", 
                                         P_list=P_list, 
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
+        print("DEBUG: Running action_cons_vals")
         action_cons_vals.append(solve.aggregate_values(aggregation_type=False, 
-                                        filename="test.csv", 
+                                        filename="test_action.csv", 
                                         P_list=P_list, 
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
+        print("DEBUG: Consensus values\n", cons_vals)
+        print("DEBUG: Action consensus values\n", action_cons_vals)
+        # TODO: Do something with decision.
+        decisions.append(solve.make_decision(cons_vals[-1], action_cons_vals[-1]))
 
     # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
     scores = satisfaction(cons_vals=cons_vals, action_cons_vals=action_cons_vals)
@@ -90,7 +106,6 @@ if __name__ == '__main__':
             
             # TODO: Change principles from staying the same to changing
             sample = sample_data[principles]
-            print("DEBUG: Sample\n", sample)
             principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
             print("DEBUG: Testing with the following sample\n", personal_data)

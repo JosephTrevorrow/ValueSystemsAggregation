@@ -10,6 +10,103 @@ import math
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
+def transition_point(P_list, J_list, w, country_dict):
+    A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
+    cons_1, r_1, u_1 = L1(A, b)
+    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
+    cons_l, r_l, u_l = Linf(A, b)
+    diff = np.inf
+    incr = 0.1
+
+    p_list = []
+    dist_p_list = []
+    dist_inf_list = []
+    diff_list = []
+
+    e = 1e-4
+    # Range of P's to check for transition point
+    p = 10
+
+    for i in np.arange(1 + incr, p, incr):
+        A, b = FormalisationMatrix(P_list, J_list, w, i, True)
+        cons, r, u = Lp(A, b, i)
+        dist_1p = np.linalg.norm(cons_1 - cons, i)
+        dist_pl = np.linalg.norm(cons_l - cons, i)
+        if (abs(dist_1p - dist_pl) < e):
+            best_p = i
+            print('Not improving anymore, stopping!')
+            break
+        else:
+            if abs(dist_1p - dist_pl) < diff:
+                diff = abs(dist_1p - dist_pl)
+                best_p = i
+            p_list.append(i)
+            dist_p_list.append(dist_1p)
+            dist_inf_list.append(dist_pl)
+            diff_list.append(abs(dist_1p - dist_pl))  
+    print('Transition point: {:.2f}'.format(best_p))
+    return best_p
+
+def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
+    print("DEBUG INFO: Aggregating on Agent Principle")
+    p_list, _,  cons_list, _, _, _=  aggregate_all_p(P_list=PP_list, 
+                                                        J_list=PJ_list,
+                                                        w=Pw)
+
+    print("DEBUG INFO: Finding best P")
+    ## Defining a cut point to drop all rows where there are P's that are higher than this
+    # TODO: Include finding limit P rather than hard coding
+    cut_point = 3.8
+    cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
+    print("DEBUG: cut_list length is: ", len(cut_list))
+    con_vals = [0, 0]
+    for j in range(2):
+        con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
+    print("DEBUG: Con vals are: ",con_vals)
+    
+    con_p = 1.0 
+    best_dist = 999
+    for j in range(len(cons_list)):
+        dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
+        dist = sum(dist)
+        if dist < best_dist:
+            best_dist = dist
+            # to convert from ordinal list num to corresponding p
+            con_p = (j/10)+1
+
+    print("DEBUG: Nearest P is: ", con_p)
+    return con_p
+
+def aggregate_all_p(P_list, J_list, w):
+    A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
+    cons_1, _, ua = L1(A, b)
+    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
+    cons_l, _, _, = Linf(A, b)
+    dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
+    dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
+    p = 1
+    print('{:.2f} \t \t {:.4f}'.format(p, ua))
+    incr = 0.1
+    p_list = [1.0]
+    u_list = [ua]
+    cons_list = [cons_1]
+    dist_1p_list = [dist_1p]
+    dist_pl_list = [dist_pl]
+
+    while p < 10:
+        p += incr
+        A, b = FormalisationMatrix(P_list, J_list, w, p, True)
+        cons, _, ub = Lp(A, b, p)
+        p_list.append(p)
+        u_list.append(ub)
+        cons_list.append(cons)
+        dist_1p = np.linalg.norm(cons_1 - cons, p)
+        dist_pl = np.linalg.norm(cons_l - cons, p)
+        dist_1p_list.append(dist_1p)
+        dist_pl_list.append(dist_pl)
+        print('{:.2f} \t \t {:.4f}'.format(p, ub))
+    return p_list, u_list, cons_list, dist_1p_list, dist_pl_list, cons_l
+
 def print_consensus(cons):
     print('Rs =')
     if args.v:
@@ -24,9 +121,10 @@ def make_decision(cons_prefs, cons_actions) -> str:
 
     cons_prefs: array that maps to [p, ub, cons, dist_1p, dist_pl]
     cons_actions: array that maps to [p, ub, cons, dist_1p, dist_pl]
-    cons in this case is in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel], and similar for actions
+    cons_prefs in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel]
+    cons_actions in format [rel_adp_p, rel_div_p, nonrel_adp_p, nonrel_div_p]
     """
-    adp = (cons_prefs[2][1] * cons_actions[2][1]) + (cons_prefs[2][2] * cons_list[2][2])
+    adp = (cons_prefs[0][1] * cons_actions[0][1]) + (cons_prefs[0][2] * cons_list[0][2])
     div = 1 - adp
     decision = [adp, div]
     return decision
@@ -138,11 +236,10 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     """
     We run aggregation of the action value matrices and store in a file
     """
-    
     consensus_vals = []
-    print("DEBUG: CON_P IS ", con_p)
 
     ## The same as in elif args.g
+    # Doing compute on 1 and np.inf allows for distance calc for P
     A, b = FormalisationMatrix(P_list, J_list, w, 1, aggregation_type)
     cons_1, _, ua = L1(A, b)
     A, b = FormalisationMatrix(P_list, J_list, w, np.inf, aggregation_type)
@@ -150,34 +247,13 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
     dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
     
-    p = principle_val
-    
-    print('{:.2f} \t \t {:.4f}'.format(p, ua))
-    incr = 0.1
-    p_list = [1.0]
-    u_list = [ua]
-    cons_list = [cons_1]
-    dist_1p_list = [dist_1p]
-    dist_pl_list = [dist_pl]
+    p = principle_val    
+    p_list = []
+    u_list = []
+    cons_list = []
+    dist_1p_list = []
+    dist_pl_list = []
 
-    # ATM this just returns you the P val consensus, not the action consensus
-    """
-    while p < principle_val:
-        p += incr
-        A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
-        cons, _, ub = Lp(A, b, p)
-        p_list.append(p)
-        u_list.append(ub)
-        cons_list.append(cons)
-        dist_1p = np.linalg.norm(cons_1 - cons, p)
-        dist_pl = np.linalg.norm(cons_l - cons, p)
-        dist_1p_list.append(dist_1p)
-        dist_pl_list.append(dist_pl)
-        print('{:.2f} \t \t {:.4f}'.format(p, ub))
-        if math.isclose(p, float(con_p), rel_tol=1e-9):
-            print("DEBUG: P and con_P equal")
-            consensus_vals = [p, ub, cons, dist_1p, dist_pl]
-    """
     A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
     cons, _, ub = Lp(A, b, p)
     p_list.append(p)
@@ -188,10 +264,9 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     dist_1p_list.append(dist_1p)
     dist_pl_list.append(dist_pl)
     print('{:.2f} \t \t {:.4f}'.format(p, ub))
-    if math.isclose(p, float(con_p), rel_tol=1e-9):
-        print("DEBUG: P and con_P equal")
-        consensus_vals = [p, ub, cons, dist_1p, dist_pl]
-    print("DEBUG: Saving to file, ", filename)
+    consensus_vals = [p, ub, cons, dist_1p, dist_pl]
+    
+    print("DEBUG: Saving to file, ", filename, " and returning cons list")
     output_file(
         p_list,
         u_list,
@@ -201,8 +276,11 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
         aggregation_type,
         filename)
     
+    # Cut off n values, only interested in p values
+    # Note: n values (in action judgements) are the opposite of the p values
+    cons_list = cons_list[0][:4]
     return cons_list
-    
+
 
 def L1(A, b):
     """
