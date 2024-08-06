@@ -48,12 +48,10 @@ def transition_point(P_list, J_list, w, country_dict):
     return best_p
 
 def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
-    print("DEBUG INFO: Aggregating on Agent Principle")
     p_list, _,  cons_list, _, _, _=  aggregate_all_p(P_list=PP_list, 
                                                         J_list=PJ_list,
                                                         w=Pw)
 
-    print("DEBUG INFO: Finding best P")
     ## Defining a cut point to drop all rows where there are P's that are higher than this
     # TODO: Include finding limit P rather than hard coding
     cut_point = 3.8
@@ -62,7 +60,6 @@ def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
     con_vals = [0, 0]
     for j in range(2):
         con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
-    print("DEBUG: Con vals are: ",con_vals)
     
     con_p = 1.0 
     best_dist = 999
@@ -74,7 +71,6 @@ def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
             # to convert from ordinal list num to corresponding p
             con_p = (j/10)+1
 
-    print("DEBUG: Nearest P is: ", con_p)
     return con_p
 
 def aggregate_all_p(P_list, J_list, w):
@@ -124,8 +120,6 @@ def make_decision(cons_prefs, cons_actions) -> str:
     cons_prefs in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel]
     cons_actions in format [rel_adp_p, rel_div_p, nonrel_adp_p, nonrel_div_p]
     """
-    print("DEBUG: Cons vals in make decision: ", cons_prefs)
-    print("DEBUG: Cons actions in make decision: ", cons_actions)
     adp = (cons_prefs[1] * cons_actions[1]) + (cons_prefs[2] * cons_actions[2])
     div = 1 - adp
     decision = [adp, div]
@@ -268,6 +262,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     print('{:.2f} \t \t {:.4f}'.format(p, ub))
     consensus_vals = [p, ub, cons, dist_1p, dist_pl]
     
+    """
     print("DEBUG: Saving to file, ", filename, " and returning cons list")
     output_file(
         p_list,
@@ -277,6 +272,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
         dist_pl_list,
         aggregation_type,
         filename)
+    """
     
     # Cut off n values, only interested in p values
     # Note: n values (in action judgements) are the opposite of the p values
