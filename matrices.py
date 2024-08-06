@@ -114,7 +114,7 @@ def FormalisationObjects(filename='data.csv', delimiter=',', weights=0, df=None)
             J_p, J_n = JMatrixs(df.iloc[i])
             J_list.append((J_p, J_n))
         except:
-            print("Could not find JMatrix")
+            print("Could not find JMatrix, do you only have preference data?")
         P_list.append(P)
 
     w = Weights(df, n_countries, weights)

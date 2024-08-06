@@ -12,19 +12,17 @@ from matrices import FormalisationObjects, FormalisationMatrix
 personal_data = None
 principle_data = None
 
-def satisfaction(cons_vals: list, action_cons_vals: list):
+def satisfaction(decision_made):
     """
     This function will calculate satisfaction for each agent in the simulation
+    Satisfaction is calculated as: |(decision made - decision preferred)| for each agent
     """
     satisfaction = {}
     for i in range(len(personal_data)):
         agent_id = personal_data.iloc[i]['country']
-        # personal data rel - consensus val rel
-        sat = 0
-        for j in range(len(cons_vals)):
-            # Check to see if this matches the action taken
-            sat += personal_data.iloc[i]["rel"] - cons_vals[j][1]
-        satisfaction.update({agent_id : sat})    
+        # make agent decision
+        agent_decision = solve.make_decision([0, personal_data.iloc[i]['rel'], personal_data.iloc[i]['nonrel'], 0], [0, personal_data.iloc[i]['a_div_rel'], personal_data.iloc[i]['a_div_nonrel'], 0])
+        satisfaction.update({agent_id : abs(agent_decision[0] - decision_made[0])})    
 
     return satisfaction
 
@@ -47,8 +45,10 @@ def run_experiment() -> None:
     action_cons_vals = []
     
     decisions = []
+    scores = {}
 
     for p in [1, 10, "t", "p"]:
+        print("DEBUG: Running with new P = ", p)
         # Run simulation for example 1 p = 1
         if p == "t":
             p = solve.transition_point(P_list, J_list, w, country_dict)
@@ -69,10 +69,11 @@ def run_experiment() -> None:
                                         w=w,
                                         principle_val=p))
         # TODO: Do something with decision.
-        decisions.append(solve.make_decision(cons_vals[-1], action_cons_vals[-1]))
-
-    # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
-    scores = satisfaction(cons_vals=cons_vals, action_cons_vals=action_cons_vals)
+        decision = solve.make_decision(cons_vals[-1], action_cons_vals[-1])
+        decisions.append(decision)
+        # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
+        score = satisfaction(decision)
+        scores.update(score)
     return scores
 
 if __name__ == '__main__':
@@ -112,7 +113,6 @@ if __name__ == '__main__':
         principle_data = None
 
         i+=1
-    
     # Store in a file results
     headers = experiment_scores[0].keys()
     print("DEBUG: Headers\n", headers)
