@@ -8,41 +8,54 @@ agent_id, pp (egal, util), P_1 (budget, enjoy), P_2 (conformity, stimulation), P
 """
 
 import csv
-import random
+import sys
 import pandas as pd
+import numpy as np
 
-def generate_data(df : pd.DataFrame) -> None:
+def generate_random_data(df: pd.DataFrame) -> None:
     for i in range(0, 100):
         agent_id = i
-        pp_1 = random.random().__round__(3)
-        pp_1_1 = 1 - pp_1
-        pp_2 = random.random().__round__(3)
-        pp_2_1 = 1 - pp_2
-        pp_3 = random.random().__round__(3)
-        pp_3_1 = 1 - pp_3
-        P_1 = random.random().__round__(3)
-        P_1_1 = 1- P_1
-        P_2 = random.random().__round__(3)
-        P_2_1 = 1- P_2
-        P_3 = random.random().__round__(3)
-        P_3_1 = 1- P_3
-        a_enjoy_camp = random.uniform(-1, 1).__round__(3)
-        a_enjoy_resort = random.uniform(-1, 1).__round__(3)
-        a_budget_camp = random.uniform(-1, 1).__round__(3)
-        a_budget_resort = random.uniform(-1, 1).__round__(3)
-        a_conform_chain = random.uniform(-1, 1).__round__(3)
-        a_conform_independent = random.uniform(-1, 1).__round__(3)
-        a_stim_chain = random.uniform(-1, 1).__round__(3)
-        a_stim_independent = random.uniform(-1, 1).__round__(3)
-        a_enjoy_classic = random.uniform(-1, 1).__round__(3)
-        a_enjoy_unknown = random.uniform(-1, 1).__round__(3)
-        a_stimulation_classic = random.uniform(-1, 1).__round__(3)
-        a_stimulation_unknown = random.uniform(-1, 1).__round__(3)
-        
-        data = [agent_id, pp_1, pp_1_1, pp_2, pp_2_1, pp_3, pp_3_1, P_1, P_1_1, P_2, P_2_1, P_3, P_3_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort, a_conform_chain, a_conform_independent, a_stim_chain, a_stim_independent, a_enjoy_classic, a_enjoy_unknown, a_stimulation_classic, a_stimulation_unknown]
+        rand_prefs = np.random.uniform(size=6)
+        rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
+        rand_actions = np.random.uniform(low=-1, high=1, size=12)
+        data = [agent_id, *rand_prefs, *rand_actions]
         df.loc[len(df)] = data
+    return df
+
+# TODO: Implement different society generation methods
+ 
+def generate_utilitarian_data():
+    # Generates agent data that is majority utilitarian
+    return
+
+def generate_egalitarian_data():
+    # Generates agent data that is majority egalitarian
+    return
+
+def generate_normal_dist_data(df: pd.DataFrame):
+    rng = np.random.default_rng()
+    for i in range(0, 100):
+        agent_id = i
+        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=6)
+        rand_prefs = np.clip(rand_prefs, 0, 1)
+        rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
+        rand_actions = rng.normal(loc=0, scale=0.5, size=12)
+        rand_actions = np.clip(rand_actions, -1, 1)
+        data = [agent_id, *rand_prefs, *rand_actions]
+        df.loc[len(df)] = data
+    return df
 
 if __name__ == '__main__':
     df = pd.DataFrame(columns=['agent_id', 'pp_1', 'pp_1_1', 'pp_2', 'pp_2_1', 'pp_3', 'pp_3_1', 'P_1', 'P_1_1', 'P_2', 'P_2_1', 'P_3', 'P_3_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'])
-    generate_data(df)
+    #print("DEBUG: All args: ", sys.argv)
+    if sys.argv[1] == "-r":
+        df = generate_random_data(df)
+    elif sys.argv[1] == "-n":
+        df = generate_normal_dist_data(df)
+    elif sys.argv[1] == "-u":
+        df = generate_utilitarian_data(df)
+    elif sys.argv[1] == "-e":
+        df = generate_egalitarian_data(df)
+    else:
+        print("No argument found, no data generated")
     df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/agent_data.csv', index=True)
