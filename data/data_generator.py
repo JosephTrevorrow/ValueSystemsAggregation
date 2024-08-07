@@ -21,16 +21,39 @@ def generate_random_data(df: pd.DataFrame) -> None:
         data = [agent_id, *rand_prefs, *rand_actions]
         df.loc[len(df)] = data
     return df
-
-# TODO: Implement different society generation methods
  
-def generate_utilitarian_data():
+def generate_utilitarian_data(df: pd.DataFrame):
     # Generates agent data that is majority utilitarian
-    return
+    rng = np.random.default_rng()
+    for i in range(0, 100):
+        agent_id = i
+        principle_pref = rng.normal(loc=0.2, scale=0.1, size=1)
+        principle_prefs = [principle_pref, 1 - principle_pref]
+        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=5)
+        rand_prefs = np.clip(rand_prefs, 0, 1)
+        rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
+        rand_actions = rng.normal(loc=0, scale=0.5, size=12)
+        rand_actions = np.clip(rand_actions, -1, 1)
+        data = [agent_id, *principle_prefs, *rand_prefs, *rand_actions]
+        df.loc[len(df)] = data
+    return df
 
-def generate_egalitarian_data():
+def generate_egalitarian_data(df: pd.DataFrame):
     # Generates agent data that is majority egalitarian
-    return
+    rng = np.random.default_rng()
+    for i in range(0, 100):
+        agent_id = i
+        principle_pref = rng.normal(loc=0.8, scale=0.1, size=1)
+        principle_pref = np.clip(principle_pref, 0, 1)[0]
+        principle_prefs = [principle_pref, 1 - principle_pref]
+        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=5)
+        rand_prefs = np.clip(rand_prefs, 0, 1)
+        rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
+        rand_actions = rng.normal(loc=0, scale=0.5, size=12)
+        rand_actions = np.clip(rand_actions, -1, 1)
+        data = [agent_id, *principle_prefs, *rand_prefs, *rand_actions]
+        df.loc[len(df)] = data
+    return df
 
 def generate_normal_dist_data(df: pd.DataFrame):
     rng = np.random.default_rng()
