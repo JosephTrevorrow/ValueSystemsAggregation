@@ -19,7 +19,7 @@ def satisfaction(decision_made):
     """
     satisfaction = {}
     for i in range(len(personal_data)):
-        agent_id = personal_data.iloc[i]['country']
+        agent_id = i
         # make agent decision
         agent_decision = solve.make_decision([0, personal_data.iloc[i]['rel'], personal_data.iloc[i]['nonrel'], 0], [0, personal_data.iloc[i]['a_div_rel'], personal_data.iloc[i]['a_div_nonrel'], 0])
         satisfaction.update({agent_id : abs(agent_decision[0] - decision_made[0])})    
@@ -45,7 +45,8 @@ def run_experiment() -> None:
     action_cons_vals = []
     
     decisions = []
-    scores = {}
+    scores = []
+
 
     for p in [1, 10, "t", "p"]:
         print("DEBUG: Running with new P = ", p)
@@ -73,7 +74,8 @@ def run_experiment() -> None:
         decisions.append(decision)
         # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
         score = satisfaction(decision)
-        scores.update(score)
+        print("DEBUG: Score\n", score)
+        scores.append(score)
     return scores
 
 if __name__ == '__main__':
@@ -82,6 +84,7 @@ if __name__ == '__main__':
     
     iterations = 1
     i = 0
+    experiment_scores = []
     while i < iterations:
         sample_data = data.sample(n=4)
         example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
@@ -93,7 +96,7 @@ if __name__ == '__main__':
                                 ['agent_id', 'pp_3', 'pp_3_1']
         ]
 
-        experiment_scores = []
+        
         # Loop through each example case
         for (situation, principles) in zip(example_data_names, example_principle_names):
             # Extract values and action judgements for eg. 1
@@ -106,17 +109,21 @@ if __name__ == '__main__':
             principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
             print("DEBUG: Testing with the following sample\n", personal_data)
-            experiment_scores.append(run_experiment())
+            experiment_score = run_experiment()
+            print("DEBUG: Experiment score\n", experiment_score)
+            experiment_scores.append(experiment_score)
+            print("DEBUG: Experiment scores\n", experiment_scores)
 
         # Reset data
         personal_data = None
         principle_data = None
 
         i+=1
-    # Store in a file results
-    headers = experiment_scores[0].keys()
-    print("DEBUG: Headers\n", headers)
-    with open('test4.csv', 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames = headers)
-        writer.writeheader()
-        writer.writerows(experiment_scores)
+
+        with open('normsoc_10iteration_3diffagent.csv', 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            # flatten rows
+            for i, sublist in enumerate(experiment_scores):
+                for j, dictionary in enumerate(sublist):
+                    for key, value in dictionary.items():
+                        writer.writerow([i, j, key, value])

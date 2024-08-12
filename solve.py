@@ -115,16 +115,12 @@ def make_decision(cons_prefs, cons_actions) -> str:
     This function computes a simple decision based on the consensus value system
     $(P[v_1,v_2]*a_{v_1}(i))+(P[v_2,v_1]*a_{v_2}(i))$
 
-    cons_prefs: array that maps to [p, ub, cons, dist_1p, dist_pl]
-    cons_actions: array that maps to [p, ub, cons, dist_1p, dist_pl]
     cons_prefs in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel]
     cons_actions in format [rel_adp_p, rel_div_p, nonrel_adp_p, nonrel_div_p]
     """
     # adp can be between -1 and 1, as cons_prefs can be between 0 and 1, and cons_actions can be between -1 and 1
-    adp = (cons_prefs[1] * cons_actions[1]) + (cons_prefs[2] * cons_actions[2])
-    # Normalise adp to be between 0 and 1 for ratio purposes
-    adp = (adp + 1) / 2
-    div = 1 - adp
+    adp = (cons_prefs[1] * cons_actions[0]) + (cons_prefs[2] * cons_actions[2])
+    div = (cons_prefs[1] * cons_actions[1]) + (cons_prefs[2] * cons_actions[3])
     decision = [adp, div]
     return decision
 

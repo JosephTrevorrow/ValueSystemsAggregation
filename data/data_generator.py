@@ -28,6 +28,7 @@ def generate_utilitarian_data(df: pd.DataFrame):
     for i in range(0, 100):
         agent_id = i
         principle_pref = rng.normal(loc=0.2, scale=0.1, size=1)
+        principle_pref = np.clip(principle_pref, 0, 1)[0]
         principle_prefs = [principle_pref, 1 - principle_pref]
         rand_prefs = rng.normal(loc=0.5, scale=0.1, size=5)
         rand_prefs = np.clip(rand_prefs, 0, 1)
