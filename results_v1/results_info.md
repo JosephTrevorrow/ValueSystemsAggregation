@@ -1,20 +1,4 @@
 # Format of results data
-For every situation, each $p$ is ran, such that the results are in this format:
-
-There are 4 agents being sampled, hence the 4 rows, but there are 3 decisions, with 4 different types of P
-
-10 rounds
-
-Situation one: 
-    p = 1
-
-    p = 10
-
-    p = t
-
-    p = p
-
-repeat this for all three situations for one run
 
 single round is 3 situations, 4 different p, so 12 rows per round
 
@@ -23,10 +7,9 @@ single round is 3 situations, 4 different p, so 12 rows per round
 row 0-11 is one single round
 12 - 23 is second round
 
-
 DEBUG: Experiment scores
 
-e.g.
+e.g. format:
 [
     [
         p=1,
@@ -35,7 +18,7 @@ e.g.
         p=p
     ]
 ]
-
+%%%%%%%%%%%%%%%%%%%%%
  [
     [
         {0: 0.314616903218605, 1: 0.39601946518923836, 2: 0.16897976996360825, 3: 0.48294020835304285}, 
@@ -59,3 +42,4 @@ e.g.
     ]
 
 ]
+%%%%%%%%%%%%%%%%%%%%%%

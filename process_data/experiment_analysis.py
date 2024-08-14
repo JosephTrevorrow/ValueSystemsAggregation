@@ -30,8 +30,10 @@ def unpack_data(filename: str):
             agent_id = row[0]
             iteration = row[1]
             satisfaction = row[2]
-            
+
             unpacked_data[agent_id][iteration].append(satisfaction)
+        final_data = [[dict(unpacked_data)]]
+    return final_data
 
 
 if __name__ == "__main__":
