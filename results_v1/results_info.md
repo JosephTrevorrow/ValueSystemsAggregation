@@ -1,8 +1,18 @@
 # Format of results data
+There are 25 groups
+- each group has 4 different p values it must test per context
+- each group goes through of 3 different contexts:
+- each row is: context, p value, agent name, satisfaction score
 
-single round is 3 situations, 4 different p, so 12 rows per round
+Group 1 run their iteration. This runs from row 1 to row 48.
+- row 1-16 is context 1, with 4 different p values
+- this continues for each context up to a p value of 3
 
-120 rows, but only have 30!?!? 
+
+there are 10 rounds, so the 25 groups go through this process 10 times
+
+0-74 is one experiment
+
 
 row 0-11 is one single round
 12 - 23 is second round
@@ -18,6 +28,7 @@ e.g. format:
         p=p
     ]
 ]
+
 %%%%%%%%%%%%%%%%%%%%%
  [
     [
@@ -43,3 +54,22 @@ e.g. format:
 
 ]
 %%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+DECISIONS:
+debug:  [
+    [
+        [0.22034259271698586, 0.013006399354801204], 
+        [0.06305957410307769, 0.057101927376922004], 
+        [0.08246102366820196, 0.04858601192510803], 
+        [0.09248628445405602, 0.04698879393427133]
+    ], 
+    [
+        [0.0020342659393683057, -0.0601931901605178], 
+        [0.09613671492466577, -0.12410478734346797], [0.004456010549852875, -0.09254668742297928], [-0.03476647214201755, -0.061344738385434396]
+    ], 
+    [
+        [-0.1399367766669715, -0.08205251581271009], [-0.26368212503235827, -0.06702436336040477], [-0.20326414087956976, -0.07287940570011961], [-0.12187335409082808, -0.08631011847112835]
+    ]
+]

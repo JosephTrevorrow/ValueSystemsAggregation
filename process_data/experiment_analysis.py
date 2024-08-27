@@ -3,6 +3,7 @@ This file creates graphs tracking satisfaction over time for each agent in the s
 """
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import numpy as np
 import csv
@@ -15,28 +16,84 @@ def plot_agent_satisfaction(data: pd.DataFrame, title: str):
     """
 
 
-def plot_average_satisfaction(data: pd.DataFrame, title: str):
+def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: str):
     """
     This function plots the average satisfaction for each test in the data.
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
     """
 
-def unpack_data(filename: str):
-    unpacked_data = defaultdict(lambda: defaultdict(list))
-    
-    with open(filename, "r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            agent_id = row[0]
-            iteration = row[1]
-            satisfaction = row[2]
+    df_dict = {}
+    unique_p_values = data['p_value'].unique()
+    colours = ['red', 'green', 'blue', 'orange']
+    # Split the DataFrame by P_Value
+    for p_value in unique_p_values:
+        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
+    for key in df_dict.keys():
+        df_dict[key] = df_dict[key].sort_values(by=['agent', 'context']).reset_index(drop=True)
+    for key in df_dict:
+        # Calculate cumulative sum of Satisfaction for each Agent
+        df_dict[key]['Cumulative_Satisfaction'] = df_dict[key].groupby('agent')['satisfaction'].cumsum()
 
-            unpacked_data[agent_id][iteration].append(satisfaction)
-        final_data = [[dict(unpacked_data)]]
-    return final_data
+    for key in df_dict:
+        # Reset the Context for each Agent group
+        df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
+        
+    plt.figure(figsize=(12, 8))
+    labels = ['1', '10', 't', 'p']
+    # Loop through each DataFrame in df_dict
+    for (key, colour, label) in zip(df_dict, colours, labels):
+        # Calculate the mean, min, and max of Cumulative Satisfaction for each Context across all Agents
+        mean_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].mean()
+        min_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].min()
+        max_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].max()
+
+        # Plot the line for this dataframe
+        plt.plot(mean_cum_satisfaction, color=colour, label=label)
+                # Plot the spread (shaded area)
+        plt.fill_between(mean_cum_satisfaction.index,
+                         min_cum_satisfaction,
+                         max_cum_satisfaction,
+                         color=colour, alpha=0.1)
+
+    # Add labels and title
+    plt.xlabel('Context')
+    plt.ylabel('Mean Cumulative Satisfaction')
+    plt.title('Mean Cumulative Satisfaction over Time for Different P_Values')
+    plt.legend(title='P_Values')
+    plt.grid(True)
+    plt.savefig(plot_savename+title)
+
+def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots a boxplot of the residuals for each test in the data.
+    INPUT: data -- pd.DataFrame, title -- str (title of the plot)
+    """
+    satisfaction_df = data.groupby(['agent', 'p_value'], as_index=False).agg({'satisfaction': 'sum'})
+    satisfaction_df['p_value'] = satisfaction_df['p_value'].replace({0: '1', 1: '10', 2: 't', 3: 'p'})
+
+    sns.set_theme(style="whitegrid")
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x='p_value', y='satisfaction', data=satisfaction_df, width=0.3, whis=3)
+
+    plt.title(title)
+    plt.xlabel('P Value')
+    plt.ylabel('Satisfaction')
+    savename = plot_savename+title
+    plt.savefig(savename)
+
+
+def unpack_data(filename: str):
+    df = pd.read_csv(filename)
+    return df
 
 
 if __name__ == "__main__":
-    # Example of use
-    data = unpack_data("/home/ia23938/Documents/GitHub/ValueSystemsAggregation/results_v1/egalsoc_10iteration_3diffagent.csv")
-    plot_average_satisfaction(data, "Agent Satisfaction Over Time")
+    print("DEBUG: Unpacking data")
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/results_v1/plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/results_v1/"
+    results_filename = {'egal': "egalsoc_10iteration_3diffagent.csv", 'norm': "normsoc_10iteration_3diffagent.csv"}
+    for name, filename in results_filename.items():
+        data = unpack_data(results_path + filename)
+        plot_boxplot_residuals(data, f"Agent Satisfaction Over Time for {name} society", plot_savename)
+        plot_cumulative_satisfaction(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename)
+    

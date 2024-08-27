@@ -45,18 +45,34 @@ def transition_point(P_list, J_list, w, country_dict):
             dist_inf_list.append(dist_pl)
             diff_list.append(abs(dist_1p - dist_pl))  
     print('Transition point: {:.2f}'.format(best_p))
+    limit_output(p_list, dist_p_list, dist_inf_list, diff_list, "limits.csv")
     return best_p
 
 def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
-    p_list, _,  cons_list, _, _, _=  aggregate_all_p(P_list=PP_list, 
+    p_list, _, cons_list, _, _, cons_1, cons_l=  aggregate_all_p(P_list=PP_list, 
                                                         J_list=PJ_list,
                                                         w=Pw)
 
     ## Defining a cut point to drop all rows where there are P's that are higher than this
-    # TODO: Include finding limit P rather than hard coding
-    cut_point = 3.8
+    
+    # Cut point is the limit where p is within epsilon of p=\infty
+    #print("Cons list is: ", cons_list)
+    cut_point = 10
+    incr = 0.1
+    j = 0
+    for i in np.arange(1 + incr, 10, incr):
+        cons = cons_list[j]
+        dist_1p = np.linalg.norm(cons_1 - cons, i)
+        dist_pl = np.linalg.norm(cons_l - cons, i)
+        j += 1
+        # Note: Hard Coded \epsilon value
+        if (abs(dist_1p - dist_pl) < 0.005):
+            cut_point = i
+            print('Not improving anymore, stopping!')
+            break
+
     cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-    print("DEBUG: cut_list length is: ", len(cut_list))
+    #print("DEBUG: cut_list length is: ", len(cut_list))
     con_vals = [0, 0]
     for j in range(2):
         con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
@@ -100,8 +116,8 @@ def aggregate_all_p(P_list, J_list, w):
         dist_pl = np.linalg.norm(cons_l - cons, p)
         dist_1p_list.append(dist_1p)
         dist_pl_list.append(dist_pl)
-        print('{:.2f} \t \t {:.4f}'.format(p, ub))
-    return p_list, u_list, cons_list, dist_1p_list, dist_pl_list, cons_l
+        #print('{:.2f} \t \t {:.4f}'.format(p, ub))
+    return p_list, u_list, cons_list, dist_1p_list, dist_pl_list, cons_1, cons_l
 
 def print_consensus(cons):
     print('Rs =')
@@ -226,8 +242,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
                      P_list=None, 
                      J_list=None, 
                      w=None,
-                     principle_val=1
-                     ):
+                     principle_val=None):
     """
     We run aggregation of the action value matrices and store in a file
     """
@@ -258,7 +273,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
     dist_pl = np.linalg.norm(cons_l - cons, p)
     dist_1p_list.append(dist_1p)
     dist_pl_list.append(dist_pl)
-    print('{:.2f} \t \t {:.4f}'.format(p, ub))
+    #print('{:.2f} \t \t {:.4f}'.format(p, ub))
     consensus_vals = [p, ub, cons, dist_1p, dist_pl]
     
     """
@@ -425,28 +440,29 @@ if __name__ == '__main__':
     parser.add_argument(
         '-g',
         type=str,
-        default='none',
+        default='slide_results.csv',
         #default='results.csv',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_principles.csv',
+        default=None,
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_principles.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        #default=False, 
-        default=True,
+        default=False, 
+        #default=True,
         help='Compute the P value consensus aggregation method'
     )
     parser.add_argument(
         '-ex',
         type=str,
-        default="A",
+        default="",
         help="Generate explanation of agent with index as arg"
     )
 
@@ -608,8 +624,43 @@ if __name__ == '__main__':
     # Aggregate using principle values
     elif args.pv == True:
         print("DEBUG INFO: Aggregating on Agent Principle")
-        p_list, _,  cons_list, _, _, _= aggregate_values(True, "consensus_principles.csv")
+        p_list, _, cons_list, _, _, cons_1, cons_l=  aggregate_all_p(P_list=PP_list, 
+                                                        J_list=PJ_list,
+                                                        w=Pw)        
+        ## Defining a cut point to drop all rows where there are P's that are higher than this
+    
+        # Cut point is the limit where p is within epsilon of p=\infty
+        print("Cons list is: ", cons_list)
+        cut_point = 10
+        incr = 0.1
+        j = 0
+        for i in np.arange(1 + incr, 10, incr):
+            cons = cons_list[j]
+            dist_1p = np.linalg.norm(cons_1 - cons, i)
+            dist_pl = np.linalg.norm(cons_l - cons, i)
+            j += 1
+            # Note: Hard Coded \epsilon value
+            if (abs(dist_1p - dist_pl) < 0.005):
+                cut_point = i
+                print('Not improving anymore, stopping!')
+                break
+
+        cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
+        print("DEBUG: cut_list length is: ", len(cut_list))
+        con_vals = [0, 0]
+        for j in range(2):
+            con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
         
+        con_p = 1.0 
+        best_dist = 999
+        for j in range(len(cons_list)):
+            dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
+            dist = sum(dist)
+            if dist < best_dist:
+                best_dist = dist
+                # to convert from ordinal list num to corresponding p
+                con_p = (j/10)+1
+
         print("DEBUG INFO: Finding best P")
         ## Defining a cut point to drop all rows where there are P's that are higher than this
         # TODO: Include finding limit P rather than hard coding

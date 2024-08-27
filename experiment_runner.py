@@ -12,14 +12,22 @@ from matrices import FormalisationObjects, FormalisationMatrix
 personal_data = None
 principle_data = None
 
+def split_into_samples(data, sample_size):
+    shuffled_df = data.sample(frac=1).reset_index(drop=True)
+    # Split into samples
+    samples = [shuffled_df.iloc[i*sample_size:(i+1)*sample_size] for i in range(25)]
+    return samples
+    
+
 def satisfaction(decision_made):
     """
     This function will calculate satisfaction for each agent in the simulation
     Satisfaction is calculated as: |(decision made - decision preferred)| for each agent
+    An agents ID must be tracked and kept consistent
     """
     satisfaction = {}
     for i in range(len(personal_data)):
-        agent_id = i
+        agent_id = personal_data.iloc[i]['country']
         # make agent decision
         agent_decision = solve.make_decision([0, personal_data.iloc[i]['rel'], personal_data.iloc[i]['nonrel'], 0], [0, personal_data.iloc[i]['a_div_rel'], personal_data.iloc[i]['a_div_nonrel'], 0])
         satisfaction.update({agent_id : abs(agent_decision[0] - decision_made[0])})    
@@ -27,17 +35,11 @@ def satisfaction(decision_made):
     return satisfaction
 
 def run_experiment() -> None:
-    """
-    Data is prepared for the sim by using matrices files mimicing original solve.py
-    """
+
     P_list, J_list, w, country_dict = FormalisationObjects(
     filename=None, delimiter=',', df=personal_data)
-
-    # Solve missing principle values
-    #fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
     
-    print("DEBUG: Principle data\n", principle_data)
-    # Note: Could not find JMatrix is printed for preference data (there is no action judgement data)
+    # Note: Could not find JMatrix is printed for principle data (there is no action judgement data in our principle value system)
     PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
         filename=None, delimiter=',', df=principle_data)
     
@@ -47,16 +49,11 @@ def run_experiment() -> None:
     decisions = []
     scores = []
 
-
     for p in [1, 10, "t", "p"]:
-        print("DEBUG: Running with new P = ", p)
-        # Run simulation for example 1 p = 1
         if p == "t":
-            p = solve.transition_point(P_list, J_list, w, country_dict)
+            p = solve.transition_point(P_list, J_list, w, country_dict, 'limit_p_files.csv')
         elif p == "p":
-            # get voted principle
             p = solve.voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, principle_data)
-        # filename is what you save data as
         cons_vals.append(solve.aggregate_values(aggregation_type=True, 
                                         filename="test.csv", 
                                         P_list=P_list, 
@@ -69,61 +66,96 @@ def run_experiment() -> None:
                                         J_list=J_list,
                                         w=w,
                                         principle_val=p))
-        # TODO: Do something with decision.
         decision = solve.make_decision(cons_vals[-1], action_cons_vals[-1])
         decisions.append(decision)
-        # Calculate satisfaction (cons_vals, action_cons_vals are in format [p=1, p=10])
         score = satisfaction(decision)
-        print("DEBUG: Score\n", score)
         scores.append(score)
-    return scores
+    return scores, decisions, cons_vals, action_cons_vals
 
 if __name__ == '__main__':
     # read in data
     data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/agent_data.csv')
     
-    iterations = 1
+    """
+    - An experiment will run for 100 days, going out with different agents each time (randomly)
+    - We map the satisfaction of each agent over time
+    - So every agent will have a satisfaction score for each day
+    """
+    iterations = 9
     i = 0
     experiment_scores = []
+    decision_scores = []
+    preference_consensuses = []
+    action_judgement_consensuses = []
     while i < iterations:
-        sample_data = data.sample(n=4)
-        example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
-                            ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
-                            ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown']
-        ]
-        example_principle_names = [['agent_id', 'pp_1', 'pp_1_1'],
-                                ['agent_id', 'pp_2', 'pp_2_1'],
-                                ['agent_id', 'pp_3', 'pp_3_1']
-        ]
-
         
-        # Loop through each example case
-        for (situation, principles) in zip(example_data_names, example_principle_names):
-            # Extract values and action judgements for eg. 1
-            # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
-            sample = sample_data[situation]
-            personal_data = sample.rename(columns={'agent_id': 'country', situation[1]: 'rel', situation[2] : 'nonrel', situation[3] : 'a_adp_rel', situation[4] : 'a_div_rel', situation[5] : 'a_adp_nonrel', situation[6] : 'a_div_nonrel'})
+        # Single sample:
+        #sample_data = data.sample(n=4)
+
+        split_samples = split_into_samples(data, sample_size=4)
+        for sample_data in split_samples:
+            # Situtational data
+            example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
+                                ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
+                                ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'],
+            ]
+            example_principle_names = [['agent_id', 'pp_1', 'pp_1_1'],
+                                    ['agent_id', 'pp_2', 'pp_2_1'],
+                                    ['agent_id', 'pp_3', 'pp_3_1'],
+            ]
             
-            # TODO: Change principles from staying the same to changing
-            sample = sample_data[principles]
-            principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
+            # Loop through each example case
+            for (situation, principles) in zip(example_data_names, example_principle_names):
+                # Extract values and action judgements for eg. 1
+                # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
+                sample = sample_data[situation]
+                personal_data = sample.rename(columns={'agent_id': 'country', situation[1]: 'rel', situation[2] : 'nonrel', situation[3] : 'a_adp_rel', situation[4] : 'a_div_rel', situation[5] : 'a_adp_nonrel', situation[6] : 'a_div_nonrel'})
+                
+                sample = sample_data[principles]
+                principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-            print("DEBUG: Testing with the following sample\n", personal_data)
-            experiment_score = run_experiment()
-            print("DEBUG: Experiment score\n", experiment_score)
-            experiment_scores.append(experiment_score)
-            print("DEBUG: Experiment scores\n", experiment_scores)
+                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment()
+                experiment_scores.append(experiment_score)
+                decision_scores.append(decisions)
+                preference_consensuses.append(preference_consensus)
+                action_judgement_consensuses.append(action_judgement_consensus)
 
-        # Reset data
-        personal_data = None
-        principle_data = None
+            # Reset data
+            personal_data = None
+            principle_data = None
 
         i+=1
 
-        with open('normsoc_10iteration_3diffagent.csv', 'w') as csvfile:
+        with open('utilsoc_10iteration_3diffagent.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(experiment_scores):
                 for j, dictionary in enumerate(sublist):
                     for key, value in dictionary.items():
                         writer.writerow([i, j, key, value])
+        with open('utilsoc_10iteration_3diffagent_DECISIONS.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            # flatten rows
+            for i, sublist in enumerate(decision_scores):
+                for j, decision in enumerate(sublist):
+                    writer.writerow([i, j, decision])
+        # Store consensus value system
+        with open('utilsoc_10iteration_3diffagent_CONS_PREFERENCES.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            # flatten rows
+            for i, sublist in enumerate(preference_consensus):
+                for j, pref in enumerate(sublist):
+                    writer.writerow([i, j, pref])
+        print("debug: ", action_judgement_consensus)
+        with open('utilsoc_10iteration_3diffagent_CONS_ACTIONS.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            # flatten rows
+            for i, sublist in enumerate(action_judgement_consensus):
+                for j, action in enumerate(sublist):
+                    writer.writerow([i, j, action])
+
+        # Reset storage
+        experiment_scores = []
+        decision_scores = []
+        preference_consensuses = []
+        action_judgement_consensuses = []
