@@ -28,7 +28,6 @@ def plot_data(data: pd.DataFrame, title: str):
     plt.show()
 
 if __name__ == "__main__":
-    # Example of use
-    data = pd.read_csv("/home/ia23938/Documents/GitHub/ValueSystemsAggregation/limits.csv")
+    data = pd.read_csv("/home/ia23938/Documents/GitHub/ValueSystemsAggregation/limit_p_files.csv")
     plot_data(data, "Value Principle Preference Matrix Aggregation (limit P)")
 

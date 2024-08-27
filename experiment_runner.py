@@ -6,6 +6,7 @@ The file will track satisfaction for each agent and store in a results csv file.
 import pandas as pd
 import solve
 import csv
+import sys
 from matrices import FormalisationObjects, FormalisationMatrix
     
 # Global variables
@@ -34,7 +35,10 @@ def satisfaction(decision_made):
 
     return satisfaction
 
-def run_experiment() -> None:
+def run_experiment(filename, iteration, contextnum) -> None:
+    """
+    filename needed to store limit graphs
+    """
 
     P_list, J_list, w, country_dict = FormalisationObjects(
     filename=None, delimiter=',', df=personal_data)
@@ -49,9 +53,11 @@ def run_experiment() -> None:
     decisions = []
     scores = []
 
+    limit_p_filename = filename+'it'+str(iteration)+'_context'+str(contextnum)+'.csv'
+
     for p in [1, 10, "t", "p"]:
         if p == "t":
-            p = solve.transition_point(P_list, J_list, w, country_dict, 'limit_p_files.csv')
+            p = solve.transition_point(P_list, J_list, w, country_dict, limit_p_filename)
         elif p == "p":
             p = solve.voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, principle_data)
         cons_vals.append(solve.aggregate_values(aggregation_type=True, 
@@ -73,8 +79,13 @@ def run_experiment() -> None:
     return scores, decisions, cons_vals, action_cons_vals
 
 if __name__ == '__main__':
+    try:
+        filename = sys.argv[1]
+    except:
+        filename = 'agent_data'
+
     # read in data
-    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/agent_data.csv')
+    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/'+filename+'.csv')
     
     """
     - An experiment will run for 100 days, going out with different agents each time (randomly)
@@ -103,7 +114,7 @@ if __name__ == '__main__':
                                     ['agent_id', 'pp_2', 'pp_2_1'],
                                     ['agent_id', 'pp_3', 'pp_3_1'],
             ]
-            
+            j = 0
             # Loop through each example case
             for (situation, principles) in zip(example_data_names, example_principle_names):
                 # Extract values and action judgements for eg. 1
@@ -114,43 +125,43 @@ if __name__ == '__main__':
                 sample = sample_data[principles]
                 principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment()
+                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment(filename, i, j)
                 experiment_scores.append(experiment_score)
                 decision_scores.append(decisions)
                 preference_consensuses.append(preference_consensus)
                 action_judgement_consensuses.append(action_judgement_consensus)
-
+                j+=1
             # Reset data
             personal_data = None
             principle_data = None
 
         i+=1
 
-        with open('utilsoc_10iteration_3diffagent.csv', 'a') as csvfile:
+        with open(filename+'.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(experiment_scores):
                 for j, dictionary in enumerate(sublist):
                     for key, value in dictionary.items():
                         writer.writerow([i, j, key, value])
-        with open('utilsoc_10iteration_3diffagent_DECISIONS.csv', 'a') as csvfile:
+        with open(filename+'_DECISIONS.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(decision_scores):
                 for j, decision in enumerate(sublist):
                     writer.writerow([i, j, decision])
         # Store consensus value system
-        with open('utilsoc_10iteration_3diffagent_CONS_PREFERENCES.csv', 'a') as csvfile:
+        with open(filename+'_CONS_PREFERENCES.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(preference_consensus):
                 for j, pref in enumerate(sublist):
                     writer.writerow([i, j, pref])
         print("debug: ", action_judgement_consensus)
-        with open('utilsoc_10iteration_3diffagent_CONS_ACTIONS.csv', 'a') as csvfile:
+        with open(filename+'_CONS_ACTIONS.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
-            for i, sublist in enumerate(action_judgement_consensus):
+            for i, sublist in enumerate(action_judgement_consensuses):
                 for j, action in enumerate(sublist):
                     writer.writerow([i, j, action])
 

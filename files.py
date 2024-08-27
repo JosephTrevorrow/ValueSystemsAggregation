@@ -65,7 +65,7 @@ def limit_output(p, dist_p_list, dist_inf_list, diff_list, name):
     for i in range(len(p)):
         el = [p[i], dist_p_list[i], dist_inf_list[i], diff_list[i]]
         csv_rows.append(el)
-    with open(name, 'a', newline='') as csvfile:
+    with open(name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
     return None

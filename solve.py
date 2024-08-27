@@ -10,7 +10,7 @@ import math
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
-def transition_point(P_list, J_list, w, country_dict):
+def transition_point(P_list, J_list, w, country_dict, filename):
     A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
     cons_1, r_1, u_1 = L1(A, b)
     A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
@@ -45,7 +45,7 @@ def transition_point(P_list, J_list, w, country_dict):
             dist_inf_list.append(dist_pl)
             diff_list.append(abs(dist_1p - dist_pl))  
     print('Transition point: {:.2f}'.format(best_p))
-    limit_output(p_list, dist_p_list, dist_inf_list, diff_list, "limits.csv")
+    limit_output(p_list, dist_p_list, dist_inf_list, diff_list, filename)
     return best_p
 
 def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
