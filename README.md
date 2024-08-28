@@ -1,3 +1,13 @@
+Hierarchical Consensus Value Aggregation for Value-Aligned Multi-Agent Systems
+===================
+This Repository contains all code and experiment data for the paper "Hierarchical Consensus Value Aggregation for Value-Aligned Multi-Agent Systems". This work is an extension of work done by researchers credited below, and as such a fork of a repository for their paper "Aggregating Value Systems for Decision Support". 
+
+We run our experiments in "experiment_runner.py" which given the name of a society data will produce limit graph csv files for each timestep, and files contianing the consensus value system at each time step, as well as an average satisfaction for each group of agents. 
+
+```
+usage testing on a society data file of "util_soc.csv: python-jl -m IPython experiment_runner.py util_soc
+```
+
 Aggregating Value Systems
 ===================
 This repository contains the implementation of the algorithms and data of the experimental section of the paper
