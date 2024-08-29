@@ -8,6 +8,21 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import math
 
+import juliapkg
+juliapkg.require_julia("=1.10.3")
+juliapkg.resolve()
+from juliacall import Main as jl
+
+import atexit
+
+def shutdown_julia():
+    try:
+        jl.seval("exit()")
+        print("julia has been shutdown.")
+    except Exception as e:
+        print("error shutting down julia {e}")
+#atexit.register(shutdown_julia)
+
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
 def transition_point(P_list, J_list, w, country_dict, filename):
@@ -379,7 +394,26 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     r = np.abs(A @ x - b)
     return x, r, np.linalg.norm(r, p)
 
+def Lp(A, b, p):
+    # l = A.shape[1]
+    if p >= 2:  # pIRLS implementation (NIPS 2019)
+        jl.include(os.path.dirname(
+                os.path.realpath(__file__)) +
+            '/IRLS-pNorm.jl')
+        # constraints needed for pIRLS (empty)
+        C = np.zeros_like(A)
+        d = np.zeros_like(b)
+        epsilon = 1e-10
+        cons, it = jl.pNorm(epsilon, A, b.reshape(-1, 1),
+                              p, C, d.reshape(-1, 1))
+        # cons, it = IRLS.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
+        r = np.abs(A @ cons - b)
+        #jl.collector()
+        return cons, r, np.linalg.norm(r, p)
+    else:  # vanilla IRLS implementation
+        return IRLS(A, b, p)
 
+"""
 def Lp(A, b, p):
     # l = A.shape[1]
     if p >= 2:  # pIRLS implementation (NIPS 2019)
@@ -397,10 +431,13 @@ def Lp(A, b, p):
                               p, C, d.reshape(-1, 1))
         # cons, it = IRLS.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
         r = np.abs(A @ cons - b)
+        Main.collector()
+        Main.eval('GC.gc()')
+        Main.eval('GC.gc()')
         return cons, r, np.linalg.norm(r, p)
     else:  # vanilla IRLS implementation
         return IRLS(A, b, p)
-
+"""
 
 ### TODO: Make a new arguement that allows user to compute preference aggregation using principles
 if __name__ == '__main__':

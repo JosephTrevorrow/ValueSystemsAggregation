@@ -112,6 +112,15 @@ if __name__ == '__main__':
     action_judgement_consensuses = []
     transition_points = []
     hcva_points = []
+    # Situtational data
+    example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
+                        ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
+                        ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'],
+    ]
+    example_principle_names = [['agent_id', 'pp_1', 'pp_1_1'],
+                            ['agent_id', 'pp_2', 'pp_2_1'],
+                            ['agent_id', 'pp_3', 'pp_3_1'],
+    ]
     while iterator < iterations:
         experiment_scores = []
         decision_scores = []
@@ -125,15 +134,7 @@ if __name__ == '__main__':
         j = 0
         split_samples = split_into_samples(data, sample_size=4)
         for sample_data in split_samples:
-            # Situtational data
-            example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
-                                ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
-                                ['agent_id', 'P_3', 'P_3_1', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'],
-            ]
-            example_principle_names = [['agent_id', 'pp_1', 'pp_1_1'],
-                                    ['agent_id', 'pp_2', 'pp_2_1'],
-                                    ['agent_id', 'pp_3', 'pp_3_1'],
-            ]
+
             k = 0
             # Loop through each example case
             for (situation, principles) in zip(example_data_names, example_principle_names):
@@ -146,7 +147,7 @@ if __name__ == '__main__':
                 principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
                 #print("DEBUG: Running experiment for ", personal_data)
-                #print("DEBUG: Running experiment for ", principle_data)
+                print("DEBUG: Running experiment for ", principle_data)
 
                 experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(filename, iterator, j, k)
                 experiment_scores.append(experiment_score)
@@ -162,6 +163,8 @@ if __name__ == '__main__':
             del principle_data
             j+=1
             gc.collect()
+
+        solve.shutdown_julia()
 
         with open(path+filename+'.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
@@ -182,7 +185,7 @@ if __name__ == '__main__':
         with open(path+filename+'_CONS_PREFERENCES.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
-            for i, sublist in enumerate(preference_consensus):
+            for i, sublist in enumerate(preference_consensuses):
                 for j, pref in enumerate(sublist):
                     writer.writerow([i, j, pref])
         csvfile.close()
@@ -214,5 +217,6 @@ if __name__ == '__main__':
         del transition_points
         del hcva_points
         gc.collect()
+        # the memory isnt python????? its julia!!!!!!!!!!!!!!
         iterator+=1
         print("DEBUG: Iteration complete")

@@ -1,6 +1,18 @@
 using LinearAlgebra
 using SparseArrays
 
+function collector()
+    # Explicitly clear large variables
+    println("Clearing variables")
+    Δ = nothing
+    α = nothing
+    R = nothing
+    g = nothing
+    C_aug = nothing
+    current = nothing
+    return 0;
+end
+
 # The linear solver used at every iteration.
 function solve(A, W, b)
     L = A' * W * A
@@ -182,6 +194,7 @@ function pNorm(ϵ,A,b,p,C,d, x, lb)
         end
         i = min(i, (current^p - lb^p)/(16*p))
     end
+
     return x,iteration
 end
 

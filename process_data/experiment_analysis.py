@@ -81,12 +81,19 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     savename = plot_savename+title
     plt.savefig(savename)
 
-def plot_transition_and_hcva_points(data: pd.DataFrame, title: str, plot_savename: str):
+def plot_transition_and_hcva_points(folders: str, hcva_points: str, t_points: str, title: str, plot_savename: str):
     """
     This function plots the transition and hcva points for each  on a scatter plot.
     """ 
+    hcva_data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')
+    t_data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')
     plt.figure(figsize=(10, 5))
     plt.style.use("science")
+    plt.scatter(hcva_data['p'], hcva_data['hcva'], label="HCVA Points")
+    plt.scatter(t_data['p'], t_data['t'], label="Transition Points")
+    plt.title(title)
+    plt.xlabel("p")
+    plt.ylabel("Distance")
     
 
 def plot_data(data: pd.DataFrame, title: str, plot_savenme: str):
@@ -134,4 +141,4 @@ if __name__ == "__main__":
     folders = 'experiment_results_v2/random_dist'
     t_points = 'random_distrandom_dist_t_points.csv'
     hcva_points = 'random_distrandom_dist_hcva_points.csv'
-    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')
+    plot_transition_and_hcva_points(folders, hcva_points, t_points, "Transition and HCVA Points", plot_savename)
