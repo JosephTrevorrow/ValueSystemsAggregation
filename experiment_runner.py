@@ -14,7 +14,7 @@ from matrices import FormalisationObjects, FormalisationMatrix
 personal_data = None
 principle_data = None
 import gc
-gc.set_threshold(0)
+#gc.set_threshold(0)
 
 def split_into_samples(data, sample_size):
     shuffled_df = data.sample(frac=1).reset_index(drop=True)
@@ -54,14 +54,18 @@ def run_experiment(filename, iteration, contextnum, samplenum) -> None:
     action_cons_vals = []
     decisions = []
     scores = []
+    transition_point = 0
+    hcva_point = 0
 
     limit_p_filename = path+"limit_p_"+filename+'_iter_'+str(iteration)+'_context_'+str(contextnum)+'_sample_'+str(samplenum)+'.csv'
 
     for p in [1, 10, "t", "p"]:
         if p == "t":
             p = solve.transition_point(P_list, J_list, w, country_dict, limit_p_filename)
+            transition_point = p
         elif p == "p":
             p = solve.voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, principle_data)
+            hcva_point = p
         cons_vals.append(solve.aggregate_values(aggregation_type=True, 
                                         filename="test.csv", 
                                         P_list=P_list, 
@@ -78,7 +82,7 @@ def run_experiment(filename, iteration, contextnum, samplenum) -> None:
         decisions.append(decision)
         score = satisfaction(decision)
         scores.append(score)
-    return scores, decisions, cons_vals, action_cons_vals
+    return scores, decisions, cons_vals, action_cons_vals, transition_point, hcva_point
 
 if __name__ == '__main__':
     try:
@@ -90,7 +94,7 @@ if __name__ == '__main__':
     data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/'+filename+'.csv')
     
     try:
-        path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/'+filename
+        path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_v2/'+filename
         os.mkdir(path)
     except OSError as e:
         print("DEBUG: Directory already exists")
@@ -106,7 +110,15 @@ if __name__ == '__main__':
     decision_scores = []
     preference_consensuses = []
     action_judgement_consensuses = []
+    transition_points = []
+    hcva_points = []
     while iterator < iterations:
+        experiment_scores = []
+        decision_scores = []
+        preference_consensuses = []
+        action_judgement_consensuses = []
+        transition_points = []
+        hcva_points = []
         print("DEBUG: Iteration: ", iterator)
         # Single sample:
         #sample_data = data.sample(n=4)
@@ -133,19 +145,23 @@ if __name__ == '__main__':
                 sample = sample_data[principles]
                 principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-                print("DEBUG: Running experiment for ", personal_data)
-                print("DEBUG: Running experiment for ", principle_data)
+                #print("DEBUG: Running experiment for ", personal_data)
+                #print("DEBUG: Running experiment for ", principle_data)
 
-                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment(filename, iterator, j, k)
+                experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(filename, iterator, j, k)
                 experiment_scores.append(experiment_score)
                 decision_scores.append(decisions)
                 preference_consensuses.append(preference_consensus)
                 action_judgement_consensuses.append(action_judgement_consensus)
+
+                transition_points.append(transition_point)
+                hcva_points.append(hcva_point)
                 k+=1
             # Reset data
-            personal_data = None
-            principle_data = None
+            del personal_data
+            del principle_data
             j+=1
+            gc.collect()
 
         with open(path+filename+'.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
@@ -177,11 +193,26 @@ if __name__ == '__main__':
                 for j, action in enumerate(sublist):
                     writer.writerow([i, j, action])
         csvfile.close()
+        with open(path+filename+'_t_points.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            for point in transition_points:
+                writer.writerow([point])
+        csvfile.close()
+        with open(path+filename+'_hcva_points.csv', 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            for point in hcva_points:
+                writer.writerow([point])
+        csvfile.close()
 
         # Reset storage
-        experiment_scores = []
-        decision_scores = []
-        preference_consensuses = []
-        action_judgement_consensuses = []
+        # Clear memory
+        del split_samples
+        del experiment_scores
+        del decision_scores
+        del preference_consensuses
+        del action_judgement_consensuses
+        del transition_points
+        del hcva_points
+        gc.collect()
         iterator+=1
         print("DEBUG: Iteration complete")

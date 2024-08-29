@@ -65,7 +65,7 @@ def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: 
 
 def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     """
-    This function plots a boxplot of the residuals for each test in the data.
+    This function plots a boxplot of the satisfaction residuals for each test in the data.
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
     """
     satisfaction_df = data.groupby(['agent', 'p_value'], as_index=False).agg({'satisfaction': 'sum'})
@@ -80,6 +80,14 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     plt.ylabel('Satisfaction')
     savename = plot_savename+title
     plt.savefig(savename)
+
+def plot_transition_and_hcva_points(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots the transition and hcva points for each  on a scatter plot.
+    """ 
+    plt.figure(figsize=(10, 5))
+    plt.style.use("science")
+    
 
 def plot_data(data: pd.DataFrame, title: str, plot_savenme: str):
     """
@@ -122,3 +130,8 @@ if __name__ == "__main__":
         plot_boxplot_residuals(data, f"Agent Satisfaction Over Time for {name} society", plot_savename)
         plot_cumulative_satisfaction(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename)
     
+    # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
+    folders = 'experiment_results_v2/random_dist'
+    t_points = 'random_distrandom_dist_t_points.csv'
+    hcva_points = 'random_distrandom_dist_hcva_points.csv'
+    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')

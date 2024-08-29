@@ -12,16 +12,16 @@ np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
 
 def transition_point(P_list, J_list, w, country_dict, filename):
     A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
-    cons_1, r_1, u_1 = L1(A, b)
+    cons_1, _, _ = L1(A, b)
     A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
-    cons_l, r_l, u_l = Linf(A, b)
+    cons_l, _, _ = Linf(A, b)
     diff = np.inf
     incr = 0.1
 
-    p_list = []
-    dist_p_list = []
-    dist_inf_list = []
-    diff_list = []
+    #p_list = []
+    #dist_p_list = []
+    #dist_inf_list = []
+    #diff_list = []
 
     e = 1e-4
     # Range of P's to check for transition point
@@ -29,7 +29,7 @@ def transition_point(P_list, J_list, w, country_dict, filename):
 
     for i in np.arange(1 + incr, p, incr):
         A, b = FormalisationMatrix(P_list, J_list, w, i, True)
-        cons, r, u = Lp(A, b, i)
+        cons, _, _ = Lp(A, b, i)
         dist_1p = np.linalg.norm(cons_1 - cons, i)
         dist_pl = np.linalg.norm(cons_l - cons, i)
         if (abs(dist_1p - dist_pl) < e):
@@ -40,12 +40,13 @@ def transition_point(P_list, J_list, w, country_dict, filename):
             if abs(dist_1p - dist_pl) < diff:
                 diff = abs(dist_1p - dist_pl)
                 best_p = i
-            p_list.append(i)
-            dist_p_list.append(dist_1p)
-            dist_inf_list.append(dist_pl)
-            diff_list.append(abs(dist_1p - dist_pl))  
+
+            #p_list.append(i)
+            #dist_p_list.append(dist_1p)
+            #dist_inf_list.append(dist_pl)
+            #diff_list.append(abs(dist_1p - dist_pl))  
     print('Transition point: {:.2f}'.format(best_p))
-    limit_output(p_list, dist_p_list, dist_inf_list, diff_list, filename)
+    # limit_output(p_list, dist_p_list, dist_inf_list, diff_list, filename)
     return best_p
 
 def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
