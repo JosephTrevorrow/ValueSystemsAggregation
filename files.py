@@ -14,7 +14,7 @@ def output_file(p, U, cons, dist_1, dist_l, v, name):
     """
     csv_rows = []
     if v:
-        # header for the value prefference aggregation
+        # header for the value preference aggregation
         header = [
             "p", "Up", "Dist1", "Distl", "Rel-Rel",
             "Rel-Nonrel", "Nonrel-Rel", "Nonrel-Nonrel"
@@ -37,6 +37,7 @@ def output_file(p, U, cons, dist_1, dist_l, v, name):
         # writing file
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
+    csvfile.close()
     return None
 
 
@@ -53,6 +54,7 @@ def simple_output_file(p, y, name):
     with open(name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
+    csvfile.close()
     return None
 
 def limit_output(p, dist_p_list, dist_inf_list, diff_list, name):
@@ -68,4 +70,5 @@ def limit_output(p, dist_p_list, dist_inf_list, diff_list, name):
     with open(name, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
+    csvfile.close() 
     return None

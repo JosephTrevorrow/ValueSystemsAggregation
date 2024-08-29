@@ -316,7 +316,7 @@ def L1(A, b):
     cons = list(x.value)
     cons = np.array(cons)
     obj = prob.value
-    print("obj value:", obj)
+    #print("obj value:", obj)
     r = np.abs(A @ cons - b)
     return cons, r, np.linalg.norm(r, 1)
 
@@ -352,10 +352,9 @@ def Linf(A, b):
     cons = list(x.value)
     cons = np.array(cons)
     obj = prob.value
-    print("obj value: ", obj)
+    #print("obj value: ", obj)
     r = np.abs(A @ cons - b)
     return cons, r, np.linalg.norm(r, np.inf)
-
 
 def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     """

@@ -7,11 +7,14 @@ import pandas as pd
 import solve
 import csv
 import sys
+import os
 from matrices import FormalisationObjects, FormalisationMatrix
     
 # Global variables
 personal_data = None
 principle_data = None
+import gc
+gc.set_threshold(0)
 
 def split_into_samples(data, sample_size):
     shuffled_df = data.sample(frac=1).reset_index(drop=True)
@@ -35,7 +38,7 @@ def satisfaction(decision_made):
 
     return satisfaction
 
-def run_experiment(filename, iteration, contextnum) -> None:
+def run_experiment(filename, iteration, contextnum, samplenum) -> None:
     """
     filename needed to store limit graphs
     """
@@ -49,11 +52,10 @@ def run_experiment(filename, iteration, contextnum) -> None:
     
     cons_vals = []
     action_cons_vals = []
-    
     decisions = []
     scores = []
 
-    limit_p_filename = filename+'it'+str(iteration)+'_context'+str(contextnum)+'.csv'
+    limit_p_filename = path+"limit_p_"+filename+'_iter_'+str(iteration)+'_context_'+str(contextnum)+'_sample_'+str(samplenum)+'.csv'
 
     for p in [1, 10, "t", "p"]:
         if p == "t":
@@ -82,27 +84,33 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
     except:
-        filename = 'agent_data'
+        filename = 'random_dist'
 
     # read in data
     data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/'+filename+'.csv')
     
+    try:
+        path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/'+filename
+        os.mkdir(path)
+    except OSError as e:
+        print("DEBUG: Directory already exists")
+
     """
     - An experiment will run for 100 days, going out with different agents each time (randomly)
     - We map the satisfaction of each agent over time
     - So every agent will have a satisfaction score for each day
     """
-    iterations = 9
-    i = 0
+    iterations = 10
+    iterator = 0
     experiment_scores = []
     decision_scores = []
     preference_consensuses = []
     action_judgement_consensuses = []
-    while i < iterations:
-        
+    while iterator < iterations:
+        print("DEBUG: Iteration: ", iterator)
         # Single sample:
         #sample_data = data.sample(n=4)
-
+        j = 0
         split_samples = split_into_samples(data, sample_size=4)
         for sample_data in split_samples:
             # Situtational data
@@ -114,7 +122,7 @@ if __name__ == '__main__':
                                     ['agent_id', 'pp_2', 'pp_2_1'],
                                     ['agent_id', 'pp_3', 'pp_3_1'],
             ]
-            j = 0
+            k = 0
             # Loop through each example case
             for (situation, principles) in zip(example_data_names, example_principle_names):
                 # Extract values and action judgements for eg. 1
@@ -125,48 +133,55 @@ if __name__ == '__main__':
                 sample = sample_data[principles]
                 principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment(filename, i, j)
+                print("DEBUG: Running experiment for ", personal_data)
+                print("DEBUG: Running experiment for ", principle_data)
+
+                experiment_score, decisions, preference_consensus, action_judgement_consensus = run_experiment(filename, iterator, j, k)
                 experiment_scores.append(experiment_score)
                 decision_scores.append(decisions)
                 preference_consensuses.append(preference_consensus)
                 action_judgement_consensuses.append(action_judgement_consensus)
-                j+=1
+                k+=1
             # Reset data
             personal_data = None
             principle_data = None
+            j+=1
 
-        i+=1
-
-        with open(filename+'.csv', 'a') as csvfile:
+        with open(path+filename+'.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(experiment_scores):
                 for j, dictionary in enumerate(sublist):
                     for key, value in dictionary.items():
                         writer.writerow([i, j, key, value])
-        with open(filename+'_DECISIONS.csv', 'a') as csvfile:
+        csvfile.close()
+        with open(path+filename+'_DECISIONS.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(decision_scores):
                 for j, decision in enumerate(sublist):
                     writer.writerow([i, j, decision])
+        csvfile.close()
         # Store consensus value system
-        with open(filename+'_CONS_PREFERENCES.csv', 'a') as csvfile:
+        with open(path+filename+'_CONS_PREFERENCES.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(preference_consensus):
                 for j, pref in enumerate(sublist):
                     writer.writerow([i, j, pref])
-        print("debug: ", action_judgement_consensus)
-        with open(filename+'_CONS_ACTIONS.csv', 'a') as csvfile:
+        csvfile.close()
+        with open(path+filename+'_CONS_ACTIONS.csv', 'a') as csvfile:
             writer = csv.writer(csvfile)
             # flatten rows
             for i, sublist in enumerate(action_judgement_consensuses):
                 for j, action in enumerate(sublist):
                     writer.writerow([i, j, action])
+        csvfile.close()
 
         # Reset storage
         experiment_scores = []
         decision_scores = []
         preference_consensuses = []
         action_judgement_consensuses = []
+        iterator+=1
+        print("DEBUG: Iteration complete")
