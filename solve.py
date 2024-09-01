@@ -13,14 +13,13 @@ juliapkg.require_julia("=1.10.3")
 juliapkg.resolve()
 from juliacall import Main as jl
 
-import atexit
-
 def shutdown_julia():
     try:
-        jl.seval("exit()")
-        print("julia has been shutdown.")
+        jl.seval("empty!(names(Main, all=true))")
+        #print("julia has been reset.")
     except Exception as e:
-        print("error shutting down julia {e}")
+        pass
+        #print("error shutting down julia "+str(e))
 #atexit.register(shutdown_julia)
 
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
@@ -49,7 +48,7 @@ def transition_point(P_list, J_list, w, country_dict, filename):
         dist_pl = np.linalg.norm(cons_l - cons, i)
         if (abs(dist_1p - dist_pl) < e):
             best_p = i
-            print('Not improving anymore, stopping!')
+            #print('Not improving anymore, stopping!')
             break
         else:
             if abs(dist_1p - dist_pl) < diff:
@@ -60,7 +59,7 @@ def transition_point(P_list, J_list, w, country_dict, filename):
             #dist_p_list.append(dist_1p)
             #dist_inf_list.append(dist_pl)
             #diff_list.append(abs(dist_1p - dist_pl))  
-    print('Transition point: {:.2f}'.format(best_p))
+    #print('Transition point: {:.2f}'.format(best_p))
     # limit_output(p_list, dist_p_list, dist_inf_list, diff_list, filename)
     return best_p
 
@@ -84,7 +83,7 @@ def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
         # Note: Hard Coded \epsilon value
         if (abs(dist_1p - dist_pl) < 0.005):
             cut_point = i
-            print('Not improving anymore, stopping!')
+            #print('Not improving anymore, stopping!')
             break
 
     cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
@@ -113,7 +112,7 @@ def aggregate_all_p(P_list, J_list, w):
     dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
     dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
     p = 1
-    print('{:.2f} \t \t {:.4f}'.format(p, ua))
+    #print('{:.2f} \t \t {:.4f}'.format(p, ua))
     incr = 0.1
     p_list = [1.0]
     u_list = [ua]
@@ -408,7 +407,7 @@ def Lp(A, b, p):
                               p, C, d.reshape(-1, 1))
         # cons, it = IRLS.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
         r = np.abs(A @ cons - b)
-        #jl.collector()
+        jl.collector()
         return cons, r, np.linalg.norm(r, p)
     else:  # vanilla IRLS implementation
         return IRLS(A, b, p)

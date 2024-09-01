@@ -3,7 +3,7 @@ using SparseArrays
 
 function collector()
     # Explicitly clear large variables
-    println("Clearing variables")
+    #println("Clearing variables")
     Δ = nothing
     α = nothing
     R = nothing

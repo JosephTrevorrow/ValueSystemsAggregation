@@ -9,11 +9,10 @@ import csv
 import sys
 import os
 from matrices import FormalisationObjects, FormalisationMatrix
-    
 # Global variables
 personal_data = None
 principle_data = None
-import gc
+#import gc
 #gc.set_threshold(0)
 
 def split_into_samples(data, sample_size):
@@ -88,7 +87,7 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
     except:
-        filename = 'random_dist'
+        filename = 'util_dist'
 
     # read in data
     data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/'+filename+'.csv')
@@ -104,7 +103,7 @@ if __name__ == '__main__':
     - We map the satisfaction of each agent over time
     - So every agent will have a satisfaction score for each day
     """
-    iterations = 10
+    iterations = 2
     iterator = 0
     experiment_scores = []
     decision_scores = []
@@ -162,7 +161,6 @@ if __name__ == '__main__':
             del personal_data
             del principle_data
             j+=1
-            gc.collect()
 
         solve.shutdown_julia()
 
@@ -216,7 +214,7 @@ if __name__ == '__main__':
         del action_judgement_consensuses
         del transition_points
         del hcva_points
-        gc.collect()
+        #gc.collect()
         # the memory isnt python????? its julia!!!!!!!!!!!!!!
         iterator+=1
         print("DEBUG: Iteration complete")

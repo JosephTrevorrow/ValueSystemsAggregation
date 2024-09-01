@@ -82,4 +82,4 @@ if __name__ == '__main__':
         df = generate_egalitarian_data(df)
     else:
         print("No argument found, no data generated")
-    df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/normal_dist.csv', index=True)
+    df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/util_dist.csv', index=True)
