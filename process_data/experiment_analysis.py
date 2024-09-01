@@ -78,6 +78,7 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     plt.title(title)
     plt.xlabel('P Value')
     plt.ylabel('Satisfaction')
+    plt.ylim(0, 20)  # Set the y-axis limits
     savename = plot_savename+title
     plt.savefig(savename)
 
@@ -85,25 +86,26 @@ def plot_transition_and_hcva_points(folders: str, hcva_points: str, t_points: st
     """
     This function plots the transition and hcva points for each  on a scatter plot.
     """ 
-    hcva_data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')
-    t_data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/'+folders+filename+'.csv')
     plt.figure(figsize=(10, 5))
-    plt.style.use("science")
-    plt.scatter(hcva_data['p'], hcva_data['hcva'], label="HCVA Points")
-    plt.scatter(t_data['p'], t_data['t'], label="Transition Points")
+    # Calculate the difference between hcva_points and t_points
+    smaller_length = min(len(hcva_points), len(t_points))
+    hcva_points = hcva_points[:smaller_length]
+    t_points = t_points[:smaller_length]
+    difference = np.array(t_points) - np.array(hcva_points)
+    # Plot the difference line
+    plt.plot(difference, color="green", label="Difference")
     plt.title(title)
-    plt.xlabel("p")
-    plt.ylabel("Distance")
-    
+    plt.xlabel("Iteration")
+    plt.ylabel("Difference")
+    plt.savefig(plot_savename)
 
-def plot_data(data: pd.DataFrame, title: str, plot_savenme: str):
+def plot_limit_p_data(data: pd.DataFrame, title: str, plot_savenme: str):
     """
     This function plots the limit P data (-t True).
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
     """
 
     plt.figure(figsize=(10, 5))
-    plt.style.use("science")
     plt.plot(data["p"], data["Dist_p"], label="$||P^{(1)}_S-P^{(P)}_S||_p$")
     plt.plot(data["p"], data["Dist_inf"], label="$||P^{(\infty)}_S-P^{(P)}_S||_p$")
     plt.fill_between(data["p"], data["Dist_p"], data["Dist_inf"], where=(data["Dist_p"] >= data["Dist_inf"]) & (data["Dist_inf"] >= 0.05), color="blue", alpha=0.3, label="Egalitarian Zone")
@@ -126,19 +128,27 @@ def unpack_data(filename: str):
     df = pd.read_csv(filename)
     return df
 
-
-if __name__ == "__main__":
+def boxplots_and_cumulatives():
     print("DEBUG: Unpacking data")
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/results_v1/plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/results_v1/"
-    results_filename = {'egal': "egalsoc_10iteration_3diffagent.csv", 'norm': "normsoc_10iteration_3diffagent.csv"}
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
+    results_filename = {'egal': "egal_dist/egal_dist.csv", 'norm': "normal_dist/norm_dist.csv", "util": "util_dist/util_dist.csv", "random": "random_dist/rand_dist.csv"}
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
         plot_boxplot_residuals(data, f"Agent Satisfaction Over Time for {name} society", plot_savename)
         plot_cumulative_satisfaction(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename)
     
+
+if __name__ == "__main__":
+    
+    #boxplots_and_cumulatives()
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    t_points = 'random_distrandom_dist_t_points.csv'
-    hcva_points = 'random_distrandom_dist_hcva_points.csv'
-    plot_transition_and_hcva_points(folders, hcva_points, t_points, "Transition and HCVA Points", plot_savename)
+    results_filename = {'egal_dist/egal_dist_HCVA_POINTS.csv': "egal_dist/egal_dist_T_POINTS.csv", 'normal_dist/norm_dist_HCVA_POINTS.csv': "normal_dist/norm_dist_T_POINTS.csv", "util_dist/util_dist_HCVA_POINTS.csv": "util_dist/util_dist_T_POINTS.csv", "random_dist/rand_dist_HCVA_POINTS.csv": "random_dist/rand_dist_T_POINTS.csv"}
+    savenames = ['egalitarian_p', 'normal_p', 'utilitarian_p', 'random_p']
+    for (hcva, t_point), savename in zip(results_filename.items(), savenames):
+        hcva_data = unpack_data(results_path + hcva)
+        t_data = unpack_data(results_path + t_point)
+        plot_transition_and_hcva_points(folders, hcva_data, t_data, f"Transition and HCVA Points for {hcva}",savename)
