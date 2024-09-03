@@ -9,13 +9,6 @@ import numpy as np
 import csv
 from collections import defaultdict
 
-def plot_agent_satisfaction(data: pd.DataFrame, title: str):
-    """
-    This function plots the satisfaction data.
-    INPUT: data -- pd.DataFrame, title -- str (title of the plot)
-    """
-
-
 def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: str):
     """
     This function plots the average satisfaction for each test in the data.
@@ -60,6 +53,7 @@ def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: 
     plt.ylabel('Mean Cumulative Satisfaction')
     plt.title('Mean Cumulative Satisfaction over Time for Different P_Values')
     plt.legend(title='P_Values')
+    plt.ylim(0, 20)  # Set the y-axis limits
     plt.grid(True)
     plt.savefig(plot_savename+title)
 
@@ -123,6 +117,70 @@ def plot_limit_p_data(data: pd.DataFrame, title: str, plot_savenme: str):
     savename = plot_savename+title
     plt.savefig(savename)
 
+def npfloat64remover(x):
+    x = x.replace('np.float64(', '')
+    x = x.replace(')', '')
+    x = x.replace(']', '')
+    x = x.replace('[', '')
+    x = x.replace(' ', '')
+    return x
+
+def decisionsplitter(x):
+    y, z = x.split(',')
+    return [float(y), float(z)]
+
+def plot_decisiveness(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots the decisiveness measure (the difference in the strength of two actions) for each $p$ value as a boxplot for each $p$
+    """
+    means = {}
+    p_vals = ['1', '10', 't', 'HCVA']
+    for i in range(0, 4):
+        plt.figure(figsize=(10, 5))
+        # split the difference
+        filtered = data[data['p'] == i]
+        filtered['decision'] = filtered['decision'].apply(npfloat64remover)
+        filtered['decisionsplit']=filtered['decision'].apply(decisionsplitter)
+        
+        filtered['decision_diff'] = filtered['decisionsplit'].apply(lambda x: abs(x[0]-x[1]))
+        filtered = filtered.sort_values(by='decision_diff', ascending=False).reset_index(drop=True)
+
+        mean_dec_diff = filtered['decision_diff'].mean()
+        means[plot_savename+'p'+p_vals[i]] = mean_dec_diff
+        plt.axhline(mean_dec_diff, color='red', linestyle='--', linewidth=2, label=f'Mean Value: {mean_dec_diff:.2f}')
+        plt.ylim(0, 1)  # Set the y-axis limits
+        #plt.xlim(-1, 1)  # Set the y-axis limits
+
+        plt.bar(filtered['context'], filtered['decision_diff'], color="green", label="Difference")
+        plt.xlabel("Context")
+        plt.ylabel("Decisiveness")
+        plt.title("Decisiveness for "+p_vals[i])
+        plt.savefig(plot_savename+'p'+p_vals[i])
+    
+    # Save means to a CSV file
+    means_df = pd.DataFrame.from_dict(means, orient='index', columns=['Mean_Decisiveness'])
+    means_df.to_csv(plot_savename + 'decs_means.csv')
+
+    #plt.scatter(data['x'], data['y'])
+    # Calculate mean x and y
+    #filtered['x'] = filtered['decisionsplit'].apply(lambda x: x[0])
+    #filtered['y'] = filtered['decisionsplit'].apply(lambda x: x[1])
+    #mean_x = data['x'].mean()
+    #mean_y = data['y'].mean()
+    #plt.scatter(mean_x, mean_y, color='red', marker='x', s=100, label='Mean')
+
+
+def plot_fairness_percentage(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots fairness defined as the average percentage of group members whose personal value system results in the same decision 
+    being made as the consensus value system. We calculate the individual values and return a table.
+    """
+
+def plot_fairness_thresholds(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    Fairness defined as the satisfaction of an agent with a certain decision being below some value (as a satisfaction of 0 corresponds to maximum 
+    satisfaction). We plot this a line graph for each p value.
+    """
 
 def unpack_data(filename: str):
     df = pd.read_csv(filename)
@@ -138,6 +196,20 @@ def boxplots_and_cumulatives():
         plot_boxplot_residuals(data, f"Agent Satisfaction Over Time for {name} society", plot_savename)
         plot_cumulative_satisfaction(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename)
     
+def t_points():
+    results_filename = {'egal_dist/egal_dist_HCVA_POINTS.csv': "egal_dist/egal_dist_T_POINTS.csv", 'normal_dist/norm_dist_HCVA_POINTS.csv': "normal_dist/norm_dist_T_POINTS.csv", "util_dist/util_dist_HCVA_POINTS.csv": "util_dist/util_dist_T_POINTS.csv", "random_dist/rand_dist_HCVA_POINTS.csv": "random_dist/rand_dist_T_POINTS.csv"}
+    savenames = ['egalitarian societyz', 'normal society', 'utilitarian society', 'random society']
+    for (hcva, t_point), savename in zip(results_filename.items(), savenames):
+        hcva_data = unpack_data(results_path + hcva)
+        t_data = unpack_data(results_path + t_point)
+        plot_transition_and_hcva_points(folders, hcva_data, t_data, f"Transition and HCVA Points for {savename}",savename)
+
+def decisiveness():
+    results_filename = ["egal_dist/egal_dist_DECISIONS.csv", "normal_dist/norm_dist_DECISIONS.csv", "util_dist/util_dist_DECISIONS.csv", "random_dist/rand_dist_DECISIONS.csv"]
+    savenames = ['decs_egalitarian_society', 'decs_normal_society', 'decs_utilitarian society', 'decs_random_society']
+    for filename, savename in zip(results_filename, savenames):
+        data = unpack_data(results_path + filename)
+        plot_decisiveness(data, f"Decisiveness for {savename}", savename)
 
 if __name__ == "__main__":
     
@@ -146,9 +218,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    results_filename = {'egal_dist/egal_dist_HCVA_POINTS.csv': "egal_dist/egal_dist_T_POINTS.csv", 'normal_dist/norm_dist_HCVA_POINTS.csv': "normal_dist/norm_dist_T_POINTS.csv", "util_dist/util_dist_HCVA_POINTS.csv": "util_dist/util_dist_T_POINTS.csv", "random_dist/rand_dist_HCVA_POINTS.csv": "random_dist/rand_dist_T_POINTS.csv"}
-    savenames = ['egalitarian_p', 'normal_p', 'utilitarian_p', 'random_p']
-    for (hcva, t_point), savename in zip(results_filename.items(), savenames):
-        hcva_data = unpack_data(results_path + hcva)
-        t_data = unpack_data(results_path + t_point)
-        plot_transition_and_hcva_points(folders, hcva_data, t_data, f"Transition and HCVA Points for {hcva}",savename)
+    decisiveness()
