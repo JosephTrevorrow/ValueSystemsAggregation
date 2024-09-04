@@ -175,12 +175,32 @@ def plot_fairness_percentage(data: pd.DataFrame, title: str, plot_savename: str)
     This function plots fairness defined as the average percentage of group members whose personal value system results in the same decision 
     being made as the consensus value system. We calculate the individual values and return a table.
     """
+    
+
 
 def plot_fairness_thresholds(data: pd.DataFrame, title: str, plot_savename: str):
     """
-    Fairness defined as the satisfaction of an agent with a certain decision being below some value (as a satisfaction of 0 corresponds to maximum 
-    satisfaction). We plot this a line graph for each p value.
+    Fairness defined as the satisfaction of an agent with a certain decision being below some value 0.05 (as a satisfaction of 0 corresponds to maximum 
+    satisfaction)
     """
+    df_dict = {}
+    unique_p_values = data['p_value'].unique()
+    # Split the DataFrame by P_Value
+    for p_value in unique_p_values:
+        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
+   
+    vals = {}
+    p_vals = ['1', '10', 't', 'HCVA']
+    i = 0
+    for df in df_dict:
+        num_below_threshold = len(df_dict[df][df_dict[df]['satisfaction'] < 0.05])
+        vals[p_vals[i]] = num_below_threshold
+        i += 1
+    # Save means to a CSV file
+    vals_df = pd.DataFrame.from_dict(vals, orient='index', columns=['Num_Below_Threshold'])
+    vals_df.to_csv(plot_savename +'fairness_thresholds.csv')
+
+
 
 def unpack_data(filename: str):
     df = pd.read_csv(filename)
@@ -211,6 +231,16 @@ def decisiveness():
         data = unpack_data(results_path + filename)
         plot_decisiveness(data, f"Decisiveness for {savename}", savename)
 
+def fairness():
+    print("DEBUG: Unpacking data")
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
+    results_filename = {'egal': "egal_dist/egal_dist.csv", 'norm': "normal_dist/norm_dist.csv", "util": "util_dist/util_dist.csv", "random": "random_dist/rand_dist.csv"}
+    for name, filename in results_filename.items():
+        data = unpack_data(results_path + filename)
+        plot_fairness_percentage(data, f"Fairness Percentage for {name} society", plot_savename+name)
+        plot_fairness_thresholds(data, f"Fairness Thresholds for {name} society", plot_savename+name)
+
 if __name__ == "__main__":
     
     #boxplots_and_cumulatives()
@@ -218,4 +248,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    decisiveness()
+    fairness()
