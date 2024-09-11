@@ -1,17 +1,16 @@
-"""
-This file will read in 4 random agents from the csv and run through each of the 3 examples in the simulation using their data.
-The file will track satisfaction for each agent and store in a results csv file. The simulation will run 4 times, for p=1. p=10, p=transition point, and p=voted_p
-"""
-
 import pandas as pd
 import solve
 import csv
 import sys
 import os
 from matrices import FormalisationObjects, FormalisationMatrix
+
+
 # Global variables
 personal_data = None
 principle_data = None
+
+# Garbage Collection
 #import gc
 #gc.set_threshold(0)
 
@@ -20,7 +19,6 @@ def split_into_samples(data, sample_size):
     # Split into samples
     samples = [shuffled_df.iloc[i*sample_size:(i+1)*sample_size] for i in range(25)]
     return samples
-    
 
 def satisfaction(decision_made):
     """
@@ -38,25 +36,52 @@ def satisfaction(decision_made):
     return satisfaction
 
 def run_experiment(filename, iteration, contextnum, samplenum) -> None:
-    """
-    filename needed to store limit graphs
-    """
 
+    # formalise current personal data to matrices to run aggregation
     P_list, J_list, w, country_dict = FormalisationObjects(
     filename=None, delimiter=',', df=personal_data)
     
-    # Note: Could not find JMatrix is printed for principle data (there is no action judgement data in our principle value system)
+    # Note: debug phrase: "Could not find JMatrix" is printed for principle data (there is no action judgement data in our principle value system)
     PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
         filename=None, delimiter=',', df=principle_data)
     
-    cons_vals = []
-    action_cons_vals = []
-    decisions = []
+    # Values for current experiment to save to file
+    experiment_cons_vals = []
+    experiment_action_cons_vals = []
+    experiment_decisions = []
     scores = []
-    transition_point = 0
-    hcva_point = 0
 
     limit_p_filename = path+"limit_p_"+filename+'_iter_'+str(iteration)+'_context_'+str(contextnum)+'_sample_'+str(samplenum)+'.csv'
+
+    # Solve aggregation for sample here: do all P values in 0.1 steps from 0 to 10
+    # I want to have all aggregate data here, and then reason about it afterwards
+    transition_point, hcva_point, cons_vals, action_cons_vals = solve.aggregate(P_list, 
+                                                                                J_list, 
+                                                                                w, 
+                                                                                country_dict, 
+                                                                                PP_list, 
+                                                                                PJ_list, 
+                                                                                Pw, 
+                                                                                Pcountry_dict, 
+                                                                                principle_data, 
+                                                                                limit_p_filename)
+    
+    # Reason about points to make decisions for
+
+
+    # Save data
+    for p in [1, 10, transition_point, hcva_point]:
+        # Convert p value to point in list (list is 0.1 increments)
+        p = int((p-1)*10)
+        print(p)
+        experiment_cons_vals.append(cons_vals[p])
+        experiment_action_cons_vals.append(action_cons_vals[p])
+        decision = solve.make_decision(cons_vals[p], action_cons_vals[p])
+        experiment_decisions.append(decision)
+        score = satisfaction(decision)
+        scores.append(score)
+    
+    return scores, experiment_decisions, experiment_cons_vals, experiment_action_cons_vals, transition_point, hcva_point
 
     for p in [1, 10, "t", "p"]:
         if p == "t":
@@ -90,7 +115,7 @@ if __name__ == '__main__':
         filename = 'util_dist'
 
     # read in data
-    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/'+filename+'.csv')
+    data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+filename+'.csv')
     
     try:
         path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_v2/'+filename
