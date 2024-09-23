@@ -70,16 +70,27 @@ def generate_normal_dist_data(df: pd.DataFrame):
     return df
 
 if __name__ == '__main__':
-    df = pd.DataFrame(columns=['agent_id', 'pp_1', 'pp_1_1', 'pp_2', 'pp_2_1', 'pp_3', 'pp_3_1', 'P_1', 'P_1_1', 'P_2', 'P_2_1', 'P_3', 'P_3_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'])
-    #print("DEBUG: All args: ", sys.argv)
     if sys.argv[1] == "-r":
-        df = generate_random_data(df)
+        function = generate_random_data
+        folder = "rand_societies"
+        name = "rand_society"
     elif sys.argv[1] == "-n":
-        df = generate_normal_dist_data(df)
+        function = generate_normal_dist_data
+        folder = "norm_societies"
+        name = "norm_society"
     elif sys.argv[1] == "-u":
-        df = generate_utilitarian_data(df)
+        function = generate_utilitarian_data
+        folder = "util_societies"
+        name = "util_society"
     elif sys.argv[1] == "-e":
-        df = generate_egalitarian_data(df)
+        function = generate_egalitarian_data
+        folder = "egal_societies"
+        name = "egal_society"
     else:
         print("No argument found, no data generated")
-    df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/util_dist.csv', index=True)
+        exit()
+    for i in range(0,100):
+        df = pd.DataFrame(columns=['agent_id', 'pp_1', 'pp_1_1', 'pp_2', 'pp_2_1', 'pp_3', 'pp_3_1', 'P_1', 'P_1_1', 'P_2', 'P_2_1', 'P_3', 'P_3_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'])
+        #print("DEBUG: All args: ", sys.argv)
+        function(df)
+        df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(i)+'.csv', index=True)
