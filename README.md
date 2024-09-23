@@ -4,8 +4,9 @@ This Repository contains all code and experiment data for the paper "Hierarchica
 
 We run our experiments in "experiment_runner.py" which given the name of a society data will produce limit graph csv files for each timestep, and files contianing the consensus value system at each time step, as well as an average satisfaction for each group of agents. 
 
+Usage testing on a society data file of "util_soc.csv: 
 ```
-usage testing on a society data file of "util_soc.csv: python-jl -m IPython experiment_runner.py util_soc
+python-jl -m IPython experiment_runner.py util_soc
 ```
 
 Aggregating Value Systems
