@@ -4,6 +4,7 @@ import csv
 import sys
 import os
 import secrets
+import wandb
 from datetime import date
 
 from matrices import FormalisationObjects, FormalisationMatrix
@@ -87,7 +88,6 @@ def run_experiment(filename, iteration, contextnum, samplenum) -> None:
 # Main NEW ##############
 #########################
 if __name__ == '__main__':
-
     # Situtational data
     example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
                         ['agent_id', 'P_2', 'P_2_1', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent'],
@@ -110,7 +110,8 @@ if __name__ == '__main__':
     random = int(secrets.randbelow(high - low) + low) # = random number from range [low, high)
 
     timestamp = date.today().strftime('%Y-%m-%d') 
-
+    if wandb.run is not None:
+        wandb.finish()
     for name, folder in societies.items():
         # read in data
         data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
@@ -128,6 +129,13 @@ if __name__ == '__main__':
         - We map the satisfaction of each agent over time
         - So every agent will have a satisfaction score for each day
         """
+        wandb.init(project="valuesystemsaggregation",
+            config={"iterations": 300,
+                    "society": name,
+                    "society_num": random,
+                    "timestamp": timestamp,
+                    }
+            )
         iterations = 300
         iterator = 0
         experiment_scores = []
@@ -173,6 +181,35 @@ if __name__ == '__main__':
                     transition_points.append(transition_point)
                     hcva_points.append(hcva_point)
                     k+=1
+  
+                    # log metrics to wandb
+                    wandb.log({"iteration": iterator, 
+                               "sample": j, 
+                               "situation": k, 
+                               "transition_point": transition_point, 
+                               "hcva_point": hcva_point, 
+
+                               "experiment_score_1": experiment_score[0], 
+                               "experiment_score_10": experiment_score[1], 
+                               "experiment_score_t": experiment_score[2], 
+                               "experiment_score_h": experiment_score[3],
+
+                               "preference_consensus_1": preference_consensus[0], 
+                               "preference_consensus_10": preference_consensus[1], 
+                               "preference_consensus_t": preference_consensus[2], 
+                               "preference_consensus_h": preference_consensus[3], 
+                                
+                               "action_judgement_consensus_1": action_judgement_consensus[0],
+                               "action_judgement_consensus_10": action_judgement_consensus[1],
+                               "action_judgement_consensus_t": action_judgement_consensus[2],
+                               "action_judgement_consensus_h": action_judgement_consensus[3],
+
+                               "decisions_1": decisions[0],
+                               "decisions_10": decisions[1], 
+                               "decisions_t": decisions[2], 
+                               "decisions_h": decisions[3],  
+                               
+                               })
                 # Reset data
                 del personal_data
                 del principle_data
