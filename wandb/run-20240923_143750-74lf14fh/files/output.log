@@ -1,0 +1,304 @@
+DEBUG: Iteration:  0
+DEBUG: Running experiment for     country       rel    nonrel
+0      8.0  0.188253  0.811747
+1     22.0  0.333678  0.666322
+2     85.0  0.045836  0.954164
+3     43.0  0.165658  0.834342
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for     country       rel    nonrel
+0      8.0  0.440977  0.559023
+1     22.0  0.538282  0.461718
+2     85.0  0.557644  0.442356
+3     43.0  0.509790  0.490210
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for     country       rel    nonrel
+0      8.0  0.450670  0.549330
+1     22.0  0.482475  0.517525
+2     85.0  0.667983  0.332017
+3     43.0  0.532795  0.467205
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for     country       rel    nonrel
+4     73.0  0.164630  0.835370
+5     63.0  0.363312  0.636688
+6     72.0  0.014889  0.985111
+7     33.0  0.150505  0.849495
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for     country       rel    nonrel
+4     73.0  0.590310  0.409690
+5     63.0  0.492941  0.507059
+6     72.0  0.368580  0.631420
+7     33.0  0.514521  0.485479
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for     country       rel    nonrel
+4     73.0  0.733902  0.266098
+5     63.0  0.561867  0.438133
+6     72.0  0.644843  0.355157
+7     33.0  0.560883  0.439117
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+8       2.0  0.337935  0.662065
+9       1.0  0.112036  0.887964
+10     41.0  0.161864  0.838136
+11     97.0  0.364249  0.635751
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+8       2.0  0.597503  0.402497
+9       1.0  0.460406  0.539594
+10     41.0  0.557233  0.442767
+11     97.0  0.598563  0.401437
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+8       2.0  0.310735  0.689265
+9       1.0  0.497115  0.502885
+10     41.0  0.477756  0.522244
+11     97.0  0.340767  0.659233
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+12     84.0  0.233939  0.766061
+13     23.0  0.404537  0.595463
+14     55.0  0.108827  0.891173
+15     36.0  0.401279  0.598721
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+12     84.0  0.428054  0.571946
+13     23.0  0.397733  0.602267
+14     55.0  0.454067  0.545933
+15     36.0  0.573641  0.426359
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+12     84.0  0.460711  0.539289
+13     23.0  0.695966  0.304034
+14     55.0  0.546287  0.453713
+15     36.0  0.472669  0.527331
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+16     90.0  0.331968  0.668032
+17     54.0  0.425703  0.574297
+18      7.0  0.094541  0.905459
+19     78.0  0.107450  0.892550
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+16     90.0  0.537080  0.462920
+17     54.0  0.434615  0.565385
+18      7.0  0.490841  0.509159
+19     78.0  0.574066  0.425934
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+16     90.0  0.590555  0.409445
+17     54.0  0.517464  0.482536
+18      7.0  0.424127  0.575873
+19     78.0  0.563847  0.436153
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+20     71.0  0.263206  0.736794
+21     56.0  0.130529  0.869471
+22     12.0  0.194001  0.805999
+23     32.0  0.279162  0.720838
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+20     71.0  0.496000  0.504000
+21     56.0  0.551729  0.448271
+22     12.0  0.360621  0.639379
+23     32.0  0.556634  0.443366
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+20     71.0  0.597100  0.402900
+21     56.0  0.567972  0.432028
+22     12.0  0.601515  0.398485
+23     32.0  0.437990  0.562010
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+24     39.0  0.119339  0.880661
+25     26.0  0.133510  0.866490
+26     66.0  0.135397  0.864603
+27     87.0  0.375406  0.624594
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+24     39.0  0.589670  0.410330
+25     26.0  0.611302  0.388698
+26     66.0  0.502089  0.497911
+27     87.0  0.405091  0.594909
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+24     39.0  0.478264  0.521736
+25     26.0  0.548402  0.451598
+26     66.0  0.531528  0.468472
+27     87.0  0.648822  0.351178
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+DEBUG: Running experiment for      country       rel    nonrel
+28     76.0  0.057478  0.942522
+29     68.0  0.191667  0.808333
+30     13.0  0.062585  0.937415
+31     60.0  0.000000  1.000000
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+Traceback (most recent call last):
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py", line 175, in <module>
+    experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, j, k)
+                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py", line 62, in run_experiment
+    transition_point, hcva_point, cons_vals, action_cons_vals = solve.aggregate(P_list,
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/solve.py", line 165, in aggregate
+    cons, _, ub = Lp(A, b, p)
+                  ^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/solve.py", line 556, in Lp
+    cons, it = jl.pNorm(epsilon, A, b.reshape(-1, 1),
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/.julia/packages/PythonCall/Nr75f/src/JlWrap/any.jl", line 258, in __call__
+    return self._jl_callmethod($(pyjl_methodnum(pyjlany_call)), args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

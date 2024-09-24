@@ -1,0 +1,18 @@
+{"time":"2024-09-23T15:17:59.450100903+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-23T15:17:59.450123218+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240923_151759-8456ygvw/logs/debug-core.log"}
+{"time":"2024-09-23T15:17:59.450176988+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-23T15:17:59.450182325+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240923_151759-8456ygvw/logs/debug-core.log"}
+{"time":"2024-09-23T15:17:59.456419869+01:00","level":"INFO","msg":"created new stream","id":"8456ygvw"}
+{"time":"2024-09-23T15:17:59.456455448+01:00","level":"INFO","msg":"stream: started","id":"8456ygvw"}
+{"time":"2024-09-23T15:17:59.456484182+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:17:59.456521289+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:17:59.456533304+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:17:59.766426934+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-23T15:17:59.767928271+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-23T15:37:48.685820051+01:00","level":"INFO","msg":"stream: closing","id":"8456ygvw"}
+{"time":"2024-09-23T15:37:48.68583506+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-09-23T15:37:48.685928564+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-09-23T15:37:51.641896755+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:37:51.641986763+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:37:51.641969729+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"8456ygvw"}}
+{"time":"2024-09-23T15:37:51.642123184+01:00","level":"INFO","msg":"stream: closed","id":"8456ygvw"}
