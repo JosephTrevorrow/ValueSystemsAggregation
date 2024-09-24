@@ -7,6 +7,7 @@
 #SBATCH --mem=100M
 #SBATCH --account=cosc023424
 
-PYTHON_FILE="user/home/ia23938/ValueSystemsAggregation/experiment_runner.py"
+PYTHON_FILE="experiment_runner.py"
 
+python3 -pip install -r requirements.txt
 python3 $PYTHON_FILE
