@@ -114,12 +114,13 @@ if __name__ == '__main__':
         wandb.finish()
     for name, folder in societies.items():
         # read in data
-        data = pd.read_csv('ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        data = pd.read_csv('user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
             path = 'user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
             os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists")
+# FileNotFoundError: [Errno 2] No such file or directory: 'ValueSystemsAggregation/data/society_data/util_societies/util_society_68.csv'
 
         ##################
         # Run Experiment #
