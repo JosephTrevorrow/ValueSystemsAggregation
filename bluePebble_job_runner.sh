@@ -9,5 +9,5 @@
 
 PYTHON_FILE="experiment_runner.py"
 
-python3 -pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 python3 $PYTHON_FILE
