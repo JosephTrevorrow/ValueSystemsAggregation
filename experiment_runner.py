@@ -114,11 +114,11 @@ if __name__ == '__main__':
         wandb.finish()
     for name, folder in societies.items():
         # read in data
-        #data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
-        data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        #data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
-            #path = '/user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
-            path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            path = '/user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            #path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
 
             os.mkdir(path)
         except OSError as e:
@@ -178,7 +178,7 @@ if __name__ == '__main__':
                     principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
                     #print("DEBUG: Running experiment for ", personal_data)
-                    print("DEBUG: Running experiment for ", principle_data)
+                    #print("DEBUG: Running experiment for ", principle_data)
 
                     experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, j, k)
                     experiment_scores.append(experiment_score)
@@ -189,7 +189,6 @@ if __name__ == '__main__':
                     transition_points.append(transition_point)
                     hcva_points.append(hcva_point)
                     k+=1
-                    print("preference Score: ", preference_consensus[0])
                     # log metrics to wandb
                     wandb.log({"iteration": iterator, 
                                "sample": j, 
