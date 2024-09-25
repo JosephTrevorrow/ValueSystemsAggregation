@@ -117,9 +117,8 @@ if __name__ == '__main__':
         data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         #data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
-            path = '/user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
             #path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
-
             os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists")
