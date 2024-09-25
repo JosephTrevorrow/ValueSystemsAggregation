@@ -18,10 +18,10 @@ principle_data = None
 #import gc
 #gc.set_threshold(0)
 
-def split_into_samples(data, sample_size):
+def split_into_samples(data, sample_size, number_of_groups):
     shuffled_df = data.sample(frac=1).reset_index(drop=True)
     # Split into samples
-    samples = [shuffled_df.iloc[i*sample_size:(i+1)*sample_size] for i in range(25)]
+    samples = [shuffled_df.iloc[i*sample_size:(i+1)*sample_size] for i in range(number_of_groups)]
     return samples
 
 def satisfaction(decision_made):
@@ -114,11 +114,11 @@ if __name__ == '__main__':
         wandb.finish()
     for name, folder in societies.items():
         # read in data
-        data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
-        #data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        #data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
-            path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
-            #path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            #path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
+            path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
             os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists")
@@ -160,8 +160,11 @@ if __name__ == '__main__':
 
             
             # Split into sample groups for each context
-            samples = [split_into_samples(data, sample_size=4), split_into_samples(data, sample_size=10), split_into_samples(data, sample_size=25)]
+            samples = [split_into_samples(data, sample_size=4, number_of_groups=25), split_into_samples(data, sample_size=10, number_of_groups=10), split_into_samples(data, sample_size=25, number_of_groups=4)]
+            print("DEBUG: Samples: ", samples)
+
             # 25 samples of 4, 10 samples of 10, 4 samples of 25 for small/medium/large sample sizes
+            samples = [[sample.dropna() for sample in sample_group] for sample_group in samples]
 
             # THIS IS BROKEN: TODO: the samples need to be properly split for the correct context
 
@@ -181,8 +184,8 @@ if __name__ == '__main__':
                     sample = sample_data[principles]
                     principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-                    #print("DEBUG: Running experiment for ", personal_data)
-                    #print("DEBUG: Running experiment for ", principle_data)
+                    print("DEBUG: Running experiment for ", personal_data)
+                    print("DEBUG: Running experiment for ", principle_data)
 
                     experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, context_num, sample_num)
                     experiment_scores.append(experiment_score)
@@ -229,7 +232,6 @@ if __name__ == '__main__':
             #########################################
             # Old Experiment (with one sample size) #
             #########################################
-
             
             solve.shutdown_julia()
 

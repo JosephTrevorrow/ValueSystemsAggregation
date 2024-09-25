@@ -1,0 +1,18 @@
+{"time":"2024-09-25T21:18:29.579650752+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T21:18:29.579656175+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_211829-cw14a4cp/logs/debug-core.log"}
+{"time":"2024-09-25T21:18:29.579670804+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T21:18:29.579672511+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_211829-cw14a4cp/logs/debug-core.log"}
+{"time":"2024-09-25T21:18:29.581101256+01:00","level":"INFO","msg":"created new stream","id":"cw14a4cp"}
+{"time":"2024-09-25T21:18:29.581107174+01:00","level":"INFO","msg":"stream: started","id":"cw14a4cp"}
+{"time":"2024-09-25T21:18:29.581116009+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:29.581127597+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:29.5811375+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:29.859271064+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-25T21:18:29.85974894+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-25T21:18:35.018795287+01:00","level":"INFO","msg":"stream: closing","id":"cw14a4cp"}
+{"time":"2024-09-25T21:18:35.01881311+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-09-25T21:18:35.018913435+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-09-25T21:18:36.003454035+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:36.003481608+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:36.003474297+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"cw14a4cp"}}
+{"time":"2024-09-25T21:18:36.003524376+01:00","level":"INFO","msg":"stream: closed","id":"cw14a4cp"}

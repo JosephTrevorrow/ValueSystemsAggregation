@@ -1,0 +1,18 @@
+{"time":"2024-09-25T21:17:36.842921088+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T21:17:36.842937181+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_211736-a18n36qi/logs/debug-core.log"}
+{"time":"2024-09-25T21:17:36.842971836+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T21:17:36.842975763+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_211736-a18n36qi/logs/debug-core.log"}
+{"time":"2024-09-25T21:17:36.844579172+01:00","level":"INFO","msg":"created new stream","id":"a18n36qi"}
+{"time":"2024-09-25T21:17:36.844589704+01:00","level":"INFO","msg":"stream: started","id":"a18n36qi"}
+{"time":"2024-09-25T21:17:36.8446017+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:36.844607064+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:36.844632148+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:37.154365143+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-25T21:17:37.154943939+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-25T21:17:42.40681307+01:00","level":"INFO","msg":"stream: closing","id":"a18n36qi"}
+{"time":"2024-09-25T21:17:42.406831137+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-09-25T21:17:42.406981001+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-09-25T21:17:44.929026327+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:44.929076088+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:44.929143859+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"a18n36qi"}}
+{"time":"2024-09-25T21:17:44.929174617+01:00","level":"INFO","msg":"stream: closed","id":"a18n36qi"}
