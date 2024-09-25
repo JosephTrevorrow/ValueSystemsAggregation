@@ -1,0 +1,45 @@
+DEBUG: Iteration:  0
+DEBUG: Running experiment for     country       rel    nonrel
+0     28.0  0.159391  0.840609
+1     20.0  0.058448  0.941552
+2      3.0  0.201575  0.798425
+3     42.0  0.252044  0.747956
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+preference Score:  [0.     0.4666 0.5334 0.    ]
+DEBUG: Running experiment for     country       rel    nonrel
+4     38.0  0.077425  0.922575
+5     99.0  0.251894  0.748106
+6     71.0  0.201282  0.798718
+7      8.0  0.323523  0.676477
+/home/ia23938/miniconda3/envs/value-agg/lib/python3.11/site-packages/cvxpy/reductions/solvers/solving_chain.py:354: FutureWarning:
+    You specified your problem should be solved by ECOS. Starting in
+    CXVPY 1.6.0, ECOS will no longer be installed by default with CVXPY.
+    Please either add an explicit dependency on ECOS or switch to our new
+    default solver, Clarabel, by either not specifying a solver argument
+    or specifying ``solver=cp.CLARABEL``.
+
+  warnings.warn(ECOS_DEP_DEPRECATION_MSG, FutureWarning)
+Traceback (most recent call last):
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py", line 183, in <module>
+    experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, j, k)
+                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py", line 62, in run_experiment
+    transition_point, hcva_point, cons_vals, action_cons_vals = solve.aggregate(P_list,
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/solve.py", line 61, in aggregate
+    cons, _, ub = Lp(A, b, p)
+                  ^^^^^^^^^^^
+  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/solve.py", line 556, in Lp
+    cons, it = jl.pNorm(epsilon, A, b.reshape(-1, 1),
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ia23938/.julia/packages/PythonCall/Nr75f/src/JlWrap/any.jl", line 258, in __call__
+    return self._jl_callmethod($(pyjl_methodnum(pyjlany_call)), args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

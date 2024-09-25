@@ -114,9 +114,12 @@ if __name__ == '__main__':
         wandb.finish()
     for name, folder in societies.items():
         # read in data
-        data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        #data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
-            path = '/user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            #path = '/user/work/ia23938/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+
             os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists")
@@ -156,12 +159,16 @@ if __name__ == '__main__':
             # Single sample:
             #sample_data = data.sample(n=4)
             j = 0
-            split_samples = split_into_samples(data, sample_size=4)
-            for sample_data in split_samples:
+            
 
+            # Split into sample groups for each context
+            samples = [split_into_samples(data, sample_size=4), split_into_samples(data, sample_size=10), split_into_samples(data, sample_size=25)]
+            # 25 samples of 4, 10 samples of 10, 4 samples of 25 for small/medium/large sample sizes
+
+            for (sample_dataset, situation, principles) in zip(samples, example_data_names, example_principle_names):
                 k = 0
                 # Loop through each example case
-                for (situation, principles) in zip(example_data_names, example_principle_names):
+                for sample_data in sample_dataset:
                     # Extract values and action judgements for eg. 1
                     # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
                     sample = sample_data[situation]
@@ -182,7 +189,7 @@ if __name__ == '__main__':
                     transition_points.append(transition_point)
                     hcva_points.append(hcva_point)
                     k+=1
-  
+                    print("preference Score: ", preference_consensus[0])
                     # log metrics to wandb
                     wandb.log({"iteration": iterator, 
                                "sample": j, 
@@ -195,20 +202,20 @@ if __name__ == '__main__':
                                "experiment_score_t": experiment_score[2], 
                                "experiment_score_h": experiment_score[3],
 
-                               "preference_consensus_1": preference_consensus[0], 
-                               "preference_consensus_10": preference_consensus[1], 
-                               "preference_consensus_t": preference_consensus[2], 
-                               "preference_consensus_h": preference_consensus[3], 
+                               "preference_consensus_1": preference_consensus[0][1], 
+                               "preference_consensus_10": preference_consensus[1][1], 
+                               "preference_consensus_t": preference_consensus[2][1], 
+                               "preference_consensus_h": preference_consensus[3][1], 
                                 
                                "action_judgement_consensus_1": action_judgement_consensus[0],
                                "action_judgement_consensus_10": action_judgement_consensus[1],
                                "action_judgement_consensus_t": action_judgement_consensus[2],
                                "action_judgement_consensus_h": action_judgement_consensus[3],
-
-                               "decisions_1": decisions[0],
-                               "decisions_10": decisions[1], 
-                               "decisions_t": decisions[2], 
-                               "decisions_h": decisions[3],  
+                            ## We give wandb the decisions, but only for the left side (such that it isnt being displayed as a list)
+                               "decisions_1": decisions[0][0],
+                               "decisions_10": decisions[1][0], 
+                               "decisions_t": decisions[2][0], 
+                               "decisions_h": decisions[3][0],  
                                
                                })
                 # Reset data
@@ -216,6 +223,11 @@ if __name__ == '__main__':
                 del principle_data
                 j+=1
 
+            #########################################
+            # Old Experiment (with one sample size) #
+            #########################################
+
+            
             solve.shutdown_julia()
 
             with open(path+name+'.csv', 'a') as csvfile:

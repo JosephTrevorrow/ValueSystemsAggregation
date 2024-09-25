@@ -1,0 +1,18 @@
+{"time":"2024-09-25T13:52:18.910151782+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T13:52:18.910190216+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_135218-7ka3055u/logs/debug-core.log"}
+{"time":"2024-09-25T13:52:18.910294674+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-25T13:52:18.910305429+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240925_135218-7ka3055u/logs/debug-core.log"}
+{"time":"2024-09-25T13:52:18.918211763+01:00","level":"INFO","msg":"created new stream","id":"7ka3055u"}
+{"time":"2024-09-25T13:52:18.918262535+01:00","level":"INFO","msg":"stream: started","id":"7ka3055u"}
+{"time":"2024-09-25T13:52:18.918327937+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:52:18.918291955+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:52:18.918329435+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:52:19.303020234+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-25T13:52:19.308233408+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-25T13:53:47.097855789+01:00","level":"INFO","msg":"stream: closing","id":"7ka3055u"}
+{"time":"2024-09-25T13:53:47.097878174+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-09-25T13:53:47.097975507+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-09-25T13:53:50.449648156+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:53:50.449789635+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:53:50.449755076+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"7ka3055u"}}
+{"time":"2024-09-25T13:53:50.450087239+01:00","level":"INFO","msg":"stream: closed","id":"7ka3055u"}

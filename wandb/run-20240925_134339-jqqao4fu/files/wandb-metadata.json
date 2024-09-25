@@ -1,0 +1,43 @@
+{
+  "os": "Linux-6.8.0-45-generic-x86_64-with-glibc2.35",
+  "python": "3.11.9",
+  "startedAt": "2024-09-25T12:43:39.699154Z",
+  "program": "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py",
+  "codePath": "experiment_runner.py",
+  "git": {
+    "remote": "https://github.com/JosephTrevorrow/ValueSystemsAggregation.git",
+    "commit": "fd296d3b241d0d2a0c3452f897cac59046bbb71f"
+  },
+  "email": "joseph.trevorrow@gmail.com",
+  "root": "/home/ia23938/Documents/GitHub/ValueSystemsAggregation",
+  "host": "joseph-ubtunu",
+  "username": "ia23938",
+  "executable": "/home/ia23938/miniconda3/envs/value-agg/bin/python",
+  "codePathLocal": "experiment_runner.py",
+  "cpu_count": 14,
+  "cpu_count_logical": 20,
+  "gpu": "[NVIDIA GeForce MX550]",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "981132795904",
+      "used": "298641162240"
+    }
+  },
+  "memory": {
+    "total": "33322733568"
+  },
+  "cpu": {
+    "count": 14,
+    "countLogical": 20
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce MX550",
+      "memoryTotal": "2147483648",
+      "cudaCores": 1024,
+      "architecture": "Turing"
+    }
+  ],
+  "cudaVersion": "12.2"
+}
