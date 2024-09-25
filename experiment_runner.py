@@ -157,17 +157,22 @@ if __name__ == '__main__':
             print("DEBUG: Iteration: ", iterator)
             # Single sample:
             #sample_data = data.sample(n=4)
-            j = 0
-            
 
+            
             # Split into sample groups for each context
             samples = [split_into_samples(data, sample_size=4), split_into_samples(data, sample_size=10), split_into_samples(data, sample_size=25)]
             # 25 samples of 4, 10 samples of 10, 4 samples of 25 for small/medium/large sample sizes
 
+            # THIS IS BROKEN: TODO: the samples need to be properly split for the correct context
+
+            context_num = 0
+            # for every sample and situation/principle pair (3 iterations)
             for (sample_dataset, situation, principles) in zip(samples, example_data_names, example_principle_names):
-                k = 0
-                # Loop through each example case
+                sample_num = 0
+                print("DEBUG: context_num ", context_num)
+                # Loop through each sample that is in samples[0], samples[1], samples[2] for the correct situation/principle pair
                 for sample_data in sample_dataset:
+                    print("DEBUG: sample_num ", sample_num)
                     # Extract values and action judgements for eg. 1
                     # need pp, P_1, a_enjoy_camp, a_enjoy_resort, a_budget_camp, a_budget_resort
                     sample = sample_data[situation]
@@ -179,7 +184,7 @@ if __name__ == '__main__':
                     #print("DEBUG: Running experiment for ", personal_data)
                     #print("DEBUG: Running experiment for ", principle_data)
 
-                    experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, j, k)
+                    experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, context_num, sample_num)
                     experiment_scores.append(experiment_score)
                     decision_scores.append(decisions)
                     preference_consensuses.append(preference_consensus)
@@ -187,11 +192,11 @@ if __name__ == '__main__':
 
                     transition_points.append(transition_point)
                     hcva_points.append(hcva_point)
-                    k+=1
+                    sample_num+=1
                     # log metrics to wandb
                     wandb.log({"iteration": iterator, 
-                               "sample": j, 
-                               "situation": k, 
+                               "sample": context_num, 
+                               "situation": sample_num, 
                                "transition_point": transition_point, 
                                "hcva_point": hcva_point, 
 
@@ -219,7 +224,7 @@ if __name__ == '__main__':
                 # Reset data
                 del personal_data
                 del principle_data
-                j+=1
+                context_num+=1
 
             #########################################
             # Old Experiment (with one sample size) #
@@ -232,31 +237,31 @@ if __name__ == '__main__':
                 writer = csv.writer(csvfile)
                 # flatten rows
                 for i, sublist in enumerate(experiment_scores):
-                    for j, dictionary in enumerate(sublist):
+                    for context_num, dictionary in enumerate(sublist):
                         for key, value in dictionary.items():
-                            writer.writerow([i, j, key, value])
+                            writer.writerow([i, context_num, key, value])
             csvfile.close()
             with open(path+name+'_DECISIONS.csv', 'a') as csvfile:
                 writer = csv.writer(csvfile)
                 # flatten rows
                 for i, sublist in enumerate(decision_scores):
-                    for j, decision in enumerate(sublist):
-                        writer.writerow([i, j, decision])
+                    for context_num, decision in enumerate(sublist):
+                        writer.writerow([i, context_num, decision])
             csvfile.close()
             # Store consensus value system
             with open(path+name+'_CONS_PREFERENCES.csv', 'a') as csvfile:
                 writer = csv.writer(csvfile)
                 # flatten rows
                 for i, sublist in enumerate(preference_consensuses):
-                    for j, pref in enumerate(sublist):
-                        writer.writerow([i, j, pref])
+                    for context_num, pref in enumerate(sublist):
+                        writer.writerow([i, context_num, pref])
             csvfile.close()
             with open(path+name+'_CONS_ACTIONS.csv', 'a') as csvfile:
                 writer = csv.writer(csvfile)
                 # flatten rows
                 for i, sublist in enumerate(action_judgement_consensuses):
-                    for j, action in enumerate(sublist):
-                        writer.writerow([i, j, action])
+                    for context_num, action in enumerate(sublist):
+                        writer.writerow([i, context_num, action])
             csvfile.close()
             with open(path+name+'_t_points.csv', 'a') as csvfile:
                 writer = csv.writer(csvfile)
