@@ -1,0 +1,18 @@
+{"time":"2024-09-26T09:31:05.128840526+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-26T09:31:05.128874131+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240926_093105-o98hetam/logs/debug-core.log"}
+{"time":"2024-09-26T09:31:05.128919997+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-26T09:31:05.128924311+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240926_093105-o98hetam/logs/debug-core.log"}
+{"time":"2024-09-26T09:31:05.132125259+01:00","level":"INFO","msg":"created new stream","id":"o98hetam"}
+{"time":"2024-09-26T09:31:05.132135598+01:00","level":"INFO","msg":"stream: started","id":"o98hetam"}
+{"time":"2024-09-26T09:31:05.132167111+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:31:05.132179676+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:31:05.132184462+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:31:05.437862085+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-26T09:31:05.438358946+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-26T09:32:36.221981235+01:00","level":"INFO","msg":"stream: closing","id":"o98hetam"}
+{"time":"2024-09-26T09:32:36.222015913+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-09-26T09:32:36.222112623+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-09-26T09:32:38.819822078+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:32:38.819858952+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:32:38.819888971+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"o98hetam"}}
+{"time":"2024-09-26T09:32:38.819892379+01:00","level":"INFO","msg":"stream: closed","id":"o98hetam"}
