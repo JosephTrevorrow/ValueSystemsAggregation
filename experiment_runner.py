@@ -9,14 +9,10 @@ from datetime import date
 
 from matrices import FormalisationObjects, FormalisationMatrix
 
-
 # Global variables
 personal_data = None
 principle_data = None
-
-# Garbage Collection
-#import gc
-#gc.set_threshold(0)
+path = ""
 
 def split_into_samples(data, sample_size, number_of_groups):
     shuffled_df = data.sample(frac=1).reset_index(drop=True)
@@ -58,7 +54,6 @@ def run_experiment(filename, iteration, contextnum, samplenum) -> None:
     limit_p_filename = path+"limit_p_"+filename+'_iter_'+str(iteration)+'_context_'+str(contextnum)+'_sample_'+str(samplenum)+'.csv'
 
     # Solve aggregation for sample here: do all P values in 0.1 steps from 0 to 10
-    # I want to have all aggregate data here, and then reason about it afterwards
     transition_point, hcva_point, cons_vals, action_cons_vals = solve.aggregate(P_list, 
                                                                                 J_list, 
                                                                                 w, 
@@ -99,9 +94,11 @@ if __name__ == '__main__':
     ]
 
 
-    society_names = ['util_society', 'egal_society', 'norm_society', 'rand_society']
-    societies = {'util_society':'util_societies', 
-                 'egal_society':'egal_societies', 
+    society_names = [#'util_society', 
+        #'egal_society', 
+        'norm_society', 'rand_society']
+    societies = {#'util_society':'util_societies', 
+                 #'egal_society':'egal_societies', 
                  'norm_society':'norm_societies', 
                  'rand_society':'rand_societies'
                  }
@@ -117,18 +114,17 @@ if __name__ == '__main__':
         #data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
         try:
-            os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp)
-            os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
+            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp)
+            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
             #path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
         
             #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp)
-            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
-            #path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
-            #print("Path is: ", path)
+            os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
+            path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            print("Path is: ", path)
             #os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists. Exits with error ", e)
-# FileNotFoundError: [Errno 2] No such file or directory: 'ValueSystemsAggregation/data/society_data/util_societies/util_society_68.csv'
 
         ##################
         # Run Experiment #
@@ -161,6 +157,7 @@ if __name__ == '__main__':
             transition_points = []
             hcva_points = []
             print("DEBUG: Iteration: ", iterator)
+
             # Single sample:
             #sample_data = data.sample(n=4)
 
@@ -171,8 +168,6 @@ if __name__ == '__main__':
 
             # 25 samples of 4, 10 samples of 10, 4 samples of 25 for small/medium/large sample sizes
             samples = [[sample.dropna() for sample in sample_group] for sample_group in samples]
-
-            # THIS IS BROKEN: TODO: the samples need to be properly split for the correct context
 
             context_num = 0
             # for every sample and situation/principle pair (3 iterations)
@@ -234,10 +229,6 @@ if __name__ == '__main__':
                 del personal_data
                 del principle_data
                 context_num+=1
-
-            #########################################
-            # Old Experiment (with one sample size) #
-            #########################################
             
             solve.shutdown_julia()
 
@@ -282,17 +273,18 @@ if __name__ == '__main__':
                     writer.writerow([point])
             csvfile.close()
 
-            # Reset storage
             # Clear memory
-            del split_samples
-            del experiment_scores
-            del decision_scores
-            del preference_consensuses
-            del action_judgement_consensuses
-            del transition_points
-            del hcva_points
+            try:
+                #del split_samples
+                del experiment_scores
+                del decision_scores
+                del preference_consensuses
+                del action_judgement_consensuses
+                del transition_points
+                del hcva_points
+            except Exception as e:
+                print("DEBUG: Error in memory clearing: ", e)
             #gc.collect()
-            # the memory isnt python????? its julia!!!!!!!!!!!!!!
             iterator+=1
             print("DEBUG: Iteration complete")
         print("DEBUG: Experiment complete")

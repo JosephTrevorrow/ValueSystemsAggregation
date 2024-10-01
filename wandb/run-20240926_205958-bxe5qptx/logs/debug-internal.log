@@ -1,0 +1,12 @@
+{"time":"2024-09-26T20:59:58.853141753+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-26T20:59:58.853154667+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240926_205958-bxe5qptx/logs/debug-core.log"}
+{"time":"2024-09-26T20:59:58.853191476+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-09-26T20:59:58.853195223+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20240926_205958-bxe5qptx/logs/debug-core.log"}
+{"time":"2024-09-26T20:59:58.855987349+01:00","level":"INFO","msg":"created new stream","id":"bxe5qptx"}
+{"time":"2024-09-26T20:59:58.855997244+01:00","level":"INFO","msg":"stream: started","id":"bxe5qptx"}
+{"time":"2024-09-26T20:59:58.856010137+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"bxe5qptx"}}
+{"time":"2024-09-26T20:59:58.856031198+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"bxe5qptx"}}
+{"time":"2024-09-26T20:59:58.856006365+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"bxe5qptx"}}
+{"time":"2024-09-26T20:59:59.131898448+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-09-26T20:59:59.132756506+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-09-26T21:57:44.664933889+01:00","level":"INFO","msg":"api: retrying HTTP error","status":502,"url":"https://api.wandb.ai/files/joseph-trevorrow-university-of-bristol/valuesystemsaggregation/bxe5qptx/file_stream"}

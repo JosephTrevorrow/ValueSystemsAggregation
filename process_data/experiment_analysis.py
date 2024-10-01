@@ -9,12 +9,147 @@ import numpy as np
 import csv
 from collections import defaultdict
 
-def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: str):
+#####################
+# Utility Functions #
+#####################
+
+def unpack_data(filename: str):
+    df = pd.read_csv(filename)
+    return df
+
+def npfloat64remover(x):
+    x = x.replace('np.float64(', '')
+    x = x.replace(')', '')
+    x = x.replace(']', '')
+    x = x.replace('[', '')
+    x = x.replace(' ', '')
+    return x
+
+def decisionsplitter(x):
+    y, z = x.split(',')
+    return [float(y), float(z)]
+
+def split_by_context(data: pd.DataFrame):
+    ## This function splits a DataFrame by context, such that you have 3 seperate DataFrames for each context
+
+    df_dict = {}
+    unique_contexts = data['context'].unique()
+    # Split the DataFrame by Context
+    for context in unique_contexts:
+        df_dict[f'df_context_{context}'] = data[data['context'] == context].reset_index(drop=True)
+        
+    return df_dict
+
+def split_into_size_groups(data: pd.DataFrame):
     """
-    This function plots the average satisfaction for each test in the data.
+    This function splits up the dataframe into 3 corresponding to the sizes of 25x4, 10x10, and 4x25 for analysis by group
+
+    Contexts' 0-24 are the first 25x4, contexts' 25-34 are the first 10x10, contexts' 35-38 are the first 4x25. then the context value resets
+       to 0 and this continues
+    """
+
+    df_list = []
+    size_groups = [(0, 25), (25, 35), (35, 39)]
+    for start, end in size_groups:
+        df_group = data[(data['context'] >= start) & (data['context'] < end)].reset_index(drop=True)
+        df_list.append(df_group)
+
+    return df_list
+
+############################
+# Agent Specific Functions #
+############################
+
+def find_best_worst_case_divergence_agent(data: pd.DataFrame, filter: int):
+    """
+    finds the agent that is worst off in terms of divergence
+    """
+    worst_agent = None
+    best_agent = None
+    worst_sat = 0
+    best_sat = 999
+    df_dict = {}
+    unique_agent_values = data['agent'].unique()
+    
+    # Filter out specific P values
+    data = data[data['p_value'] == filter]
+
+    # Split the DataFrame by agent value
+    for agent in unique_agent_values:
+        df_dict[f'df_p_{agent}'] = data[data['agent'] == agent].reset_index(drop=True)
+    for key in df_dict.keys():
+        df_dict[key] = df_dict[key].sort_values(by=['agent', 'context']).reset_index(drop=True)
+    for key in df_dict:
+        # Calculate cumulative sum of Satisfaction for each Agent
+        df_dict[key]['Cumulative_Satisfaction'] = df_dict[key].groupby('agent')['satisfaction'].cumsum()
+    for key in df_dict:
+        # Reset the Context for each Agent group
+        df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
+    
+    # Find the worst agent
+    for key in df_dict:
+        df = df_dict[key]
+        if df['Cumulative_Satisfaction'].iloc[-1] > worst_sat:
+            worst_agent = df
+            worst_sat = df['Cumulative_Satisfaction'].iloc[-1]
+
+    # Find the best case P
+    for key in df_dict:
+        df = df_dict[key]
+        if df['Cumulative_Satisfaction'].iloc[-1] < best_sat:
+            best_agent = df
+            best_sat = df['Cumulative_Satisfaction'].iloc[-1]
+
+    return worst_agent, best_agent
+
+######################
+# Plotting Functions #
+######################
+
+def plot_worst_best_cumulative_divergence(worst_agent: pd.DataFrame, best_agent: pd.DataFrame, title: str, plot_savename: str, name: str):
+    """
+    This function plots cumulative divergence for each strategy in the data.
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
     """
 
+    plt.style.use("ggplot")
+    colours = ['red', 'blue']
+    dfs = [worst_agent, best_agent]
+    plt.figure(figsize=(6, 6))
+    labels = ['Best off agent', 'Worst off agent']
+    # Loop through each DataFrame in df_dict
+    for (df, colour, label) in zip(dfs, colours, labels):
+        # Plot the line for this dataframe
+        plt.plot(df['Cumulative_Satisfaction'], color=colour, label=label)
+        
+        # Plot the spread (shaded area)
+        #plt.fill_between(mean_cum_satisfaction.index,
+        #                 min_cum_satisfaction,
+        #                 max_cum_satisfaction,
+        #                 color=colour, alpha=0.1)
+
+    # Add labels and title
+    plt.xlabel('Context')
+    plt.ylabel('Cumulative Divergence')
+    plt.title(f' Cumulative Divergence for worst and best case\n {name} society')
+    plt.legend(title='Legend')
+    plt.ylim(0, 100)  # Set the y-axis limits
+    plt.xlim(0,320)
+    plt.grid(True)
+    
+    plt.savefig(plot_savename+title)
+
+    # TODO: Return the exact difference at the end, and what agent was the worst (their value system)
+
+
+
+def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: str, name: str):
+    """
+    This function plots cumulative divergence for each strategy in the data.
+    INPUT: data -- pd.DataFrame, title -- str (title of the plot)
+    """
+
+    plt.style.use("ggplot")
     df_dict = {}
     unique_p_values = data['p_value'].unique()
     colours = ['red', 'green', 'blue', 'orange']
@@ -31,31 +166,40 @@ def plot_cumulative_satisfaction(data: pd.DataFrame, title: str, plot_savename: 
         # Reset the Context for each Agent group
         df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
         
-    plt.figure(figsize=(12, 8))
-    labels = ['1', '10', 't', 'p']
+    plt.figure(figsize=(6, 6))
+    labels = ['1 (Utilitarian)', '10 (Egalitarian)', 'Transition Point', 'HCVA Point']
     # Loop through each DataFrame in df_dict
     for (key, colour, label) in zip(df_dict, colours, labels):
         # Calculate the mean, min, and max of Cumulative Satisfaction for each Context across all Agents
-        mean_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].mean()
+        median_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].median()
         min_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].min()
         max_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].max()
 
         # Plot the line for this dataframe
-        plt.plot(mean_cum_satisfaction, color=colour, label=label)
-                # Plot the spread (shaded area)
-        plt.fill_between(mean_cum_satisfaction.index,
-                         min_cum_satisfaction,
-                         max_cum_satisfaction,
-                         color=colour, alpha=0.1)
+        plt.plot(max_cum_satisfaction, color=colour, label=label)
+        
+        # Plot the spread (shaded area)
+        #plt.fill_between(mean_cum_satisfaction.index,
+        #                 min_cum_satisfaction,
+        #                 max_cum_satisfaction,
+        #                 color=colour, alpha=0.1)
 
     # Add labels and title
     plt.xlabel('Context')
-    plt.ylabel('Mean Cumulative Satisfaction')
-    plt.title('Mean Cumulative Satisfaction over Time for Different P_Values')
-    plt.legend(title='P_Values')
-    plt.ylim(0, 20)  # Set the y-axis limits
+    plt.ylabel('Worst case Cumulative Divergence')
+    plt.title(f'Worst case Cumulative Divergence for Different P Values\n {name} society')
+    plt.legend(title='P Values')
+    plt.ylim(65, 100)  # Set the y-axis limits
+    plt.xlim(200,320)
     plt.grid(True)
+    
     plt.savefig(plot_savename+title)
+
+    #import tikzplotlib
+    #tikzplotlib.save("text.tex")
+
+    # TODO: Return the exact difference at the end, and what agent was the worst (their value system)
+
 
 def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     """
@@ -63,16 +207,16 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
     """
     satisfaction_df = data.groupby(['agent', 'p_value'], as_index=False).agg({'satisfaction': 'sum'})
-    satisfaction_df['p_value'] = satisfaction_df['p_value'].replace({0: '1', 1: '10', 2: 't', 3: 'p'})
+    satisfaction_df['p_value'] = satisfaction_df['p_value'].replace({0: 'Utilitarian', 1: 'Egalitarian', 2: 'Transition Point', 3: 'HCVA'})
 
-    sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(x='p_value', y='satisfaction', data=satisfaction_df, width=0.3, whis=3)
+    plt.style.use("ggplot")
+    plt.figure(figsize=(6, 6))
+    sns.boxplot(x='p_value', y='satisfaction', data=satisfaction_df, width=0.3, whis=3, color="grey")
 
     plt.title(title)
-    plt.xlabel('P Value')
-    plt.ylabel('Satisfaction')
-    plt.ylim(0, 20)  # Set the y-axis limits
+    plt.xlabel('Strategy')
+    plt.ylabel('Total Agent Divergence')
+    plt.ylim(50 ,120)  # Set the y-axis limits
     savename = plot_savename+title
     plt.savefig(savename)
 
@@ -117,17 +261,6 @@ def plot_limit_p_data(data: pd.DataFrame, title: str, plot_savenme: str):
     savename = plot_savename+title
     plt.savefig(savename)
 
-def npfloat64remover(x):
-    x = x.replace('np.float64(', '')
-    x = x.replace(')', '')
-    x = x.replace(']', '')
-    x = x.replace('[', '')
-    x = x.replace(' ', '')
-    return x
-
-def decisionsplitter(x):
-    y, z = x.split(',')
-    return [float(y), float(z)]
 
 def plot_decisiveness(data: pd.DataFrame, title: str, plot_savename: str):
     """
@@ -169,15 +302,6 @@ def plot_decisiveness(data: pd.DataFrame, title: str, plot_savename: str):
     #mean_y = data['y'].mean()
     #plt.scatter(mean_x, mean_y, color='red', marker='x', s=100, label='Mean')
 
-
-def plot_fairness_percentage(data: pd.DataFrame, title: str, plot_savename: str):
-    """
-    This function plots fairness defined as the average percentage of group members whose personal value system results in the same decision 
-    being made as the consensus value system. We calculate the individual values and return a table.
-    """
-    
-
-
 def plot_fairness_thresholds(data: pd.DataFrame, title: str, plot_savename: str):
     """
     Fairness defined as the satisfaction of an agent with a certain decision being below some value 0.05 (as a satisfaction of 0 corresponds to maximum 
@@ -202,19 +326,80 @@ def plot_fairness_thresholds(data: pd.DataFrame, title: str, plot_savename: str)
 
 
 
-def unpack_data(filename: str):
-    df = pd.read_csv(filename)
-    return df
+def plot_satisfaction_of_minority(data: pd.DataFrame, title: str, plot_savename: str):
 
-def boxplots_and_cumulatives():
+    return 
+
+def cumulative_divergence_of_sizes(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots 3 different graphs for cumulative divergence for each size group within a society to show any differences in group
+    - This function ignores P value differences
+    """
+    data = split_into_size_groups(data=data)
+    colours = ['red', 'green', 'blue', 'orange']
+    labels = ['Small (4)', 'Medium (10)', 'Large (25)']
+
+    for df in data:
+        # Calculate cumulative sum of Satisfaction for each Agent
+        df['Cumulative_Satisfaction'] = df.groupby('agent')['satisfaction'].cumsum()
+        df.groupby('agent').cumcount()
+        
+    plt.figure(figsize=(12, 8))
+
+    # Loop through each DataFrame in df_dict
+    for (key, colour, label) in zip(data, colours, labels):
+        # Calculate the mean, min, and max of Cumulative Satisfaction for each Context across all Agents
+        mean_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].mean()
+        min_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].min()
+        max_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].max()
+
+        # Plot the line for this dataframe
+        plt.plot(mean_cum_satisfaction, color=colour, label=label)
+                # Plot the spread (shaded area)
+        plt.fill_between(mean_cum_satisfaction.index,
+                         min_cum_satisfaction,
+                         max_cum_satisfaction,
+                         color=colour, alpha=0.1)
+
+    # Add labels and title
+    plt.xlabel('Context')
+    plt.ylabel('Mean Cumulative Divergence')
+    plt.title(f'Mean Cumulative Divergence over Time for Different P Values\n {name} society')
+    plt.legend(title='P Values')
+    plt.ylim(0, 100)  # Set the y-axis limits
+    plt.xlim(0,320)
+    plt.grid(True)
+    plt.savefig(plot_savename+title)
+
+    return
+
+
+#############################
+# below is runner functions #
+#############################
+
+def best_worst_case():
     print("DEBUG: Unpacking data")
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
-    results_filename = {'egal': "egal_dist/egal_dist.csv", 'norm': "normal_dist/norm_dist.csv", "util": "util_dist/util_dist.csv", "random": "random_dist/rand_dist.csv"}
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
+    filters = {"egal": 0, "util": 1, "t": 2, "HCVA": 3}
+    for pname, p_val in filters.items():
+        for name, filename in results_filename.items():
+            data = unpack_data(results_path + filename)
+            best_agent, worst_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
+            plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name)
+
+
+def boxplots_and_cumulative():
+    print("DEBUG: Unpacking data")
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
-        plot_boxplot_residuals(data, f"Agent Satisfaction Over Time for {name} society", plot_savename)
-        plot_cumulative_satisfaction(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename)
+        plot_boxplot_residuals(data, f"Total Agent Divergence for {name} society", plot_savename)
+        plot_cumulative_divergence(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename, name)
     
 def t_points():
     results_filename = {'egal_dist/egal_dist_HCVA_POINTS.csv': "egal_dist/egal_dist_T_POINTS.csv", 'normal_dist/norm_dist_HCVA_POINTS.csv': "normal_dist/norm_dist_T_POINTS.csv", "util_dist/util_dist_HCVA_POINTS.csv": "util_dist/util_dist_T_POINTS.csv", "random_dist/rand_dist_HCVA_POINTS.csv": "random_dist/rand_dist_T_POINTS.csv"}
@@ -238,7 +423,6 @@ def fairness():
     results_filename = {'egal': "egal_dist/egal_dist.csv", 'norm': "normal_dist/norm_dist.csv", "util": "util_dist/util_dist.csv", "random": "random_dist/rand_dist.csv"}
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
-        plot_fairness_percentage(data, f"Fairness Percentage for {name} society", plot_savename+name)
         plot_fairness_thresholds(data, f"Fairness Thresholds for {name} society", plot_savename+name)
 
 if __name__ == "__main__":
@@ -248,4 +432,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    fairness()
+    best_worst_case()
