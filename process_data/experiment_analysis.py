@@ -102,11 +102,149 @@ def find_best_worst_case_divergence_agent(data: pd.DataFrame, filter: int):
 
     return worst_agent, best_agent
 
+def find_decision_cumulative_divergence(data: pd.DataFrame):
+    """
+    This function calcluates the cumulative divergence as:
+    - For each agent in a deicison, find their difference from the consensus. Now sum these differences for each agent per decision.
+    - This is the cumulative divergence for that decision
+    """
+    df_dict = {}
+    unique_p_values = data['p_value'].unique()
+    # Split the DataFrame by P_Value
+    for p_value in unique_p_values:
+        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
+    for key in df_dict.keys():
+        df_dict[key] = df_dict[key].sort_values(by=['agent', 'context']).reset_index(drop=True)
+    results_dict = {}
+    # Iterate over each DataFrame in df_dict
+    for key, df in df_dict.items():
+        # Group by continuous segments where 'context' is unchanging
+        df['group'] = (df['context'] != df['context'].shift()).cumsum()
+        # Sum the 'satisfaction' values for each group
+        grouped = df.groupby('group').agg({
+            'context': 'first',
+            'satisfaction': 'sum'
+        }).reset_index(drop=True)
+        
+        # Add the p_value to the grouped DataFrame
+        grouped['p_value'] = df['p_value'].iloc[0]
+        
+        # Store the result in the dictionary with p_value as the key
+        results_dict[f'df_p_{grouped["p_value"].iloc[0]}'] = grouped
+
+    return results_dict
+
+def find_agent_cumulative_divergence(data: pd.DataFrame):
+    """
+    This function calculates the cumulative divergence as:
+    - For each agent, calculuate its cumulative sum of satisfaction over time
+    - This is the cumulative divergence for that agent
+    """
+    df_dict = {}
+    unique_p_values = data['p_value'].unique()
+    colours = ['red', 'green', 'blue', 'orange']
+    # Split the DataFrame by P_Value
+    for p_value in unique_p_values:
+        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
+    for key in df_dict:
+        # Calculate cumulative sum of Satisfaction for each Agent
+        df_dict[key]['Cumulative_Satisfaction'] = df_dict[key].groupby('agent')['satisfaction'].cumsum()
+
+    for key in df_dict:
+        # Reset the Context for each Agent group
+        df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
+
+    return df_dict
+
+
+
+def find_best_worst_off_agents_overall(data: pd.DataFrame):
+    return
+
+def find_best_worst_off_agents_over_time(data: pd.DataFrame):
+    """
+    For every context, find the agent that is the worst off in terms of divergence, and store as a list
+    see if one agent (or a small group of agents in a minority) are consistently the worst off
+    """
+    df_dict = {}
+    unique_p_values = data['p_value'].unique()
+    # Split the DataFrame by P_Value
+    for p_value in unique_p_values:
+        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
+    for key in df_dict.keys():
+        df_dict[key] = df_dict[key].sort_values(by=['agent', 'context']).reset_index(drop=True)
+    results_dict = {}
+    # Iterate over each DataFrame in df_dict
+    for key, df in df_dict.items():
+        # Group by 'context'
+        grouped = df.groupby('context')
+        max_min_list = []
+        for name, group in grouped:
+            max_row = group.loc[group['satisfaction'].idxmax()]
+            min_row = group.loc[group['satisfaction'].idxmin()]
+            max_min_list.append({
+                'context': name,
+                'agent_max': max_row['agent'],
+                'satisfaction_max': max_row['satisfaction'],
+                'agent_min': min_row['agent'],
+                'satisfaction_min': min_row['satisfaction']
+            })
+        results_dict[key] = pd.DataFrame(max_min_list)
+
+    # Save results_dict to a .csv file and find any common agents
+    for key, df in results_dict.items():
+        df.to_csv(f"{key}_results.csv", index=False)
+        # Find common agents
+        common_worst_agents = df['agent_min'].mode()
+        common_best_agents = df['agent_max'].mode()
+        print("type of common worst agents", type(common_worst_agents))
+        common_worst_agents.to_csv(f"{key}_common_worst_agents.csv", index=False)
+        # print(f"Common worst agents for {key}: {common_worst_agents}")
+
+    return results_dict
+
+
 ######################
 # Plotting Functions #
 ######################
 
-def plot_worst_best_cumulative_divergence(worst_agent: pd.DataFrame, best_agent: pd.DataFrame, title: str, plot_savename: str, name: str):
+def plot_violin_best_worst(worst_agent: pd.DataFrame, best_agent: pd.DataFrame, plot_savename: str, name:str, pname:str):
+    # TODO: UNFINISHED
+    """
+    This function plots cumulative divergence for each strategy in the data.
+    INPUT: data -- pd.DataFrame, title -- str (title of the plot)
+    """
+    plt.style.use("ggplot")
+    colours = ['red', 'blue']
+    dfs = [worst_agent, best_agent]
+    plt.figure(figsize=(6, 6))
+    labels = ['Best off agent', 'Worst off agent']
+    # Loop through each DataFrame in df_dict
+    for (df, colour, label) in zip(dfs, colours, labels):
+        # Plot the line for this dataframe
+        plt.plot(df['Cumulative_Satisfaction'], color=colour, label=label)
+    # Add labels and title
+    plt.xlabel('Context')
+    plt.ylabel('Cumulative Divergence')
+    plt.title(f' Cumulative Divergence for worst and best case\n {name} society')
+    plt.legend(title='Legend')
+    plt.ylim(0, 100)  # Set the y-axis limits
+    plt.xlim(0,320)
+    plt.grid(True)
+    
+    plt.savefig(plot_savename+title)
+
+    difference_in_satisfaction = dfs[0]['Cumulative_Satisfaction'].iloc[-1] - dfs[1]['Cumulative_Satisfaction'].iloc[-1]
+
+    with open("best_worst_divergence.csv", 'a') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([name, pname, difference_in_satisfaction])
+
+    for (df,label) in zip(dfs, labels):
+        df.to_csv(plot_savename+name+label+'.csv')
+
+
+def plot_worst_best_cumulative_divergence(worst_agent: pd.DataFrame, best_agent: pd.DataFrame, title: str, plot_savename: str, name: str, pname: str):
     """
     This function plots cumulative divergence for each strategy in the data.
     INPUT: data -- pd.DataFrame, title -- str (title of the plot)
@@ -139,9 +277,44 @@ def plot_worst_best_cumulative_divergence(worst_agent: pd.DataFrame, best_agent:
     
     plt.savefig(plot_savename+title)
 
-    # TODO: Return the exact difference at the end, and what agent was the worst (their value system)
+    difference_in_satisfaction = dfs[0]['Cumulative_Satisfaction'].iloc[-1] - dfs[1]['Cumulative_Satisfaction'].iloc[-1]
+
+    with open("best_worst_divergence.csv", 'a') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([name, pname, difference_in_satisfaction])
+
+    for (df,label) in zip(dfs, labels):
+        df.to_csv(plot_savename+name+label+'.csv')
+
+    # TODO: Find the agents actual value systems by looking at the logs for experiments
 
 
+def plot_decision_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: str):
+    """
+    This function plots cumulative divergence for each decision
+    """
+    plt.style.use("ggplot")
+    colours = ['red', 'green', 'blue', 'orange']
+    
+    df_dict = find_decision_cumulative_divergence(data)
+    
+    plt.figure(figsize=(6, 6))
+    labels = ['1 (Utilitarian)', '10 (Egalitarian)', 'Transition Point', 'HCVA Point']
+    # Loop through each DataFrame in df_dict
+    for (df, colour, label) in zip(df_dict, colours, labels):
+        # Plot the line for this dataframe
+        plt.plot(df_dict[df]['satisfaction'], color=colour, label=label)
+
+    # Add labels and title
+    plt.xlabel('Context')
+    plt.ylabel('Total Divergence for Decision')
+    # plt.title(f'Worst case Cumulative Divergence for Different P Values\n {name} society')
+    plt.legend(title='P Values')
+    plt.ylim(0, 12)  # Set the y-axis limits
+    plt.xlim(0,320)
+    plt.grid(True)    
+    
+    plt.savefig(plot_savename+title)
 
 def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: str, name: str):
     """
@@ -150,22 +323,10 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     """
 
     plt.style.use("ggplot")
-    df_dict = {}
-    unique_p_values = data['p_value'].unique()
     colours = ['red', 'green', 'blue', 'orange']
-    # Split the DataFrame by P_Value
-    for p_value in unique_p_values:
-        df_dict[f'df_p_{p_value}'] = data[data['p_value'] == p_value].reset_index(drop=True)
-    for key in df_dict.keys():
-        df_dict[key] = df_dict[key].sort_values(by=['agent', 'context']).reset_index(drop=True)
-    for key in df_dict:
-        # Calculate cumulative sum of Satisfaction for each Agent
-        df_dict[key]['Cumulative_Satisfaction'] = df_dict[key].groupby('agent')['satisfaction'].cumsum()
-
-    for key in df_dict:
-        # Reset the Context for each Agent group
-        df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
-        
+    
+    df_dict = find_agent_cumulative_divergence(data)
+    
     plt.figure(figsize=(6, 6))
     labels = ['1 (Utilitarian)', '10 (Egalitarian)', 'Transition Point', 'HCVA Point']
     # Loop through each DataFrame in df_dict
@@ -191,7 +352,7 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     plt.legend(title='P Values')
     plt.ylim(65, 100)  # Set the y-axis limits
     plt.xlim(200,320)
-    plt.grid(True)
+    plt.grid(True)    
     
     plt.savefig(plot_savename+title)
 
@@ -199,7 +360,6 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     #tikzplotlib.save("text.tex")
 
     # TODO: Return the exact difference at the end, and what agent was the worst (their value system)
-
 
 def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     """
@@ -219,6 +379,9 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     plt.ylim(50 ,120)  # Set the y-axis limits
     savename = plot_savename+title
     plt.savefig(savename)
+
+    # TODO: Return the exact difference at the end, and what agent was the worst (their value system)
+
 
 def plot_transition_and_hcva_points(folders: str, hcva_points: str, t_points: str, title: str, plot_savename: str):
     """
@@ -378,6 +541,18 @@ def cumulative_divergence_of_sizes(data: pd.DataFrame, title: str, plot_savename
 # below is runner functions #
 #############################
 
+def violins_best_worst_agents():
+    print("DEBUG: Unpacking data")
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
+    filters = {"egal": 0, "util": 1, "t": 2, "HCVA": 3}
+    for pname, p_val in filters.items():
+        for name, filename in results_filename.items():
+            data = unpack_data(results_path + filename)
+            worst_agent, best_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
+            plot_violin_best_worst(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name, pname)
+
 def best_worst_case():
     print("DEBUG: Unpacking data")
     plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
@@ -387,9 +562,9 @@ def best_worst_case():
     for pname, p_val in filters.items():
         for name, filename in results_filename.items():
             data = unpack_data(results_path + filename)
-            best_agent, worst_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
-            plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name)
-
+            worst_agent, best_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
+            #plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name, pname)
+            find_best_worst_off_agents_over_time(data)
 
 def boxplots_and_cumulative():
     print("DEBUG: Unpacking data")
@@ -399,18 +574,22 @@ def boxplots_and_cumulative():
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
         plot_boxplot_residuals(data, f"Total Agent Divergence for {name} society", plot_savename)
-        plot_cumulative_divergence(data, f"Cumulative Agent Satisfaction Over Time for {name} society", plot_savename, name)
-    
+        plot_decision_cumulative_divergence(data, f"Decision Divergence Over Time for {name} society", plot_savename)
+
 def t_points():
-    results_filename = {'egal_dist/egal_dist_HCVA_POINTS.csv': "egal_dist/egal_dist_T_POINTS.csv", 'normal_dist/norm_dist_HCVA_POINTS.csv': "normal_dist/norm_dist_T_POINTS.csv", "util_dist/util_dist_HCVA_POINTS.csv": "util_dist/util_dist_T_POINTS.csv", "random_dist/rand_dist_HCVA_POINTS.csv": "random_dist/rand_dist_T_POINTS.csv"}
-    savenames = ['egalitarian societyz', 'normal society', 'utilitarian society', 'random society']
+    results_filename = {'egal_dist/egal_dist_hcva_points.csv': "egal_dist/egal_dist_t_points.csv", 'normal_dist/norm_dist_hcva_points.csv': "normal_dist/norm_dist_t_points.csv", "util_dist/util_dist_hcva_points.csv": "util_dist/util_dist_t_points.csv", "random_dist/rand_dist_hcva_points.csv": "random_dist/rand_dist_t_points.csv"}
+    
+    results_filename = {"egal_society/egal_societyegal_society_hcva_points.csv": "egal_society/egal_societyegal_society_t_points.csv", "norm_society/norm_societynorm_society_hcva_points.csv": "norm_society/norm_societynorm_society_t_points.csv", "util_society/util_societyutil_society_hcva_points.csv": "util_society/util_societyutil_society_t_points.csv", "rand_society/rand_societyrand_society_hcva_points.csv": "rand_society/rand_societyrand_society_t_points.csv"}
+    savenames = ['egalitarian society', 'normal society', 'utilitarian society', 'random society']
     for (hcva, t_point), savename in zip(results_filename.items(), savenames):
         hcva_data = unpack_data(results_path + hcva)
         t_data = unpack_data(results_path + t_point)
         plot_transition_and_hcva_points(folders, hcva_data, t_data, f"Transition and HCVA Points for {savename}",savename)
 
 def decisiveness():
-    results_filename = ["egal_dist/egal_dist_DECISIONS.csv", "normal_dist/norm_dist_DECISIONS.csv", "util_dist/util_dist_DECISIONS.csv", "random_dist/rand_dist_DECISIONS.csv"]
+    savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    results_filename = ["egal_society/egal_societyegal_society_DECISIONS.csv", "normal_society/normal_societynormal_society_DECISIONS.csv", "util_society/util_societyutil_society_DECISIONS.csv", "random_society/random_societyrandom_society_DECISIONS.csv"]
     savenames = ['decs_egalitarian_society', 'decs_normal_society', 'decs_utilitarian society', 'decs_random_society']
     for filename, savename in zip(results_filename, savenames):
         data = unpack_data(results_path + filename)
@@ -418,9 +597,9 @@ def decisiveness():
 
 def fairness():
     print("DEBUG: Unpacking data")
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
-    results_filename = {'egal': "egal_dist/egal_dist.csv", 'norm': "normal_dist/norm_dist.csv", "util": "util_dist/util_dist.csv", "random": "random_dist/rand_dist.csv"}
+    #plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
+    #results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
+    results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
         plot_fairness_thresholds(data, f"Fairness Thresholds for {name} society", plot_savename+name)
@@ -428,8 +607,8 @@ def fairness():
 if __name__ == "__main__":
     
     #boxplots_and_cumulatives()
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results/"
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
     best_worst_case()
