@@ -161,7 +161,7 @@ def find_agent_cumulative_divergence(data: pd.DataFrame):
 def find_best_worst_off_agents_overall(data: pd.DataFrame):
     return
 
-def find_best_worst_off_agents_over_time(data: pd.DataFrame):
+def find_best_worst_off_agents_over_time(data: pd.DataFrame, society_name: str):
     """
     For every context, find the agent that is the worst off in terms of divergence, and store as a list
     see if one agent (or a small group of agents in a minority) are consistently the worst off
@@ -193,12 +193,12 @@ def find_best_worst_off_agents_over_time(data: pd.DataFrame):
 
     # Save results_dict to a .csv file and find any common agents
     for key, df in results_dict.items():
-        df.to_csv(f"{key}_results.csv", index=False)
+        df.to_csv(f"{society_name}_{key}_results.csv", index=False)
         # Find common agents
-        common_worst_agents = df['agent_min'].mode()
-        common_best_agents = df['agent_max'].mode()
-        print("type of common worst agents", type(common_worst_agents))
-        common_worst_agents.to_csv(f"{key}_common_worst_agents.csv", index=False)
+        common_worst_agents = df['agent_max'].mode()
+        common_best_agents = df['agent_min'].mode()
+        common_worst_agents.to_csv(f"{society_name}_{key}_common_worst_agents.csv", index=False)
+        common_best_agents.to_csv(f"{society_name}_{key}_common_best_agents.csv", index=False)
         # print(f"Common worst agents for {key}: {common_worst_agents}")
 
     return results_dict
@@ -564,7 +564,7 @@ def best_worst_case():
             data = unpack_data(results_path + filename)
             worst_agent, best_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
             #plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name, pname)
-            find_best_worst_off_agents_over_time(data)
+            find_best_worst_off_agents_over_time(data, name)
 
 def boxplots_and_cumulative():
     print("DEBUG: Unpacking data")
