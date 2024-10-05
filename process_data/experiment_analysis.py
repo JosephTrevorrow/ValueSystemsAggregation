@@ -332,12 +332,12 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     # Loop through each DataFrame in df_dict
     for (key, colour, label) in zip(df_dict, colours, labels):
         # Calculate the mean, min, and max of Cumulative Satisfaction for each Context across all Agents
-        median_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].median()
+        mean_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].mean()
         min_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].min()
         max_cum_satisfaction = df_dict[key].groupby('context')['Cumulative_Satisfaction'].max()
 
         # Plot the line for this dataframe
-        plt.plot(max_cum_satisfaction, color=colour, label=label)
+        plt.plot(mean_cum_satisfaction, color=colour, label=label)
         
         # Plot the spread (shaded area)
         #plt.fill_between(mean_cum_satisfaction.index,
@@ -348,9 +348,9 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     # Add labels and title
     plt.xlabel('Context')
     plt.ylabel('Worst case Cumulative Divergence')
-    plt.title(f'Worst case Cumulative Divergence for Different P Values\n {name} society')
+    #plt.title(f'Worst case Cumulative Divergence for Different P Values\n {name} society')
     plt.legend(title='P Values')
-    plt.ylim(65, 100)  # Set the y-axis limits
+    plt.ylim(0, 100)  # Set the y-axis limits
     plt.xlim(200,320)
     plt.grid(True)    
     
@@ -373,10 +373,10 @@ def plot_boxplot_residuals(data: pd.DataFrame, title: str, plot_savename: str):
     plt.figure(figsize=(6, 6))
     sns.boxplot(x='p_value', y='satisfaction', data=satisfaction_df, width=0.3, whis=3, color="grey")
 
-    plt.title(title)
+    #plt.title(title)
     plt.xlabel('Strategy')
     plt.ylabel('Total Agent Divergence')
-    plt.ylim(50 ,120)  # Set the y-axis limits
+    plt.ylim(45 ,120)  # Set the y-axis limits
     savename = plot_savename+title
     plt.savefig(savename)
 
@@ -575,6 +575,7 @@ def boxplots_and_cumulative():
         data = unpack_data(results_path + filename)
         plot_boxplot_residuals(data, f"Total Agent Divergence for {name} society", plot_savename)
         plot_decision_cumulative_divergence(data, f"Decision Divergence Over Time for {name} society", plot_savename)
+        plot_cumulative_divergence(data, f"Cumulative Divergence Over Time for {name} society", plot_savename, name)
 
 def t_points():
     results_filename = {'egal_dist/egal_dist_hcva_points.csv': "egal_dist/egal_dist_t_points.csv", 'normal_dist/norm_dist_hcva_points.csv': "normal_dist/norm_dist_t_points.csv", "util_dist/util_dist_hcva_points.csv": "util_dist/util_dist_t_points.csv", "random_dist/rand_dist_hcva_points.csv": "random_dist/rand_dist_t_points.csv"}
@@ -611,4 +612,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    best_worst_case()
+    boxplots_and_cumulative()
