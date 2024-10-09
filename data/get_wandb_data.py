@@ -13,4 +13,4 @@ filtered_runs = [run for run in runs if run.config["society"] == "norm_society"]
 for run in filtered_runs:
     print(f"FILTERED Run ID: {run.id}, Name: {run.name}, State: {run.state}, Created: {run.created_at}")
     metrics_df = run.history()
-    metrics_df.to_csv(f"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/wandb_run_data/norm-{run.name}.csv", index=False)
+    metrics_df.to_csv(f"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/wandb_run_data/{run.name}.csv", index=False)

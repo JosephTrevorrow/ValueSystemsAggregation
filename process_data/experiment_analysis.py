@@ -199,7 +199,7 @@ def find_best_worst_off_agents_over_time(data: pd.DataFrame, society_name: str):
         common_best_agents = df['agent_min'].mode()
         common_worst_agents.to_csv(f"{society_name}_{key}_common_worst_agents.csv", index=False)
         common_best_agents.to_csv(f"{society_name}_{key}_common_best_agents.csv", index=False)
-        # print(f"Common worst agents for {key}: {common_worst_agents}")
+        print(f"Common worst agents for {key}: {common_worst_agents}")
 
     return results_dict
 
@@ -555,8 +555,15 @@ def violins_best_worst_agents():
 
 def best_worst_case():
     print("DEBUG: Unpacking data")
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/newplots/"
+    #results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/norm_society.csv"
+    filters = {"egal": 0, "util": 1, "t": 2, "HCVA": 3}
+    for pname, p_val in filters.items():
+            worst_agent, best_agent = find_best_worst_case_divergence_agent(unpack_data(results_path), filter=0)
+            plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {pname} society and P value {pname}", plot_savename, pname, pname)
+
+    """
     results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
     filters = {"egal": 0, "util": 1, "t": 2, "HCVA": 3}
     for pname, p_val in filters.items():
@@ -565,6 +572,7 @@ def best_worst_case():
             worst_agent, best_agent = find_best_worst_case_divergence_agent(data, filter=p_val)
             #plot_worst_best_cumulative_divergence(worst_agent, best_agent, f"Cumulative Agent Satisfaction Over Time for {name} society and P value {pname}", plot_savename, name, pname)
             find_best_worst_off_agents_over_time(data, name)
+    """
 
 def boxplots_and_cumulative():
     print("DEBUG: Unpacking data")
@@ -612,4 +620,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    boxplots_and_cumulative()
+    best_worst_case()

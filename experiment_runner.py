@@ -30,7 +30,7 @@ def satisfaction(decision_made):
     for i in range(len(personal_data)):
         agent_id = personal_data.iloc[i]['country']
         # make agent decision
-        agent_decision = solve.make_decision([0, personal_data.iloc[i]['rel'], personal_data.iloc[i]['nonrel'], 0], [0, personal_data.iloc[i]['a_div_rel'], personal_data.iloc[i]['a_div_nonrel'], 0])
+        agent_decision = solve.make_decision([0, personal_data.iloc[i]['rel'], personal_data.iloc[i]['nonrel'], 0], [personal_data.iloc[i]['a_adp_rel'], personal_data.iloc[i]['a_div_rel'], personal_data.iloc[i]['a_div_nonrel'], personal_data.iloc[i]['a_adp_nonrel']])
         satisfaction.update({agent_id : abs(agent_decision[0] - decision_made[0])})    
 
     return satisfaction
@@ -79,9 +79,9 @@ def run_experiment(filename, iteration, contextnum, samplenum) -> None:
     
     return scores, experiment_decisions, experiment_cons_vals, experiment_action_cons_vals, transition_point, hcva_point
 
-#########################
-# Main NEW ##############
-#########################
+########
+# Main #
+########
 if __name__ == '__main__':
     # Situtational data
     example_data_names = [['agent_id', 'P_1', 'P_1_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort'],
@@ -111,37 +111,33 @@ if __name__ == '__main__':
         wandb.finish()
     for name, folder in societies.items():
         # read in data
-        #data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
-        data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        data = pd.read_csv('/user/home/ia23938/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(random)+'.csv')
+        #data = pd.read_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data_reformatted/'+folder+'/'+name+'_'+str(random)+'.csv')
+
+        """
         try:
-            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp)
-            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
-            #path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
+            os.mkdir('/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp)
+            os.mkdir('user//home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name)
+            path = '/user/home/ia23938/ValueSystemsAggregation/work/experiment_results_'+timestamp+'/'+name
         
             #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp)
-            os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
-            path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
-            print("Path is: ", path)
+            #os.mkdir('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name)
+            #path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_results_'+timestamp+'/'+name
+            #print("Path is: ", path)
             #os.mkdir(path)
         except OSError as e:
             print("DEBUG: Directory already exists. Exits with error ", e)
+        """
 
         ##################
         # Run Experiment #
         ##################
         """
-        - An experiment will run for 300 days, going out with different agents each time (randomly)
+        - An experiment will run for 30 days, going out with different agents each time (randomly)
         - We map the satisfaction of each agent over time
         - So every agent will have a satisfaction score for each day
         """
-        wandb.init(project="valuesystemsaggregation",
-            config={"iterations": 300,
-                    "society": name,
-                    "society_num": random,
-                    "timestamp": timestamp,
-                    }
-            )
-        iterations = 300
+        iterations = 30
         iterator = 0
         experiment_scores = []
         decision_scores = []
@@ -149,6 +145,14 @@ if __name__ == '__main__':
         action_judgement_consensuses = []
         transition_points = []
         hcva_points = []
+
+        wandb.init(project="valuesystemsaggregation",
+        config={"iterations": iterations,
+                "society": name,
+                "society_num": random,
+                "timestamp": timestamp,
+                }
+        )
         while iterator < iterations:
             experiment_scores = []
             decision_scores = []
@@ -164,7 +168,7 @@ if __name__ == '__main__':
             
             # Split into sample groups for each context
             samples = [split_into_samples(data, sample_size=4, number_of_groups=25), split_into_samples(data, sample_size=10, number_of_groups=10), split_into_samples(data, sample_size=25, number_of_groups=4)]
-            print("DEBUG: Samples: ", samples)
+            #print("DEBUG: Samples: ", samples)
 
             # 25 samples of 4, 10 samples of 10, 4 samples of 25 for small/medium/large sample sizes
             samples = [[sample.dropna() for sample in sample_group] for sample_group in samples]
@@ -185,8 +189,8 @@ if __name__ == '__main__':
                     sample = sample_data[principles]
                     principle_data = sample.rename(columns={'agent_id': 'country', principles[1] : 'rel', principles[2] : 'nonrel'})
 
-                    print("DEBUG: Running experiment for ", personal_data)
-                    print("DEBUG: Running experiment for ", principle_data)
+                    #print("DEBUG: Running experiment for ", personal_data)
+                    #print("DEBUG: Running experiment for ", principle_data)
 
                     experiment_score, decisions, preference_consensus, action_judgement_consensus, transition_point, hcva_point = run_experiment(name, iterator, context_num, sample_num)
                     experiment_scores.append(experiment_score)
@@ -218,7 +222,7 @@ if __name__ == '__main__':
                                "action_judgement_consensus_10": action_judgement_consensus[1],
                                "action_judgement_consensus_t": action_judgement_consensus[2],
                                "action_judgement_consensus_h": action_judgement_consensus[3],
-                            ## We give wandb the decisions, but only for the left side (such that it isnt being displayed as a list)
+                            # We give wandb the decisions, but only for the left side (such that it isnt being displayed as a list)
                                "decisions_1": decisions[0][0],
                                "decisions_10": decisions[1][0], 
                                "decisions_t": decisions[2][0], 
@@ -231,7 +235,7 @@ if __name__ == '__main__':
                 context_num+=1
             
             solve.shutdown_julia()
-
+            """
             with open(path+name+'.csv', 'a') as csvfile:
                 writer = csv.writer(csvfile)
                 # flatten rows
@@ -272,10 +276,10 @@ if __name__ == '__main__':
                 for point in hcva_points:
                     writer.writerow([point])
             csvfile.close()
+         """
 
             # Clear memory
             try:
-                #del split_samples
                 del experiment_scores
                 del decision_scores
                 del preference_consensuses

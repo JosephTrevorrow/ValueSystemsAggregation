@@ -1,0 +1,19 @@
+{"time":"2024-10-07T16:38:01.813500753+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-10-07T16:38:01.813513504+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20241007_163801-agtqx7zi/logs/debug-core.log"}
+{"time":"2024-10-07T16:38:01.813547834+01:00","level":"INFO","msg":"using version","core version":"0.18.1"}
+{"time":"2024-10-07T16:38:01.8135516+01:00","level":"INFO","msg":"created symlink","path":"/home/ia23938/Documents/GitHub/ValueSystemsAggregation/wandb/run-20241007_163801-agtqx7zi/logs/debug-core.log"}
+{"time":"2024-10-07T16:38:01.816873876+01:00","level":"INFO","msg":"created new stream","id":"agtqx7zi"}
+{"time":"2024-10-07T16:38:01.81688557+01:00","level":"INFO","msg":"stream: started","id":"agtqx7zi"}
+{"time":"2024-10-07T16:38:01.816900975+01:00","level":"INFO","msg":"sender: started","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T16:38:01.816904156+01:00","level":"INFO","msg":"handler: started","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T16:38:01.8169213+01:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T16:38:02.224510557+01:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-10-07T16:38:02.225832336+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-10-07T18:37:32.883111078+01:00","level":"INFO","msg":"api: retrying HTTP error","status":502,"url":"https://api.wandb.ai/files/joseph-trevorrow-university-of-bristol/valuesystemsaggregation/agtqx7zi/file_stream"}
+{"time":"2024-10-07T18:50:18.949532669+01:00","level":"INFO","msg":"stream: closing","id":"agtqx7zi"}
+{"time":"2024-10-07T18:50:18.949547783+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-10-07T18:50:18.949659357+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-10-07T18:50:20.071262419+01:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T18:50:20.071313312+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T18:50:20.071349721+01:00","level":"INFO","msg":"sender: closed","stream_id":{"value":"agtqx7zi"}}
+{"time":"2024-10-07T18:50:20.071368344+01:00","level":"INFO","msg":"stream: closed","id":"agtqx7zi"}

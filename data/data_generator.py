@@ -27,10 +27,10 @@ def generate_utilitarian_data(df: pd.DataFrame):
     rng = np.random.default_rng()
     for i in range(0, 100):
         agent_id = i
-        principle_pref = rng.normal(loc=0.2, scale=0.1, size=1)
+        principle_pref = rng.normal(loc=0.2, scale=0.25, size=1)
         principle_pref = np.clip(principle_pref, 0, 1)[0]
         principle_prefs = [principle_pref, 1 - principle_pref]
-        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=5)
+        rand_prefs = rng.normal(loc=0.5, scale=0.25, size=5)
         rand_prefs = np.clip(rand_prefs, 0, 1)
         rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
         rand_actions = rng.normal(loc=0, scale=0.5, size=12)
@@ -44,10 +44,10 @@ def generate_egalitarian_data(df: pd.DataFrame):
     rng = np.random.default_rng()
     for i in range(0, 100):
         agent_id = i
-        principle_pref = rng.normal(loc=0.8, scale=0.1, size=1)
+        principle_pref = rng.normal(loc=0.8, scale=0.25, size=1)
         principle_pref = np.clip(principle_pref, 0, 1)[0]
         principle_prefs = [principle_pref, 1 - principle_pref]
-        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=5)
+        rand_prefs = rng.normal(loc=0.5, scale=0.25, size=5)
         rand_prefs = np.clip(rand_prefs, 0, 1)
         rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
         rand_actions = rng.normal(loc=0, scale=0.5, size=12)
@@ -60,7 +60,7 @@ def generate_normal_dist_data(df: pd.DataFrame):
     rng = np.random.default_rng()
     for i in range(0, 100):
         agent_id = i
-        rand_prefs = rng.normal(loc=0.5, scale=0.1, size=6)
+        rand_prefs = rng.normal(loc=0.5, scale=0.25, size=6)
         rand_prefs = np.clip(rand_prefs, 0, 1)
         rand_prefs = [val for pair in zip(rand_prefs, 1 - rand_prefs) for val in pair]
         rand_actions = rng.normal(loc=0, scale=0.5, size=12)
@@ -93,4 +93,4 @@ if __name__ == '__main__':
         df = pd.DataFrame(columns=['agent_id', 'pp_1', 'pp_1_1', 'pp_2', 'pp_2_1', 'pp_3', 'pp_3_1', 'P_1', 'P_1_1', 'P_2', 'P_2_1', 'P_3', 'P_3_1', 'a_enjoy_camp', 'a_enjoy_resort', 'a_budget_camp', 'a_budget_resort', 'a_conform_chain', 'a_conform_independent', 'a_stim_chain', 'a_stim_independent', 'a_enjoy_classic', 'a_enjoy_unknown', 'a_stimulation_classic', 'a_stimulation_unknown'])
         #print("DEBUG: All args: ", sys.argv)
         function(df)
-        df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data/'+folder+'/'+name+'_'+str(i)+'.csv', index=True)
+        df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/society_data_reformatted/'+folder+'/'+name+'_'+str(i)+'.csv', index=True)
