@@ -543,9 +543,10 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     r = np.abs(A @ x - b)
     return x, r, np.linalg.norm(r, p)
 
+
 def Lp(A, b, p):
     # l = A.shape[1]
-    if p >= 2:  # pIRLS implementation (NIPS 2019)
+    if False:  # pIRLS implementation (NIPS 2019)
         jl.include(os.path.dirname(
                 os.path.realpath(__file__)) +
             '/IRLS-pNorm.jl')
@@ -598,7 +599,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_data.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/non_society_data/brexit-example.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -621,13 +622,14 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=False
+        default=True
         )
     parser.add_argument(
         '-g',
         type=str,
-        default='slide_results.csv',
-        #default='results.csv',
+        #default='slide_results_actions.csv',
+        #default='transition_point_results.csv',
+        default='none',
         help='store results in csv')
     
     parser.add_argument(
@@ -672,6 +674,7 @@ if __name__ == '__main__':
 
     # Compute the limit P
     if args.l:
+        print("limit time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, _, = L1(A, b)
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
@@ -739,6 +742,7 @@ if __name__ == '__main__':
 
     # Comptue the threshold P, and print transition point
     elif args.t:
+        print("Threshold time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, r_1, u_1 = L1(A, b)
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
