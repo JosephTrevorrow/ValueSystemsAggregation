@@ -1,5 +1,7 @@
 """
-This file creates graphs tracking satisfaction over time for each agent in the simulation
+This file contains functions to process the data from the experiments and generate plots for analysis from hpc experiments
+
+This does not contain all analysis, and other files used for analysis can be found in /process_data/evs.ipynb
 """
 
 import matplotlib.pyplot as plt
@@ -8,6 +10,7 @@ import pandas as pd
 import numpy as np
 import csv
 from collections import defaultdict
+import os
 
 #####################
 # Utility Functions #
@@ -155,8 +158,6 @@ def find_agent_cumulative_divergence(data: pd.DataFrame):
         df_dict[key]['context'] = df_dict[key].groupby('agent').cumcount()
 
     return df_dict
-
-
 
 def find_best_worst_off_agents_overall(data: pd.DataFrame):
     return
@@ -537,9 +538,9 @@ def cumulative_divergence_of_sizes(data: pd.DataFrame, title: str, plot_savename
     return
 
 
-#############################
-# below is runner functions #
-#############################
+##############################
+# below are runner functions #
+##############################
 
 def violins_best_worst_agents():
     print("DEBUG: Unpacking data")
@@ -576,14 +577,15 @@ def best_worst_case():
 
 def boxplots_and_cumulative():
     print("DEBUG: Unpacking data")
-    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_plots/"
-    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
+    plot_savename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/single_soc_plots/"
+    results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/wandb_run_data/"
     results_filename = {'egal': "egal_society/egal_societyegal_society.csv", 'norm': "norm_society/norm_societynorm_society.csv", "util": "util_society/util_societyutil_society.csv", "random": "rand_society/rand_societyrand_society.csv"}
     for name, filename in results_filename.items():
         data = unpack_data(results_path + filename)
         plot_boxplot_residuals(data, f"Total Agent Divergence for {name} society", plot_savename)
         plot_decision_cumulative_divergence(data, f"Decision Divergence Over Time for {name} society", plot_savename)
         plot_cumulative_divergence(data, f"Cumulative Divergence Over Time for {name} society", plot_savename, name)
+    
 
 def t_points():
     results_filename = {'egal_dist/egal_dist_hcva_points.csv': "egal_dist/egal_dist_t_points.csv", 'normal_dist/norm_dist_hcva_points.csv': "normal_dist/norm_dist_t_points.csv", "util_dist/util_dist_hcva_points.csv": "util_dist/util_dist_t_points.csv", "random_dist/rand_dist_hcva_points.csv": "random_dist/rand_dist_t_points.csv"}
@@ -620,4 +622,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    best_worst_case()
+    boxplots_and_cumulative()

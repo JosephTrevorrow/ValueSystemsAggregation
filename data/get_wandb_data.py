@@ -1,3 +1,8 @@
+"""
+TODO: ANONYMIZE THE CODE
+imports all runs from wandb and saves them to a csv file
+"""
+
 import wandb
 
 api = wandb.Api()

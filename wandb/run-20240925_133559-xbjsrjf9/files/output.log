@@ -1,6 +1,0 @@
-DEBUG: Iteration:  0
-Traceback (most recent call last):
-  File "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/experiment_runner.py", line 174, in <module>
-    sample = sample_data[situation]
-             ~~~~~~~~~~~^^^^^^^^^^^
-TypeError: list indices must be integers or slices, not list

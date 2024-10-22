@@ -1,1 +1,0 @@
-The societies in this folder are the ones used for the IAI CDT summer project work, where initial results were generated

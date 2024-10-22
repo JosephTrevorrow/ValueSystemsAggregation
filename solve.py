@@ -599,7 +599,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/non_society_data/brexit-example.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -611,7 +611,7 @@ if __name__ == '__main__':
         '-i',
         type=str,
         help='computes equivalent p given an input consensus')
-    parser.add_argument('-o', type=str, help='write consensus to file', default="consensus.csv")
+    parser.add_argument('-o', type=str, help='write consensus to file', default="consensus_part2.csv")
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
@@ -622,14 +622,14 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=True
+        default=False
         )
     parser.add_argument(
         '-g',
         type=str,
         #default='slide_results_actions.csv',
-        #default='transition_point_results.csv',
-        default='none',
+        default='15-10-results.csv',
+        #default='none',
         help='store results in csv')
     
     parser.add_argument(

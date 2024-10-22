@@ -1,9 +1,8 @@
-cvxpy
-juliacall
-juliapkg
-matplotlib
+pandas 
+wandb
+argparse
 numpy
-pandas
-SciencePlots
-scikit_learn
-seaborn
+sklearn
+juliapkg
+juliacall
+matplotlib
