@@ -218,7 +218,7 @@ def plot_violin_best_worst(worst_agent: pd.DataFrame, best_agent: pd.DataFrame, 
     plt.style.use("ggplot")
     colours = ['red', 'blue']
     dfs = [worst_agent, best_agent]
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 3))
     labels = ['Best off agent', 'Worst off agent']
     # Loop through each DataFrame in df_dict
     for (df, colour, label) in zip(dfs, colours, labels):
@@ -254,7 +254,7 @@ def plot_worst_best_cumulative_divergence(worst_agent: pd.DataFrame, best_agent:
     plt.style.use("ggplot")
     colours = ['red', 'blue']
     dfs = [worst_agent, best_agent]
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 3))
     labels = ['Best off agent', 'Worst off agent']
     # Loop through each DataFrame in df_dict
     for (df, colour, label) in zip(dfs, colours, labels):
@@ -328,7 +328,7 @@ def plot_cumulative_divergence(data: pd.DataFrame, title: str, plot_savename: st
     
     df_dict = find_agent_cumulative_divergence(data)
     
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 3))
     labels = ['1 (Utilitarian)', '10 (Egalitarian)', 'Transition Point', 'HCVA Point']
     # Loop through each DataFrame in df_dict
     for (key, colour, label) in zip(df_dict, colours, labels):
@@ -508,7 +508,7 @@ def cumulative_divergence_of_sizes(data: pd.DataFrame, title: str, plot_savename
         df['Cumulative_Satisfaction'] = df.groupby('agent')['satisfaction'].cumsum()
         df.groupby('agent').cumcount()
         
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(6, 3))
 
     # Loop through each DataFrame in df_dict
     for (key, colour, label) in zip(data, colours, labels):
@@ -622,4 +622,4 @@ if __name__ == "__main__":
     results_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/bluepebble_runs/experiment_results_2024-09-27/"
     # Assuming you just have a folder name now e.g. 'experiment_results_v2/random_dist'
     folders = 'experiment_results_v2/random_dist'
-    boxplots_and_cumulative()
+    decisiveness()

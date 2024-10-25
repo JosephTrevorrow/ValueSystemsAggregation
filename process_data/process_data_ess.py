@@ -1,6 +1,10 @@
 """
 In this file we read the raw data from EVS2017.sav file and we process
 the data according to the section 6 of the article.
+
+Religious maps to Traditionalist (unintentionally so)
+Non-Religious maps to Hedonist (unintentionally so)
+div is the mapping to the single action (for/against basic income scheme)
 """
 
 
@@ -18,6 +22,8 @@ def a_adp(element):
     try:
         # against the scheme 
         div_value = element['basinc']
+        if div_value > 4:
+            raise BaseException
         div_support = -(div_value - 2.5) / 1.5
 
         # for the scheme
@@ -91,36 +97,30 @@ def process_participant(dataframe, caseno):
     """
     # religious or not v6 in EVS2017
     dataframe_row = dataframe[dataframe['idno'] == caseno].iloc[0]
-    universalism = dataframe_row['imptrad']
+    traditionalism = dataframe_row['imptrad']
     hedonism = dataframe_row['ipgdtim']
 
-    """
-    try:
-        if universalism == 6 or universalism == 5 or universalism == 4:
-            universalist = False
-        elif universalism == 3 or universalism == 2 or universalism == 1:
-            universalist = True
-        else:
-            universalist = None
-    except BaseException:
-        universalist = None
-    """
+    # Avoiding refusal/dont know/not applicable (vals: 7/8/9)
+    if traditionalism > 6 and hedonism < 6:
+        traditionalist = False
+    elif traditionalism < 6 and hedonism > 6:
+        traditionalist = True
 
     try:
-        if universalism > hedonism:
-            universalist = True
+        if traditionalism > hedonism:
+            traditionalist = True
         else:
-            universalist = False
+            traditionalist = False
     except BaseException:
-        universalist = None
+        traditionalist = None
 
     # we compute a_ad and a_dv
     action_adp, action_div = a_adp(dataframe_row)
 
-    if universalist is None or action_adp is None or action_div is None:
+    if traditionalist is None or action_adp is None or action_div is None:
         return None
     else:
-        return (universalist, action_adp, action_div)
+        return (traditionalist, action_adp, action_div)
 
 
 def process_country(dataframe, country):
@@ -183,8 +183,8 @@ def process_country(dataframe, country):
     return {
         'rel': n_religious,
         'nonrel': n_nonreligious,
-        'a_adp_rel': sum_a_adp_rel / n_rel_adp,
-        'a_adp_nonrel': sum_a_adp_nonrel / n_nonrel_adp,
+        #'a_adp_rel': sum_a_adp_rel / n_rel_adp,
+        #'a_adp_nonrel': sum_a_adp_nonrel / n_nonrel_adp,
         'a_div_rel': sum_a_div_rel / n_rel_div,
         'a_div_nonrel': sum_a_div_nonrel / n_nonrel_div
     }
@@ -225,11 +225,12 @@ if __name__ == '__main__':
     # Subset here is 
     df = df.dropna(subset=['imptrad', 'ipgdtim', 'basinc'])
 
+    print(df)
 
     # we create a dictionary to store the data per country
     dictionary = {}
     for country in list(df['cntry'].unique()):
-        dict_ = process_country(
+        dict_ = principle_process_country(
             df[['cntry', 'idno', 'imptrad', 'ipgdtim', 'basinc']], country)
         dictionary.update({country: dict_})
     columns = ['country']
@@ -242,6 +243,6 @@ if __name__ == '__main__':
             csv_rows2.append(dictionary[country][item])
         csv_rows.append(csv_rows2)
     # we store the data in a file
-    with open('processed_data_ess.csv', 'w', newline='') as csvfile:
+    with open('principle_processed_data_ess.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)

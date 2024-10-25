@@ -305,6 +305,7 @@ def make_decision(cons_prefs, cons_actions) -> str:
     decision = [adp, div]
     return decision
 
+
 # TODO: Unfinished
 def compute_justification(agent_ID, personal_vals, principle_vals, cons_row, decision) -> str:
     """
@@ -543,7 +544,6 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     r = np.abs(A @ x - b)
     return x, r, np.linalg.norm(r, p)
 
-
 def Lp(A, b, p):
     # l = A.shape[1]
     if False:  # pIRLS implementation (NIPS 2019)
@@ -562,7 +562,6 @@ def Lp(A, b, p):
         return cons, r, np.linalg.norm(r, p)
     else:  # vanilla IRLS implementation
         return IRLS(A, b, p)
-
 """
 def Lp(A, b, p):
     # l = A.shape[1]
@@ -628,22 +627,22 @@ if __name__ == '__main__':
         '-g',
         type=str,
         #default='slide_results_actions.csv',
-        default='15-10-results.csv',
-        #default='none',
+        #default='15-10-results.csv',
+        default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default=None,
-        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/toy_principles.csv',
+        #default=None,
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_with_principles_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        default=False, 
+        default=True, 
         #default=True,
         help='Compute the P value consensus aggregation method'
     )
@@ -677,6 +676,7 @@ if __name__ == '__main__':
         print("limit time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, _, = L1(A, b)
+        print('L1 =', cons_1)
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_inf, _, _, = Linf(A, b)
         dist_1inf = np.linalg.norm(cons_1 - cons_inf, 1)
@@ -745,8 +745,11 @@ if __name__ == '__main__':
         print("Threshold time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, r_1, u_1 = L1(A, b)
+        print("cons_1", cons_1)
+        cons_1 = [0.0,-0.0063146942426167835,0.0,0.028138149950864198,0.0,0.0063146942426167835,0.0,-0.028138149950864198]
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, r_l, u_l = Linf(A, b)
+        cons_l = [0.0,0.18473570367846734,0.0,0.2800186320955974,0.0,-0.18473570367846734,0.0,-0.2800186320955974]
         diff = np.inf
         incr = 0.1
 
