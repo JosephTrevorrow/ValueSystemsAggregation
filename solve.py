@@ -305,62 +305,6 @@ def make_decision(cons_prefs, cons_actions) -> str:
     decision = [adp, div]
     return decision
 
-
-# TODO: Unfinished
-def compute_justification(agent_ID, personal_vals, principle_vals, cons_row, decision) -> str:
-    """
-    This function takes in an agents ID and consensus personal+principle value systems and returns a text understanding of their justification
-    This function takes in the consensus personal+principle value systems and constructs a string justification 
-
-    agent_ID: the ID of the agent, leave as None if group justification wanted
-    personal_vals: original personal values file
-    principle_vals: original principle values file
-    cons_row: the row in the aggregation that matches the consensus
-    decision: list [adp, div] that represents the decision made as a ratio of 2 scores
-    """
-    justification = []
-    principle_explainer = {
-        "util_justification": "which is justified as the principle most representative of the group attempts to maximise the total happiness of the group",
-        "egal_justification": "which is justified as the principle most representative of the group attempts to maximise equality"
-    }
-
-    personal_data = pd.read_csv(personal_vals)
-    principle_data = pd.read_csv(principle_vals)
-
-    print("DEBUG: priciple vals are: " + principle_vals)
-    print("DEBUG: personal_vals are: " + personal_vals)
-    
-    # Get consensus items (used for both)
-    cons_principle_val = cons_row[1] * 100
-    if cons_principle_val < 50:
-        cons_principle = "utilitarianism"
-        cons_principle_val = 100 - cons_principle_val  
-    else: 
-        cons_principle = "egalitarianism"
-    
-    if agent_ID != None:
-        # Agent specific Justification
-        # Get whether the agent prefered util/egal
-        principle_percentage = principle_vals.iloc[agent_ID]["rel"]*100
-        if principle_percentage < 50:
-            principle = "utilitarianism"
-            principle_percentage = 100 - principle_percentage  
-        else: 
-            principle = "egalitarianism"
-        justification.append("You Prefer ", principle, " ", principle_percentage, "% of the time.")
-
-        justification.append("The consenus princple prefers ", cons_principle, " ", cons_principle_val,"%.")
-
-        justification.append("The decision has been made to ")
-
-
-    else:
-        # General (outsider) justification
-        justification.append("The group prefers ")
-
-
-    return justification
-
 def fill_prinicples(personal_vals, principle_vals) -> pd.DataFrame:
     """
     This function takes in the principle and personal value data, and performs clustering on the personal data.
@@ -543,10 +487,9 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
             x = x_
     r = np.abs(A @ x - b)
     return x, r, np.linalg.norm(r, p)
-
 def Lp(A, b, p):
     # l = A.shape[1]
-    if False:  # pIRLS implementation (NIPS 2019)
+    if True:  # pIRLS implementation (NIPS 2019)
         jl.include(os.path.dirname(
                 os.path.realpath(__file__)) +
             '/IRLS-pNorm.jl')
@@ -598,7 +541,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_ess.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -627,22 +570,22 @@ if __name__ == '__main__':
         '-g',
         type=str,
         #default='slide_results_actions.csv',
-        #default='15-10-results.csv',
-        default='none',
+        default='31-10-results.csv',
+        #default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_with_principles_ess.csv',
+        default=None,
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_with_principles_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        default=True, 
+        default=False, 
         #default=True,
         help='Compute the P value consensus aggregation method'
     )
@@ -663,13 +606,6 @@ if __name__ == '__main__':
 
     P_list, J_list, w, country_dict = FormalisationObjects(
         filename=args.f, delimiter=',', weights=args.w)
-    
-    # init for principle aggregation
-    if args.pv == True and args.pf != 'none':
-        # Solve missing principle values
-        fill_prinicples(personal_vals=args.f, principle_vals=args.pf)
-        PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
-            filename=args.pf, delimiter=',', weights=args.w)
 
     # Compute the limit P
     if args.l:
@@ -702,6 +638,7 @@ if __name__ == '__main__':
     elif args.g != 'none':
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, ua = L1(A, b)
+        print('L1 =', cons_1)
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, _, _, = Linf(A, b)
         dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
@@ -726,7 +663,8 @@ if __name__ == '__main__':
             dist_pl = np.linalg.norm(cons_l - cons, p)
             dist_1p_list.append(dist_1p)
             dist_pl_list.append(dist_pl)
-            print('{:.2f} \t \t {:.4f}'.format(p, ub))
+            #print('{:.2f} \t \t {:.4f}'.format(p, ub))
+            print('p: {:.2f}, cons: '.format(p), cons)
 
         output_file(
             p_list,

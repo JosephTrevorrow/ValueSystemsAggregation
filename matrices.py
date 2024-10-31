@@ -24,6 +24,20 @@ def JMatrixs(df_row):
     INPUT: pd.DataFrame object
     RETURN: J+ and J- matrices
     """
+
+    """
+    Note that:  n_val=J_list[0][0].shape[0],
+                n_actions=J_list[0][0].shape[1],
+    """
+    
+
+    J_p = [
+        [df_row['a_div_rel']], 
+        [df_row['a_div_nonrel']]
+        ]
+    J_n = [[-df_row['a_div_rel']], [-df_row['a_div_nonrel']]]
+
+    """ 
     J_p = [
         [
             df_row['a_adp_rel'],
@@ -34,6 +48,7 @@ def JMatrixs(df_row):
             df_row['a_div_nonrel']
         ]
     ]
+    
     J_n = [
         [
             -df_row['a_adp_rel'],
@@ -43,7 +58,8 @@ def JMatrixs(df_row):
             -df_row['a_adp_nonrel'],
             -df_row['a_div_nonrel']
         ]
-    ]
+    ]"""
+    
     return np.array(J_p), np.array(J_n)
 
 
@@ -202,6 +218,10 @@ def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
            over moral values, when v = False, we solve the aggregation of moral values)
     RETURN: A,b
     """
+
+    print("(J List) n_val: ", J_list[0][0].shape[0])
+    print("(J List) n_actions: ", J_list[0][0].shape[1])
+
     if v:
         A = CMatrix(w, n_val=P_list[0][0].shape[0], p=p)
         b = CVector(P_list, w, p=p)
