@@ -36,6 +36,9 @@ def aggregate(P_list,
     Pcountry_dict, 
     principle_data, 
     limit_p_filename):
+    """
+    This function is used by the experiment_runner.py file for aggregation
+    """
 
     ############################################
     # Aggregate Principles and find HCVA point #
@@ -174,87 +177,10 @@ def aggregate(P_list,
 
     return t_point, hcva_point, preference_cons_vals, action_cons_vals
 
-def transition_point(P_list, J_list, w, country_dict, filename):
-    A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
-    cons_1, _, _ = L1(A, b)
-    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
-    cons_l, _, _ = Linf(A, b)
-    diff = np.inf
-    incr = 0.1
-
-    #p_list = []
-    #dist_p_list = []
-    #dist_inf_list = []
-    #diff_list = []
-
-    e = 1e-4
-    # Range of P's to check for transition point
-    p = 10
-
-    for i in np.arange(1 + incr, p, incr):
-        A, b = FormalisationMatrix(P_list, J_list, w, i, True)
-        cons, _, _ = Lp(A, b, i)
-        dist_1p = np.linalg.norm(cons_1 - cons, i)
-        dist_pl = np.linalg.norm(cons_l - cons, i)
-        if (abs(dist_1p - dist_pl) < e):
-            best_p = i
-            #print('Not improving anymore, stopping!')
-            break
-        else:
-            if abs(dist_1p - dist_pl) < diff:
-                diff = abs(dist_1p - dist_pl)
-                best_p = i
-
-            #p_list.append(i)
-            #dist_p_list.append(dist_1p)
-            #dist_inf_list.append(dist_pl)
-            #diff_list.append(abs(dist_1p - dist_pl))  
-    #print('Transition point: {:.2f}'.format(best_p))
-    # limit_output(p_list, dist_p_list, dist_inf_list, diff_list, filename)
-    return best_p
-
-def voted_principle(PP_list, PJ_list, Pw, Pcountry_dict, prinicple_data):
-    p_list, _, cons_list, _, _, cons_1, cons_l=  aggregate_all_p(P_list=PP_list, 
-                                                        J_list=PJ_list,
-                                                        w=Pw)
-
-    ## Defining a cut point to drop all rows where there are P's that are higher than this
-    
-    # Cut point is the limit where p is within epsilon of p=\infty
-    #print("Cons list is: ", cons_list)
-    cut_point = 10
-    incr = 0.1
-    j = 0
-    for i in np.arange(1 + incr, 10, incr):
-        cons = cons_list[j]
-        dist_1p = np.linalg.norm(cons_1 - cons, i)
-        dist_pl = np.linalg.norm(cons_l - cons, i)
-        j += 1
-        # Note: Hard Coded \epsilon value
-        if (abs(dist_1p - dist_pl) < 0.005):
-            cut_point = i
-            #print('Not improving anymore, stopping!')
-            break
-
-    cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-    #print("DEBUG: cut_list length is: ", len(cut_list))
-    con_vals = [0, 0]
-    for j in range(2):
-        con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
-    
-    con_p = 1.0 
-    best_dist = 999
-    for j in range(len(cons_list)):
-        dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
-        dist = sum(dist)
-        if dist < best_dist:
-            best_dist = dist
-            # to convert from ordinal list num to corresponding p
-            con_p = (j/10)+1
-
-    return con_p
-
 def aggregate_all_p(P_list, J_list, w):
+    """
+    Used by pv argument to aggregate on principles in solve.py
+    """
     A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
     cons_1, _, ua = L1(A, b)
     A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
@@ -305,49 +231,6 @@ def make_decision(cons_prefs, cons_actions) -> str:
     decision = [adp, div]
     return decision
 
-def fill_prinicples(personal_vals, principle_vals) -> pd.DataFrame:
-    """
-    This function takes in the principle and personal value data, and performs clustering on the personal data.
-    It then fills in any missing principle values with the mean of the cluster.  
-    """
-    personal_data = pd.read_csv(personal_vals)
-    principle_data = pd.read_csv(principle_vals)
-
-    # Check if any principles need to be filled, otherwise return
-    if not principle_data['rel'].isna().any():
-        return principle_data
-    # Perform clustering on personal data
-    X = personal_data.drop('country', axis=1).values
-    scaler = StandardScaler()
-    df_scaled = scaler.fit_transform(scaler.fit_transform(X))
-    # TODO: use the elbow method to pick number of clusters, default=3
-    kmeans = KMeans(n_clusters=3)
-    kmeans.fit(df_scaled)
-    labels = kmeans.labels_
-    print(labels)
-
-    cluster_averages = []
-    for i in range(kmeans.n_clusters):
-        cluster_countries = personal_data['country'][labels == i]
-        principle_values = principle_data[principle_data['country'].isin(cluster_countries)]
-        # Drop all values that don't have principles
-        principle_values = principle_values.dropna()
-        cluster_average = principle_values.drop('country', axis=1).values.mean(axis=0)
-        cluster_averages.append(cluster_average)
-
-    for index, row in principle_data.iterrows():
-        if math.isnan(row['rel']):
-            # Get the personal value system for the country
-            personal_value = personal_data.loc[personal_data['country'] == row['country']]
-            scaled_personal_value = scaler.transform(personal_value.drop('country', axis=1).values)
-            cluster = kmeans.predict(scaled_personal_value)[0]  # [0] to get the single value
-            keys = ['rel', 'nonrel', 'a_adp_rel', 'a_div_rel', 'a_adp_nonrel', 'a_div_nonrel']
-            for i, key in enumerate(keys):
-                value = cluster_averages[cluster][i]
-                principle_data.at[index, key] = value
-
-    return principle_data
-
 def aggregate_values(aggregation_type, filename, con_p=0.0, 
                      P_list=None, 
                      J_list=None, 
@@ -355,6 +238,7 @@ def aggregate_values(aggregation_type, filename, con_p=0.0,
                      principle_val=None):
     """
     We run aggregation of the action value matrices and store in a file
+    Used in the solve.py file for argument -pv (principle value aggregation)
     """
     consensus_vals = []
 
@@ -541,7 +425,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -564,14 +448,14 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=False
+        default=True
         )
     parser.add_argument(
         '-g',
         type=str,
         #default='slide_results_actions.csv',
-        default='31-10-results.csv',
-        #default='none',
+        #default='31-10-results.csv',
+        default='none',
         help='store results in csv')
     
     parser.add_argument(
@@ -637,7 +521,7 @@ if __name__ == '__main__':
     # Compute personal aggregation only and store in .csv 
     elif args.g != 'none':
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
-        cons_1, _, ua = L1(A, b)
+        cons_1, _, ua = Lp(A, b, 1)
         print('L1 =', cons_1)
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, _, _, = Linf(A, b)
@@ -682,12 +566,12 @@ if __name__ == '__main__':
     elif args.t:
         print("Threshold time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
-        cons_1, r_1, u_1 = L1(A, b)
+        cons_1, r_1, u_1 = Lp(A, b, 1.0)
         print("cons_1", cons_1)
-        cons_1 = [0.0,-0.0063146942426167835,0.0,0.028138149950864198,0.0,0.0063146942426167835,0.0,-0.028138149950864198]
+        #cons_1 = [-0.027939325961567275,0.013170938317774624,0.027939325961567275,-0.013170938317774624]
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, r_l, u_l = Linf(A, b)
-        cons_l = [0.0,0.18473570367846734,0.0,0.2800186320955974,0.0,-0.18473570367846734,0.0,-0.2800186320955974]
+        #cons_l = [-0.052294976814419566,0.01052405695704031,0.052294976814419566,-0.01052405695704031]
         diff = np.inf
         incr = 0.1
 
@@ -704,7 +588,7 @@ if __name__ == '__main__':
             if (abs(dist_1p - dist_pl) < args.e):
                 best_p = i
                 print('Not improving anymore, stopping!')
-                break
+                #break
             else:
                 print('p = {:.2f}'.format(i))
                 print('Distance L1<-->L{:.2f} = {:.4f}'.format(i, dist_1p))

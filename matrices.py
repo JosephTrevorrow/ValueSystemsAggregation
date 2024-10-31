@@ -30,7 +30,7 @@ def JMatrixs(df_row):
                 n_actions=J_list[0][0].shape[1],
     """
     
-
+    """
     J_p = [
         [df_row['a_div_rel']], 
         [df_row['a_div_nonrel']]
@@ -58,7 +58,7 @@ def JMatrixs(df_row):
             -df_row['a_adp_nonrel'],
             -df_row['a_div_nonrel']
         ]
-    ]"""
+    ]
     
     return np.array(J_p), np.array(J_n)
 
