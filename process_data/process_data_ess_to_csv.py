@@ -230,7 +230,7 @@ if __name__ == '__main__':
     # we create a dictionary to store the data per country
     dictionary = {}
     for country in list(df['cntry'].unique()):
-        dict_ = principle_process_country(
+        dict_ = process_country(
             df[['cntry', 'idno', 'imptrad', 'ipgdtim', 'basinc']], country)
         dictionary.update({country: dict_})
     columns = ['country']

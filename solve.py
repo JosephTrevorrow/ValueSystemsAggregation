@@ -231,7 +231,7 @@ def make_decision(cons_prefs, cons_actions) -> str:
     decision = [adp, div]
     return decision
 
-def aggregate_values(aggregation_type, filename, con_p=0.0, 
+def aggregate_principles(aggregation_type, filename, con_p=0.0, 
                      P_list=None, 
                      J_list=None, 
                      w=None,
@@ -314,7 +314,6 @@ def L1(A, b):
     r = np.abs(A @ cons - b)
     return cons, r, np.linalg.norm(r, 1)
 
-
 def L2(A, b):
     """
     This function runs the L2 norm on values and returns consensus
@@ -353,6 +352,7 @@ def Linf(A, b):
 def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
     """
     This function runs the IRLS method for finding consensus for any P >= 3
+    using a python implementation
     """
     # l = A.shape[1]
     n = A.shape[0]
@@ -371,9 +371,10 @@ def IRLS(A, b, p, max_iter=int(1e6), e=1e-3, d=1e-4):
             x = x_
     r = np.abs(A @ x - b)
     return x, r, np.linalg.norm(r, p)
+
 def Lp(A, b, p):
     # l = A.shape[1]
-    if True:  # pIRLS implementation (NIPS 2019)
+    if p >= 2 :  # pIRLS implementation (NIPS 2019) (always use this for continuity)
         jl.include(os.path.dirname(
                 os.path.realpath(__file__)) +
             '/IRLS-pNorm.jl')
@@ -389,33 +390,7 @@ def Lp(A, b, p):
         return cons, r, np.linalg.norm(r, p)
     else:  # vanilla IRLS implementation
         return IRLS(A, b, p)
-"""
-def Lp(A, b, p):
-    # l = A.shape[1]
-    if p >= 2:  # pIRLS implementation (NIPS 2019)
-        from julia import Main
-        # from julia import IRLSmod
-        Main.include(
-            os.path.dirname(
-                os.path.realpath(__file__)) +
-            '/IRLS-pNorm.jl')
-        # constraints needed for pIRLS (empty)
-        C = np.zeros_like(A)
-        d = np.zeros_like(b)
-        epsilon = 1e-10
-        cons, it = Main.pNorm(epsilon, A, b.reshape(-1, 1),
-                              p, C, d.reshape(-1, 1))
-        # cons, it = IRLS.pNorm(epsilon, A, b.reshape(-1, 1), p, C, d.reshape(-1, 1))
-        r = np.abs(A @ cons - b)
-        Main.collector()
-        Main.eval('GC.gc()')
-        Main.eval('GC.gc()')
-        return cons, r, np.linalg.norm(r, p)
-    else:  # vanilla IRLS implementation
-        return IRLS(A, b, p)
-"""
 
-### TODO: Make a new arguement that allows user to compute preference aggregation using principles
 if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-n', type=int, default=7, help='n')
@@ -425,7 +400,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_ess.csv',
+        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5.csv",
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -454,23 +429,23 @@ if __name__ == '__main__':
         '-g',
         type=str,
         #default='slide_results_actions.csv',
-        #default='31-10-results.csv',
+        #default='13-11-results-factor-5.0.csv',
         default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default=None,
-        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_with_principles_ess.csv',
+        #default=None,
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_with_principles_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
         '-pv',
         type=bool,
-        default=False, 
-        #default=True,
+        #default=False, 
+        default=True,
         help='Compute the P value consensus aggregation method'
     )
     parser.add_argument(
@@ -490,6 +465,10 @@ if __name__ == '__main__':
 
     P_list, J_list, w, country_dict = FormalisationObjects(
         filename=args.f, delimiter=',', weights=args.w)
+    
+    if args.pv:
+        PP_list, PJ_list, Pw, Pcountry_dict = FormalisationObjects(
+            filename=args.pf, delimiter=',', weights=args.w)
 
     # Compute the limit P
     if args.l:
@@ -566,7 +545,7 @@ if __name__ == '__main__':
     elif args.t:
         print("Threshold time!")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
-        cons_1, r_1, u_1 = Lp(A, b, 1.0)
+        cons_1, r_1, u_1 = L1(A, b)
         print("cons_1", cons_1)
         #cons_1 = [-0.027939325961567275,0.013170938317774624,0.027939325961567275,-0.013170938317774624]
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
@@ -701,8 +680,8 @@ if __name__ == '__main__':
 
         # TODO: you arent running aggregation with con_p
         print("DEBUG: Running Aggregation with P = ", con_p)
-        agg_action_p_list, _, agg_action_cons_list, _, _, cons_actions = aggregate_values(False, "aggregated_action_values.csv", con_p=con_p)
-        agg_pref_p_list, _, agg_pref_cons_list, _, _, cons_prefs = aggregate_values(True, "aggregated_preference_values.csv", con_p=con_p)
+        agg_action_p_list, _, agg_action_cons_list, _, _, cons_actions = aggregate_principles(False, "aggregated_action_values.csv", con_p=con_p)
+        agg_pref_p_list, _, agg_pref_cons_list, _, _, cons_prefs = aggregate_principles(True, "aggregated_preference_values.csv", con_p=con_p)
 
         decision = make_decision(cons_prefs, cons_actions)
         print("Decision made at ratio: ", decision[0], " to ", decision[1])

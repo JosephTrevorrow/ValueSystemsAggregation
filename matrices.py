@@ -30,12 +30,24 @@ def JMatrixs(df_row):
                 n_actions=J_list[0][0].shape[1],
     """
     
-    """
+    
     J_p = [
-        [df_row['a_div_rel']], 
-        [df_row['a_div_nonrel']]
+        [
+            df_row['a_div_rel']
+        ], 
+        [
+            df_row['a_div_nonrel']
         ]
-    J_n = [[-df_row['a_div_rel']], [-df_row['a_div_nonrel']]]
+    ]
+    
+    J_n = [
+        [
+            -df_row['a_div_rel']
+        ], 
+        [
+            -df_row['a_div_nonrel']
+        ]
+    ]
 
     """ 
     J_p = [
@@ -60,6 +72,7 @@ def JMatrixs(df_row):
         ]
     ]
     
+    """
     return np.array(J_p), np.array(J_n)
 
 
@@ -219,8 +232,8 @@ def FormalisationMatrix(P_list, J_list, w, p=2, v=True):
     RETURN: A,b
     """
 
-    print("(J List) n_val: ", J_list[0][0].shape[0])
-    print("(J List) n_actions: ", J_list[0][0].shape[1])
+    #print("(J List) n_val: ", J_list[0][0].shape[0])
+    #print("(J List) n_actions: ", J_list[0][0].shape[1])
 
     if v:
         A = CMatrix(w, n_val=P_list[0][0].shape[0], p=p)
