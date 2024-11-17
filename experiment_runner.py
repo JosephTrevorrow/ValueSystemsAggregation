@@ -1,3 +1,9 @@
+"""
+This file is used to run experiments on BluePebble
+- experiments are ran for a number of days over a number of different contexts
+- each experiment is logged locally and on wandb (local logging is currently commented out)
+"""
+
 import pandas as pd
 import solve
 import csv

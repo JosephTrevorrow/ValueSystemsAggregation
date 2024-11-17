@@ -400,7 +400,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5.csv",
+        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5_5.0.csv",
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -423,13 +423,13 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=True
+        default=False
         )
     parser.add_argument(
         '-g',
         type=str,
-        #default='slide_results_actions.csv',
-        #default='13-11-results-factor-5.0.csv',
+        #default='14-11-results-factor-2.5-5.0-prefs.csv',
+        #default='14-11-results-factor-2.5-5.0.csv',
         default='none',
         help='store results in csv')
     
@@ -437,7 +437,7 @@ if __name__ == '__main__':
         '-pf',
         type=str,
         #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_with_principles_ess.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/14-11-processed_data_with_principles_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    

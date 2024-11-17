@@ -1,5 +1,7 @@
-"""This file will format a .csv generated from solve.py
- to a latex table printout to be used in your document """
+"""
+This file will format a .csv that contains consensus value systems generated from solve.py
+to a latex table printout to be used in your document
+"""
 
 import pandas as pd
 import csv
@@ -175,9 +177,9 @@ def make_decision(row) -> str:
 
 
 if __name__ == '__main__':
-    action_filename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/23-10-example-action-results.csv"
-    preferences_filename = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/23-10-example-preference-results.csv"
-    agent_csv_file = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/processed_data_ess.csv"
+    action_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/14-11-results-factor-2.5-5.0.csv'
+    preferences_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/14-11-results-factor-2.5-5.0-prefs.csv'
+    agent_csv_file = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5_5.0.csv'
 
     columns_to_fill = ['p', 'Rel-Nonrel', 'Nonrel-Rel', 'Rel_div_p', 'Nonrel_div_p' ]
     convert_consensus_to_latex(action_filename, preferences_filename, columns_to_fill)
