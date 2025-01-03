@@ -423,21 +423,21 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=False
+        default=True
         )
     parser.add_argument(
         '-g',
         type=str,
         #default='14-11-results-factor-2.5-5.0-prefs.csv',
-        #default='14-11-results-factor-2.5-5.0.csv',
+        #default='02-01-2025-preferences-a-2.5-p-5.0.csv',
         default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/process_data/14-11-processed_data_with_principles_ess.csv',
+        default=None,
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/14-11-processed_data_with_principles_ess.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
@@ -445,7 +445,7 @@ if __name__ == '__main__':
         '-pv',
         type=bool,
         #default=False, 
-        default=True,
+        default=False,
         help='Compute the P value consensus aggregation method'
     )
     parser.add_argument(
@@ -472,7 +472,7 @@ if __name__ == '__main__':
 
     # Compute the limit P
     if args.l:
-        print("limit time!")
+        print("In args.l, computing Limit")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, _, = L1(A, b)
         print('L1 =', cons_1)
@@ -499,6 +499,7 @@ if __name__ == '__main__':
 
     # Compute personal aggregation only and store in .csv 
     elif args.g != 'none':
+        print("In args.g, computing personal aggregation")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, ua = Lp(A, b, 1)
         print('L1 =', cons_1)
@@ -543,11 +544,12 @@ if __name__ == '__main__':
 
     # Comptue the threshold P, and print transition point
     elif args.t:
-        print("Threshold time!")
+        print("In args.t, computing Threshold")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, r_1, u_1 = L1(A, b)
         print("cons_1", cons_1)
         #cons_1 = [-0.027939325961567275,0.013170938317774624,0.027939325961567275,-0.013170938317774624]
+        
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, r_l, u_l = Linf(A, b)
         #cons_l = [-0.052294976814419566,0.01052405695704031,0.052294976814419566,-0.01052405695704031]
@@ -558,7 +560,6 @@ if __name__ == '__main__':
         dist_p_list = []
         dist_inf_list = []
         diff_list = []
-
         for i in np.arange(1 + incr, p, incr):
             A, b = FormalisationMatrix(P_list, J_list, w, i, args.v)
             cons, r, u = Lp(A, b, i)
@@ -586,7 +587,7 @@ if __name__ == '__main__':
                 dist_p_list.append(dist_1p)
                 dist_inf_list.append(dist_pl)
                 diff_list.append(abs(dist_1p - dist_pl))  
-        print('Transition point: {:.2f}'.format(best_p))
+            print('Transition point: {:.2f}'.format(best_p))
 
         limit_output(
             p_list,

@@ -8,25 +8,6 @@ import csv
 import numpy as np
 
 def convert_consensus_to_latex(action_csv_file, preference_csv_file, columns_to_fill):
-    """
-    In the following format:
-    \begin{table*}[!htb]
-    % \scriptsize
-    \centering
-    \caption{convert_consensus_to_latex}
-    \begin{tabular}{lllllllll}
-    \toprule
-    P & $P_S[enjoy, budget]$ & $P_S[budget, enjoy]$ & $a^S_{enjoy}(camp)$ & $a^S_{enjoy}(resort)$ & $a^S_{budget}(camp)$ & $a^S_{budget}(resprt)$ & Value pref. \\ 
-    \midrule
-    1  & 0.544 & 0.456 & 0.256&0.782&0.559&-0.441 & $enjoy > budget$\\
-    2  & 0.525 & 0.475 & 0.275&0.775&0.600&-0.400 & $enjoy > budget$\\
-    \textbf{2.5}     & \textbf{0.516} & \textbf{0.483} & \textbf{0.284} & \textbf{0.772} & \textbf{0.620} & \textbf{-0.380} & \textbf{$enjoy > budget$}\\
-    $\infty$ (10) & 0.500 & 0.500 &0.230&0.756&0.650&-0.350& $enjoy = budget$ \\
-    \bottomrule
-    \end{tabular}
-    \label{Tab:personalAgg}
-    \end{table*}
-    """
     # Read the csv files
     data_1 = pd.read_csv(action_csv_file)
     data_2 = pd.read_csv(preference_csv_file)
@@ -177,9 +158,9 @@ def make_decision(row) -> str:
 
 
 if __name__ == '__main__':
-    action_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/14-11-results-factor-2.5-5.0.csv'
-    preferences_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/14-11-results-factor-2.5-5.0-prefs.csv'
-    agent_csv_file = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5_5.0.csv'
+    action_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/results/02-01-2025-actions-a-2.5-p-5.0.csv'
+    preferences_filename = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/results/02-01-2025-preferences-a-2.5-p-5.0.csv'
+    #agent_csv_file = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5_5.0.csv'
 
     columns_to_fill = ['p', 'Rel-Nonrel', 'Nonrel-Rel', 'Rel_div_p', 'Nonrel_div_p' ]
     convert_consensus_to_latex(action_filename, preferences_filename, columns_to_fill)

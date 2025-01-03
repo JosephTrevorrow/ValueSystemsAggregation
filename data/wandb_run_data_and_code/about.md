@@ -1,0 +1,1 @@
+This folder contains all code used to generate plots from, and all data from the WandB experiments completed in 2024. These are currently used in the experimental results section of the paper
