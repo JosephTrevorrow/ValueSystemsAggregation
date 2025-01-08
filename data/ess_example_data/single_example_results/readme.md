@@ -5,8 +5,11 @@ This results folder contains dated actions/preference .csv files for each experi
 Modifying the way that the factor is generated, such that instead of multiplying each action judgement, it also changes the value of action by increasing the distance between each action judgment by a factor gives more accurate results
 
 ##### 02-01-2025 Data (`factored_single_example`)
-For a preference factor of 2.5 and an action factor of 5.0 gives a transition point of 1.40, HCVA of 2.1 
+For a preference factor of 2.5 and an action factor of 5.0 gives:
+- transition point of 1.40
+- HCVA of 2.1 
 
 ##### Non-Factored ESS data (08-01-2025) (`single_example`)
 For the original data with no factoring, the following results are observed:
-- 
+- Transition Point 1.3
+- HCVA Point 2.1

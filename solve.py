@@ -399,7 +399,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/08-01-2025-agent-data.csv",
+        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-agent-data.csv",
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -422,21 +422,21 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=True
+        default=False
         )
     parser.add_argument(
         '-g',
         type=str,
         #default='14-11-results-factor-2.5-5.0-prefs.csv',
-        default='08-01-2025-actions.csv',
-        #sdefault='none',
+        #default='08-01-2025-actions.csv',
+        default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        default=None,
-        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/14-11-processed_data_with_principles_ess.csv',
+        #default=None,
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-principles.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
@@ -444,7 +444,7 @@ if __name__ == '__main__':
         '-pv',
         type=bool,
         #default=False, 
-        default=False,
+        default=True,
         help='Compute the P value consensus aggregation method'
     )
     parser.add_argument(
