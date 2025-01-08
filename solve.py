@@ -34,8 +34,7 @@ def aggregate(P_list,
     PJ_list, 
     Pw, 
     Pcountry_dict, 
-    principle_data, 
-    limit_p_filename):
+    principle_data):
     """
     This function is used by the experiment_runner.py file for aggregation
     """
@@ -58,7 +57,7 @@ def aggregate(P_list,
     dist_1p_list = [dist_1p]
     dist_pl_list = [dist_pl]
 
-    while p < 10:
+    while p <= 10.1:
         p += incr
         A, b = FormalisationMatrix(PP_list, PJ_list, Pw, p, True)
         cons, _, ub = Lp(A, b, p)
@@ -87,7 +86,7 @@ def aggregate(P_list,
             break
 
     cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-    #print("DEBUG: cut_list length is: ", len(cut_list))
+    print("DEBUG: cut_list length is: ", len(cut_list))
     con_vals = [0, 0]
     for j in range(2):
         con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
@@ -125,7 +124,7 @@ def aggregate(P_list,
     dist_pl_list = [dist_pl]
     diff = np.inf
 
-    while p < 10:
+    while p <= 10.1:
         p += incr
         A, b = FormalisationMatrix(P_list, J_list, w, p, True)
         cons, _, ub = Lp(A, b, p)
@@ -162,7 +161,7 @@ def aggregate(P_list,
     cons_list = [cons_1]
     dist_1p_list = [dist_1p]
     dist_pl_list = [dist_pl]
-    while p < 10:
+    while p < 10.1:
         p += incr
         A, b = FormalisationMatrix(P_list, J_list, w, p, False)
         cons, _, ub = Lp(A, b, p)
@@ -400,7 +399,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/processed_data_one_action_ess.csv_with_factor_2.5_5.0.csv",
+        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/08-01-2025-agent-data.csv",
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
@@ -429,8 +428,8 @@ if __name__ == '__main__':
         '-g',
         type=str,
         #default='14-11-results-factor-2.5-5.0-prefs.csv',
-        #default='02-01-2025-preferences-a-2.5-p-5.0.csv',
-        default='none',
+        default='08-01-2025-actions.csv',
+        #sdefault='none',
         help='store results in csv')
     
     parser.add_argument(

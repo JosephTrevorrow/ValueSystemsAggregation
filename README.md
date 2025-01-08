@@ -1,13 +1,14 @@
 Hierarchical Consensus Value Aggregation for Value-Aligned Multi-Agent Systems
 ===================
-This Repository contains all code and experiment data for the paper "Hierarchical Consensus Value Aggregation for Value-Aligned Multi-Agent Systems". This work is an extension of work done by researchers credited below, and as such a fork of a repository for their paper "Aggregating Value Systems for Decision Support". 
+This Repository contains all code and experiment data for the paper "Hierarchical Consensus Value Aggregation for Value-Aligned Multi-Agent Systems". This work is an extension of the work in "Aggregating Value Systems for Decision Support" by Roger X. Lera-Leri, Enrico Liscio, Filippo Bistaffa, Catholijn M. Jonker, Maite Lopez-Sanchez, Pradeep K. Murukannaiah, Juan A. Rodríguez-Aguilar, and Francisco Salas-Molina
+in Knowledge-Based Systems, 2024. As such, the code here is a fork of their code repository.
 
-We run our experiments in "experiment_runner.py" which given the name of a society data will produce limit graph csv files for each timestep, and files contianing the consensus value system at each time step, as well as an average satisfaction for each group of agents. 
+**In this fork, we have added the following features**
+- An ability to generate synthetic data for experiments both for a single example use case (1 action, 2 values) and for a set of contexts (3 contexts (situations), 2 actions and 2 values per context)
+- Experiment runner code files for both experiment types
+- Data analysis scripts for both experiment types
 
-Usage testing on a society data file of "util_soc.csv: 
-```
-python-jl -m IPython experiment_runner.py util_soc
-```
+We additionally have included a subset of the European Social Study (ESS) round 8 data for our single example, and include a file to process this into a value system
 
 Aggregating Value Systems
 ===================
@@ -50,6 +51,14 @@ optional arguments:
   -g G        store results in csv
 ```
 
+HPC Experiments
+-----------
+We run our experiments in "experiment_runner.py" which given the name of a society data will produce limit graph csv files for each timestep, and files contianing the consensus value system at each time step, as well as an average satisfaction for each group of agents. 
+
+Usage testing on a society data file of "util_soc.csv: 
+```
+python-jl -m IPython experiment_runner.py util_soc
+```
 
 Acknowledgements
 ----------

@@ -5,14 +5,12 @@ the data according to the section 6 of the article.
 Religious maps to Traditionalist (unintentionally so)
 Non-Religious maps to Hedonist (unintentionally so)
 div is the mapping to the single action (for/against basic income scheme)
+'adp' is mentioned here but not used in the single action example. Here it is kept as a placeholder should two actions be required.
 """
-
-
 import pandas as pd
 import csv
 
-
-def a_adp(element):
+def process_action(element):
     category_dic = {
         4: 1,
         3: 2,
@@ -32,25 +30,6 @@ def a_adp(element):
         return adp_support, div_support
     except BaseException:
         return None, None
-
-# Not used in ess
-"""
-def a_div(element): 
-    #We process the data of Q44G ('v155'). never = 1 - 5 strong disagreement
-    #INPUT: element = pandas dataframe row
-    #Return: value (float [-1,1]) represents a(adp)
-    try:
-        if element['v155'] == 'never':
-            int_value = 1
-        elif element['v155'] == 'always':
-            int_value = 10
-        else:
-            int_value = int(element['v155'])
-        value = (int_value - 5.5) / 4.5
-        return value
-    except BaseException:
-        return None
-"""
 
 def process_principle(dataframe, caseno):
     """
@@ -83,7 +62,6 @@ def process_principle(dataframe, caseno):
     else:
         return (egalitarian)
 
-
 def process_participant(dataframe, caseno):
     """
     In this function we count the number of religious or non-religious
@@ -114,14 +92,14 @@ def process_participant(dataframe, caseno):
     except BaseException:
         traditionalist = None
 
-    # we compute a_ad and a_dv
-    action_adp, action_div = a_adp(dataframe_row)
+    # we compute a_adp and a_div
+    action_adp, action_div = process_action(dataframe_row)
 
+    # Sanity checking
     if traditionalist is None or action_adp is None or action_div is None:
         return None
     else:
         return (traditionalist, action_adp, action_div)
-
 
 def process_country(dataframe, country):
     """
@@ -169,26 +147,23 @@ def process_country(dataframe, country):
                     sum_a_div_nonrel += tuple_[2]
         else:
             continue
+
+    # Normalise the preferences and add to new vars
+    normalised_religious = n_religious / (n_religious+n_nonreligious)
+    normalised_nonreligious = n_nonreligious / (n_religious+n_nonreligious)
     print("country", country)
-    print('n_religious: ', n_religious)
-    print('n_nonreligious: ', n_nonreligious)
-    print('n_rel_adp: ', n_rel_adp)
-    print('n_nonrel_adp: ', n_nonrel_adp)
-    print('n_rel_div: ', n_rel_div)
-    print('n_nonrel_div: ', n_nonrel_div)
-    print('sum_a_adp_rel: ', sum_a_adp_rel)
-    print('sum_a_adp_nonrel: ', sum_a_adp_nonrel)
-    print('sum_a_div_rel: ', sum_a_div_rel)
-    print('sum_a_div_nonrel: ', sum_a_div_nonrel)
     return {
-        'rel': n_religious,
-        'nonrel': n_nonreligious,
+        'rel_sum': n_religious,
+        'nonrel_sum': n_nonreligious,
+        'rel' : normalised_religious,
+        'nonrel' : normalised_nonreligious,
         #'a_adp_rel': sum_a_adp_rel / n_rel_adp,
         #'a_adp_nonrel': sum_a_adp_nonrel / n_nonrel_adp,
         'a_div_rel': sum_a_div_rel / n_rel_div,
         'a_div_nonrel': sum_a_div_nonrel / n_nonrel_div
     }
 
+# Unused, principles in single example are generated synthetically
 def principle_process_country(dataframe, country):
     """
     Process information for each country
@@ -227,7 +202,7 @@ if __name__ == '__main__':
 
     print(df)
 
-    # we create a dictionary to store the data per country
+    # we create a temp dictionary to store the data per country
     dictionary = {}
     for country in list(df['cntry'].unique()):
         dict_ = process_country(
@@ -242,7 +217,9 @@ if __name__ == '__main__':
         for item in dictionary[country].keys():
             csv_rows2.append(dictionary[country][item])
         csv_rows.append(csv_rows2)
+    
     # we store the data in a file
-    with open('principle_processed_data_ess.csv', 'w', newline='') as csvfile:
+    #with open('principle_processed_data_ess.csv', 'w', newline='') as csvfile:
+    with open('08-01-2025.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
