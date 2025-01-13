@@ -436,7 +436,7 @@ if __name__ == '__main__':
         '-pf',
         type=str,
         #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/13-01-2025-against-principles.csv',
         #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
         help='CSV file with principle data'
     )    
