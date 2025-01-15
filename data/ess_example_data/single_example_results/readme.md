@@ -9,7 +9,29 @@ For a preference factor of 2.5 and an action factor of 5.0 gives:
 - transition point of 1.40
 - HCVA of 2.1 
 
-##### Non-Factored ESS data (08-01-2025) (`single_example`)
+##### Non-Factored ESS data (12-01-2025) (`single_example`)
+HCVA and Transition calculation completed twice to double check 
 For the original data with no factoring, the following results are observed:
 - Transition Point 1.3
-- HCVA Point 2.1
+- HCVA Point 2.0 (cut point=2.4)
+
+13-01-2025-against-principles.csv gives HCVA point of 1.8
+
+#### Test Cases HCVAs (15/01/2025)
+- Bottom Quartile (bottom 25%): 1.3 (cut point=1.8)
+- Top Quartile (Top 25%): 2.5 (cut point=10.0)
+- Extreme Egal: 3.4 (cut point=10.0)
+- Extreme Util: 1.1 (cut point=1.2)
+
+###### Top 75% of each
+- General support : 4.1 (cut point 10)
+- General opposition 5.5 (cut point 10)
+
+##### Top 50% of each
+- General Support: 1.1 (1.2 Cut Point)
+- General Opposition: 6.0 (10 cut point)
+
+
+- General support (1) = 4.3
+- General support (2) = 4.0
+- General support (3) = 1.5

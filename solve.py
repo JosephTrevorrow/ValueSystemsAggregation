@@ -304,8 +304,8 @@ def L1(A, b):
     cost = cp.sum(t)
     prob = cp.Problem(cp.Minimize(cost), constraints)
     # optimize model
-    prob.solve(solver='ECOS', verbose=False)
-    # prob.solve(solver='GLPK', verbose=True)
+    #prob.solve(solver='ECOS', verbose=False)
+    prob.solve(solver='CPLEX', verbose=True)
     cons = list(x.value)
     cons = np.array(cons)
     obj = prob.value
@@ -400,7 +400,6 @@ if __name__ == '__main__':
         '-f',
         type=str,
         default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-agent-data.csv",
-        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_data.csv',
         help='CSV file with personal data')
     parser.add_argument(
         '-w',
@@ -436,8 +435,7 @@ if __name__ == '__main__':
         '-pf',
         type=str,
         #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/13-01-2025-against-principles.csv',
-        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/form_principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/15-01-2025-50-pc-opposition-principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
@@ -617,78 +615,43 @@ if __name__ == '__main__':
 
     # Aggregate using principle values
     elif args.pv == True:
-        print("DEBUG INFO: Aggregating on Agent Principle")
+        print("INFO: Aggregating on Agent Principle")
         p_list, _, cons_list, _, _, cons_1, cons_l=  aggregate_all_p(P_list=PP_list, 
                                                         J_list=PJ_list,
                                                         w=Pw)        
-        ## Defining a cut point to drop all rows where there are P's that are higher than this
-    
-        # Cut point is the limit where p is within epsilon of p=\infty
-        print("Cons list is: ", cons_list)
+        ## Defining a cut point to drop all rows where there are P values whose distance is within epsilon of p=\infty
         cut_point = 10
         incr = 0.1
         j = 0
+        epsilon = 0.005
         for i in np.arange(1 + incr, 10, incr):
             cons = cons_list[j]
             dist_1p = np.linalg.norm(cons_1 - cons, i)
             dist_pl = np.linalg.norm(cons_l - cons, i)
             j += 1
             # Note: Hard Coded \epsilon value
-            if (abs(dist_1p - dist_pl) < 0.005):
+            if (abs(dist_1p - dist_pl) < epsilon):
                 cut_point = i
-                print('Not improving anymore, stopping!')
+                # print('Not improving anymore, stopping!')
                 break
-
+        print("DEBUG: Cut point is: ", cut_point)
+        # Cut point defined, now cut from the list of consensus values, and find the mean of these
         cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-        print("DEBUG: cut_list length is: ", len(cut_list))
         con_vals = [0, 0]
         for j in range(2):
             con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
         
+        # Find the nearest P value to the mean of the cut list (defined in con_vals)
         con_p = 1.0 
         best_dist = 999
-        for j in range(len(cons_list)):
-            dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
+        for j in range(len(cut_list)):
+            dist = [abs(cut_list[j][1] - con_vals[0]), abs(cut_list[j][2] - con_vals[1])]
             dist = sum(dist)
             if dist < best_dist:
                 best_dist = dist
                 # to convert from ordinal list num to corresponding p
                 con_p = (j/10)+1
-
-        print("DEBUG INFO: Finding best P")
-        ## Defining a cut point to drop all rows where there are P's that are higher than this
-        # TODO: Include finding limit P rather than hard coding
-        cut_point = 3.8
-        cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-        print("DEBUG: cut_list length is: ", len(cut_list))
-        con_vals = [0, 0]
-        for j in range(2):
-            con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
-        print("DEBUG: Con vals are: ",con_vals)
-        
-        con_p = 1.0 
-        best_dist = 999
-        for j in range(len(cons_list)):
-            dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
-            dist = sum(dist)
-            if dist < best_dist:
-                best_dist = dist
-                # to convert from ordinal list num to corresponding p
-                con_p = (j/10)+1
-
-        print("DEBUG: Nearest P is: ", con_p)
-
-        # TODO: you arent running aggregation with con_p
-        print("DEBUG: Running Aggregation with P = ", con_p)
-        agg_action_p_list, _, agg_action_cons_list, _, _, cons_actions = aggregate_principles(False, "aggregated_action_values.csv", con_p=con_p)
-        agg_pref_p_list, _, agg_pref_cons_list, _, _, cons_prefs = aggregate_principles(True, "aggregated_preference_values.csv", con_p=con_p)
-
-        decision = make_decision(cons_prefs, cons_actions)
-        print("Decision made at ratio: ", decision[0], " to ", decision[1])
-
-        # Check if explanation needed, if so, run
-        #if args.ex != None:
-            # Compute justification
+        print("DEBUG: Nearest P to mean con_vals is: ", con_p)
     else:
         if p == 2:
             A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)
