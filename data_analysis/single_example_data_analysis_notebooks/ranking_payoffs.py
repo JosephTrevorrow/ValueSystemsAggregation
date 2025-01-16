@@ -69,12 +69,13 @@ def latex_rank_sums(agent_data_dfs, hcva_names):
 
     # Create a LaTeX table
     latex_table = rank_sums_df.to_latex(index=True, header=['hcva rank', 't rank', 'util rank', 'egal rank'], caption='Sum of rankings given to each strategy by agents (Lower is better).')
-    with open('rank_sums_table.tex', 'w') as f:
+    with open('individual_rank_sums_table.tex', 'w') as f:
         f.write(latex_table)
 
-def latex_single_rankings(agent_data_df):
+def latex_single_rankings(agent_data_df, hcva_name):
     # Calculate the frequency of each strategy at each rank
-    rank_frequencies = agent_data_df[['hcva_rank', 't_rank', 'util_rank', 'egal_rank']].apply(pd.Series.value_counts).fillna(0).astype(int)
+    print(agent_data_df)
+    rank_frequencies = agent_data_df[[hcva_name, 't_rank', 'util_rank', 'egal_rank']].apply(pd.Series.value_counts).fillna(0).astype(int)
 
     # Create a LaTeX table
     latex_rank_frequencies = rank_frequencies.T.to_latex()
@@ -99,11 +100,11 @@ def latex_borda_counts(agent_data_dfs, hcva_names):
 
     # Create a LaTeX table
     latex_borda_scores = borda_scores_df.to_latex(index=True, header=['hcva borda', 't borda', 'util borda', 'egal borda'], caption='Borda scores for each strategy (Higher is better).')
-    with open('borda_scores_table.tex', 'w') as f:
+    with open('individual_borda_scores_table.tex', 'w') as f:
         f.write(latex_borda_scores)
     
 if __name__ == '__main__':
-    agent_data_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-agent-data.csv"
+    agent_data_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/all_individual_responses.csv"
     agent_data_df = pd.read_csv(agent_data_path)
 
     consensus_data_path_pref = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-actions.csv"
@@ -134,7 +135,7 @@ if __name__ == '__main__':
     # Print Borda Counts and Rankings
     latex_rank_sums(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
     latex_borda_counts(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
-
+    #latex_single_rankings(agent_data_dfs['ESS_Data'], 'ESS_Data')
 
 
 
