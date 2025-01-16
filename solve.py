@@ -435,7 +435,7 @@ if __name__ == '__main__':
         '-pf',
         type=str,
         #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/15-01-2025-50-pc-opposition-principles.csv',
+        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/16-01-2025-principles-ess.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(

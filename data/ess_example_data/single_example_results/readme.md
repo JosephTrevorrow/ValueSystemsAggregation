@@ -28,10 +28,8 @@ For the original data with no factoring, the following results are observed:
 - General opposition 5.5 (cut point 10)
 
 ##### Top 50% of each
-- General Support: 1.1 (1.2 Cut Point)
-- General Opposition: 6.0 (10 cut point)
+- General Support: 1.1 (1.2 Cut Point) (50-pc)
+- General Opposition: 6.0 (10 cut point) (50-pc)
 
-
-- General support (1) = 4.3
-- General support (2) = 4.0
-- General support (3) = 1.5
+##### ESS Data
+- HCVA: 2.5 (cut points=3.7)
