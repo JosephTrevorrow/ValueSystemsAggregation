@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import math
+import cvxpy as cp
 
 import juliapkg
 juliapkg.require_julia("=1.10.3")
@@ -390,6 +391,17 @@ def Lp(A, b, p):
     else:  # vanilla IRLS implementation
         return IRLS(A, b, p)
 
+def mLp(A, b, ps, λs, weight=True):
+    wps = [λ / Lp(A, b, p) if weight else λ for λ, p in zip(λs, ps)]
+    x = cp.Variable(v)
+    cost = cp.sum([wp * cp.pnorm(A @ x - b, p) for wp, p in zip(wps, ps)])
+    prob = cp.Problem(cp.Minimize(cost))
+    prob.solve(solver="ECOS", verbose=True)
+    res = np.abs(A @ x.value - b)
+    psi = np.var([wp * np.linalg.norm(res, p) for wp, p in zip(wps, ps)])
+    return x.value, res, prob.value / sum(wps), psi
+
+
 if __name__ == '__main__':
     parser = ap.ArgumentParser()
     parser.add_argument('-n', type=int, default=7, help='n')
@@ -441,15 +453,14 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pv',
         type=bool,
-        #default=False, 
-        default=True,
+        default=False,
         help='Compute the P value consensus aggregation method'
     )
     parser.add_argument(
-        '-ex',
-        type=str,
-        default="",
-        help="Generate explanation of agent with index as arg"
+        '-sml',
+        type=bool,
+        default=True,
+        help="Generate consensus using the method described by Salas-Molina et al."
     )
 
     args = parser.parse_args()
@@ -468,7 +479,34 @@ if __name__ == '__main__':
             filename=args.pf, delimiter=',', weights=args.w)
 
     # Compute the limit P
-    if args.l:
+    if args.sml:
+        p = [2.0]
+        ps = np.atleast_1d(p)
+        ps = np.where(ps == -1, np.inf, ps)
+        λs = np.ones_like(ps)
+        nλs = min(len(λs), len([]))
+        λs[:nλs] = [][:nλs]
+
+        A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
+        v = m * m
+
+        # w has weights equal to 1, shape needs to be equal
+        w = np.repeat(w, v)
+
+        print('A =')
+        print(A)
+        print('b =')
+        print(b.reshape(-1, 1))
+        print('p =', ps)
+        print('λ =', λs)
+
+        cons, res, u, psi = mLp(A, b, ps, λs, not(True))
+
+        print('Consensus =', cons)
+        print('U = {:.4f}'.format(u))
+        print('Psi = {:.4f}'.format(psi))
+        print('Residuals =', res)
+    elif args.l:
         print("In args.l, computing Limit")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, _, _, = L1(A, b)
