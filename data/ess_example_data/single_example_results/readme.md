@@ -33,3 +33,5 @@ For the original data with no factoring, the following results are observed:
 
 ##### ESS Data
 - HCVA: 2.5 (cut points=3.7)
+- Salas-Molina Actions: 
+    - 

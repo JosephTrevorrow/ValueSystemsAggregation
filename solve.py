@@ -393,10 +393,11 @@ def Lp(A, b, p):
 
 def mLp(A, b, ps, λs, weight=True):
     wps = [λ / Lp(A, b, p) if weight else λ for λ, p in zip(λs, ps)]
+    v = A.shape[1]
     x = cp.Variable(v)
     cost = cp.sum([wp * cp.pnorm(A @ x - b, p) for wp, p in zip(wps, ps)])
     prob = cp.Problem(cp.Minimize(cost))
-    prob.solve(solver="ECOS", verbose=True)
+    prob.solve(solver="ECOS", verbose=False)
     res = np.abs(A @ x.value - b)
     psi = np.var([wp * np.linalg.norm(res, p) for wp, p in zip(wps, ps)])
     return x.value, res, prob.value / sum(wps), psi
@@ -426,7 +427,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
-        default=False,
+        default=True,
         action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true', default=False)
     parser.add_argument(
@@ -480,7 +481,7 @@ if __name__ == '__main__':
 
     # Compute the limit P
     if args.sml:
-        p = [2.0]
+        p = [10]
         ps = np.atleast_1d(p)
         ps = np.where(ps == -1, np.inf, ps)
         λs = np.ones_like(ps)
@@ -488,7 +489,6 @@ if __name__ == '__main__':
         λs[:nλs] = [][:nλs]
 
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
-        v = m * m
 
         # w has weights equal to 1, shape needs to be equal
         w = np.repeat(w, v)
@@ -501,7 +501,7 @@ if __name__ == '__main__':
         print('λ =', λs)
 
         cons, res, u, psi = mLp(A, b, ps, λs, not(True))
-
+        # mLp returns: x.value, res, prob.value / sum(wps), psi
         print('Consensus =', cons)
         print('U = {:.4f}'.format(u))
         print('Psi = {:.4f}'.format(psi))
