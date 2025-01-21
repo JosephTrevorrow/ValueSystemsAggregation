@@ -481,31 +481,37 @@ if __name__ == '__main__':
 
     # Compute the limit P
     if args.sml:
-        p = [10]
-        ps = np.atleast_1d(p)
-        ps = np.where(ps == -1, np.inf, ps)
-        λs = np.ones_like(ps)
-        nλs = min(len(λs), len([]))
-        λs[:nλs] = [][:nλs]
+        print("In args.sml, computing Salas-Molina et al. method")
+        file_path = '/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/means_and_salas_molina_ps/principles_for_slm.csv'
+        try:
+            df = pd.read_csv(file_path)
+            if df.empty:
+                print(f"Warning: {file_path} is empty.")
+        except pd.errors.EmptyDataError:
+            print(f"Error: {file_path} is empty or not a valid CSV.")
+        except Exception as e:
+            print(f"Error reading {file_path}: {e}")
+        consensus_df = pd.DataFrame()
+        for series_name, series in df.items():
+            print("DEBUG: series_name: ", series_name)
+            p = [1,10,5]
+            ps = np.atleast_1d(p)
+            ps = np.where(ps == -1, np.inf, ps)
+            λs = np.ones_like(ps)
+            nλs = min(len(λs), len([]))
+            λs[:nλs] = [][:nλs]
 
-        A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
+            A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
 
-        # w has weights equal to 1, shape needs to be equal
-        w = np.repeat(w, v)
+            # w has weights equal to 1, shape needs to be equal
+            w = np.repeat(w, A.shape[1])
 
-        print('A =')
-        print(A)
-        print('b =')
-        print(b.reshape(-1, 1))
-        print('p =', ps)
-        print('λ =', λs)
+            cons, res, u, psi = mLp(A, b, ps, λs, not(True))
+            # mLp returns: x.value, res, prob.value / sum(wps), psi
+            print('Consensus =', cons)
+            consensus_df[series_name] = cons
+        consensus_df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/means_and_salas_molina_ps/slm_consensus.csv', index=False)
 
-        cons, res, u, psi = mLp(A, b, ps, λs, not(True))
-        # mLp returns: x.value, res, prob.value / sum(wps), psi
-        print('Consensus =', cons)
-        print('U = {:.4f}'.format(u))
-        print('Psi = {:.4f}'.format(psi))
-        print('Residuals =', res)
     elif args.l:
         print("In args.l, computing Limit")
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)

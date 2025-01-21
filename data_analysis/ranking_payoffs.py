@@ -57,6 +57,7 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_actions,
                 consensus_value = consensus_row[1][column]
                 abs_difference = abs(agent_value - consensus_value)
                 temp_distances.append(abs_difference)
+            print(temp_distances)
             temp_strategy_distances[consensus_row[1]['p']] = sum(temp_distances)
             temp_distances = []
         strategy_temp_distances = {key: value for key, value in sorted(temp_strategy_distances.items(), key=lambda item: item[1])}
