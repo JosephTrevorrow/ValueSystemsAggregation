@@ -21,10 +21,10 @@ def plot_data(data: pd.DataFrame, title: str):
     # Scale the x-axis
     plt.xlim(1.1, 4)
     plt.fill_between(data["p"], data["Dist_p"], data["Dist_inf"], 
-                     where=(data["p"] >= 1.1) & (data["p"] <= 1.5), 
+                     where=(data["p"] >= 1.1) & (data["p"] <= 2.3), 
                      color='green', alpha=0.3)
     plt.fill_between(data["p"], data["Dist_p"], data["Dist_inf"], 
-                    where=(data["p"] >= 1.4) & (data["p"] <= 5), 
+                    where=(data["p"] >= 2.2) & (data["p"] <= 5), 
                     color='blue', alpha=0.3)
     
     plt.xlabel("p")

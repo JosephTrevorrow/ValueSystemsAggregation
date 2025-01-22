@@ -28,8 +28,10 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_df, mse)
     print(consensus_data_df.tail())
 
     # Filter consensus_data_df to keep only rows with p values of interest (BASELINES)
-    relevant_p_values = [1.0, 1.8, hcva, 10.0, mse]
+    relevant_p_values = [1.0, 2.2, hcva, 10.0, mse]
     tolerance = 1e-5
+    print("DEBUG: MSE IS: ", mse)
+    print("DEBUG: HCVA IS: ", hcva) 
     consensus_data_df = consensus_data_df[consensus_data_df['p'].apply(lambda x: any(abs(x - val) < tolerance for val in relevant_p_values))]
 
     # Now the same for agents, but work from the unnormalised consensus data
@@ -53,7 +55,7 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_df, mse)
                 consensus_value = consensus_row[1][column]
                 abs_difference = abs(agent_value - consensus_value)
                 temp_distances.append(abs_difference)
-            print(temp_distances)
+            #print(temp_distances)
             temp_strategy_distances[consensus_row[1]['p']] = sum(temp_distances)
             temp_distances = []
         strategy_temp_distances = {key: value for key, value in sorted(temp_strategy_distances.items(), key=lambda item: item[1])}
@@ -62,13 +64,13 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_df, mse)
             #print(f"Principle: {principle}, Distance: {distance}")
             principle = round(principle, 1)
             agent_data_df.at[agent_row[0], principle] = i + 1
-    agent_data_df.rename(columns={1.0 : 'util_rank', hcva : hcva_name, 1.8: 't_rank', 10.0 : 'egal_rank', mse : 'mse_rank'}, inplace=True)
+    agent_data_df.rename(columns={1.0 : 'util_rank', hcva : hcva_name, 2.2: 't_rank', 10.0 : 'egal_rank', mse : 'mse_rank'}, inplace=True)
     return agent_data_df
 
 def latex_rank_sums(agent_data_dfs, hcva_names):
     # Initialize a dictionary to store the rank sums for each principle
     rank_sums_dict = {name: {'hcva_rank': 0, 't_rank': 0, 'util_rank': 0, 'egal_rank': 0, 'mse_rank': 0} for name in hcva_names}
-    print(agent_data_dfs[0])
+    #print(agent_data_dfs[0])
     # Sum up the ranks for each principle
     for agent_data_df, hcva_name in zip(agent_data_dfs, hcva_names):
         print(hcva_name)
@@ -86,10 +88,30 @@ def latex_rank_sums(agent_data_dfs, hcva_names):
     latex_table = rank_sums_df.to_latex(index=True, header=['hcva rank', 't rank', 'util rank', 'egal rank', 'mse_rank'], caption='Sum of rankings given to each strategy by agents (Lower is better).')
     with open('mse_rank_sums_table.tex', 'w') as f:
         f.write(latex_table)
+def latex_rank_fptp(agent_data_dfs, hcva_names):
+    # Initialize a dictionary to store the rank sums for each principle
+    rank_sums_dict = {name: {'hcva_rank': 0, 't_rank': 0, 'util_rank': 0, 'egal_rank': 0, 'mse_rank': 0} for name in hcva_names}
+    # Sum up the ranks for each principle where the value is 1.0
+    for agent_data_df, hcva_name in zip(agent_data_dfs, hcva_names):
+        rank_sums = agent_data_df[[hcva_name, 't_rank', 'util_rank', 'egal_rank', 'mse_rank']].apply(lambda x: x[x == 1.0].sum())
+        rank_sums_dict[hcva_name]['hcva_rank'] = int(rank_sums[hcva_name])
+        rank_sums_dict[hcva_name]['t_rank'] = int(rank_sums['t_rank'])
+        rank_sums_dict[hcva_name]['util_rank'] = int(rank_sums['util_rank'])
+        rank_sums_dict[hcva_name]['egal_rank'] = int(rank_sums['egal_rank'])
+        rank_sums_dict[hcva_name]['mse_rank'] = int(rank_sums['mse_rank'])
+
+    # Create a DataFrame from the rank sums dictionary
+    rank_sums_df = pd.DataFrame(rank_sums_dict).T
+
+    # Create a LaTeX table
+    latex_table = rank_sums_df.to_latex(index=True, header=['hcva rank', 't rank', 'util rank', 'egal rank', 'mse_rank'], caption='Sum of rankings given to each strategy by agents (Lower is better).')
+    with open('mse_rank_fptp_table.tex', 'w') as f:
+        f.write(latex_table)
+
 
 def latex_single_rankings(agent_data_df, hcva_name):
     # Calculate the frequency of each strategy at each rank
-    print(agent_data_df)
+    #print(agent_data_df)
     rank_frequencies = agent_data_df[[hcva_name, 't_rank', 'util_rank', 'egal_rank', 'mse_rank']].apply(pd.Series.value_counts).fillna(0).astype(int)
 
     # Create a LaTeX table
@@ -157,7 +179,7 @@ if __name__ == '__main__':
     for column in mse_df.columns:
         if column != 'p' and column != 'series_name':
             mse_df[column] = mse_df[column].astype(float)
-    print(mse_df)
+    #print(mse_df)
 
     # Get all df's
     agent_data_dfs = {}
@@ -166,9 +188,9 @@ if __name__ == '__main__':
         agent_data_dfs[hcva_name] = temp_agent_data_df
 
     # Print Borda Counts and Rankings
-    latex_rank_sums(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
-    latex_borda_counts(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
+    #latex_rank_sums(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
+    #latex_borda_counts(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
     #latex_single_rankings(agent_data_dfs['ESS_Data'], 'ESS_Data')
-
+    latex_rank_fptp(list(agent_data_dfs.values()), list(agent_data_dfs.keys()))
 
 

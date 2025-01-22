@@ -208,7 +208,7 @@ if __name__ == '__main__':
         '-t',
         help='compute the threshold p',
         action='store_true',
-        default=False
+        default=True
         )
     parser.add_argument(
         '-g',
@@ -233,7 +233,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-sml',
         type=bool,
-        default=True,
+        default=False,
         help="Generate consensus using the method described by Salas-Molina et al."
     )
 
