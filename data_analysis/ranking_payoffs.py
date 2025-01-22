@@ -1,10 +1,11 @@
 import pandas as pd
 
-def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_actions, mse_prefs):
+def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_df, mse):
     agent_data_df = agent_data_df[['country','Rel-Nonrel','Nonrel-Rel', 'a_div_rel', 'a_div_nonrel']]
     consensus_data_df = consensus_data_df[['p','Rel_div_p', 'Nonrel_div_p', 'Rel-Nonrel', 'Nonrel-Rel']]
-    agent_data_df.rename(columns={'principle_value': 'p', 'a_div_rel' : 'Rel_div_p', 'a_div_nonrel': 'Nonrel_div_p'}, inplace=True)
-    
+    agent_data_df.rename(columns={'a_div_rel' : 'Rel_div_p', 'a_div_nonrel': 'Nonrel_div_p'}, inplace=True)
+    mse_df = mse_df[['p','Rel_div_p', 'Nonrel_div_p', 'Rel-Nonrel', 'Nonrel-Rel']]
+
     # Normalise all data between 0-1
     consensus_data_df = consensus_data_df.astype(float)
     for column in consensus_data_df.columns:
@@ -16,23 +17,18 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_actions,
         consensus_data_df[column] = (consensus_data_df[column] - min_val) / (max_val - min_val)
 
     # Normalise mse values
-    for key, val in mse_prefs.items():
-        min_val = consensus_data_df[key].min()
-        max_val = consensus_data_df[key].max()
-        mse_prefs[key] = (val - min_val) / (max_val - min_val)
-    for key, val in mse_actions.items():
-        min_val = consensus_data_df[key].min()
-        max_val = consensus_data_df[key].max()
-        mse_actions[key] = (val - min_val) / (max_val - min_val)
-
-    # Append mse prefs and mse actions as one row in consensus_data_df, where p = 999
-    mse_row = {'p': 999, 'Rel_div_p': mse_actions['Rel_div_p'], 'Nonrel_div_p': mse_actions['Nonrel_div_p'], 
-               'Rel-Nonrel': mse_prefs['Rel-Nonrel'], 'Nonrel-Rel': mse_prefs['Nonrel-Rel']}
-    consensus_data_df.loc[len(consensus_data_df)] = mse_row
+    for column in mse_df.columns:
+        if column != 'p' and column != 'series_name':
+            print("DEBUG:",column)
+            min_val = consensus_data_df[column].min()
+            max_val = consensus_data_df[column].max()
+            mse_df[column] = (mse_df[column] - min_val) / (max_val - min_val)
+    consensus_data_df = pd.concat([consensus_data_df, mse_df], ignore_index=True)
+    #consensus_data_df.loc[len(consensus_data_df)]
     print(consensus_data_df.tail())
 
-    # Filter consensus_data_df to keep only rows with p values of interest
-    relevant_p_values = [1.0, 1.4, hcva, 10.0, 999]
+    # Filter consensus_data_df to keep only rows with p values of interest (BASELINES)
+    relevant_p_values = [1.0, 1.8, hcva, 10.0, mse]
     tolerance = 1e-5
     consensus_data_df = consensus_data_df[consensus_data_df['p'].apply(lambda x: any(abs(x - val) < tolerance for val in relevant_p_values))]
 
@@ -66,7 +62,7 @@ def get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_actions,
             #print(f"Principle: {principle}, Distance: {distance}")
             principle = round(principle, 1)
             agent_data_df.at[agent_row[0], principle] = i + 1
-    agent_data_df.rename(columns={1.0 : 'util_rank', hcva : hcva_name, 1.4: 't_rank', 10.0 : 'egal_rank', 999 : 'mse_rank'}, inplace=True)
+    agent_data_df.rename(columns={1.0 : 'util_rank', hcva : hcva_name, 1.8: 't_rank', 10.0 : 'egal_rank', mse : 'mse_rank'}, inplace=True)
     return agent_data_df
 
 def latex_rank_sums(agent_data_dfs, hcva_names):
@@ -124,33 +120,49 @@ def latex_borda_counts(agent_data_dfs, hcva_names):
         f.write(latex_borda_scores)
     
 if __name__ == '__main__':
-    agent_data_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-agent-data.csv"
+    agent_data_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/22-01-2025-agent-data.csv"
     agent_data_df = pd.read_csv(agent_data_path)
+    agent_data_df.rename(columns={'rel': 'Rel-Nonrel', 'nonrel': 'Nonrel-Rel'}, inplace=True)
 
-    consensus_data_path_pref = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-actions.csv"
-    consensus_data_path_act = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-preferences.csv"
+    consensus_data_path_pref = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/22-01-2025-actions.csv"
+    consensus_data_path_act = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/22-01-2025-preferences.csv"
     temp_pref = pd.read_csv(consensus_data_path_pref)
     temp_act = pd.read_csv(consensus_data_path_act)
     consensus_data_df = pd.merge(temp_pref, temp_act, on='p')
 
     #####
     hcvas = {'Bottom_25': 1.3, "Top_25": 2.5, "Exreme_Egal": 3.4,
-             "Extreme_Util": 1.1, "General_Support_75": 4.1, "General_Opposition": 6.0,
+             "Extreme_Util": 1.1, "General_Support_75": 4.1, "General_Opposition_75": 6.0,
              "General_Support_50": 1.1, "General_Opposition_50": 6.0,
              "ESS_Data": 2.5}
     #####
-    baselines = {
-    'Utilitarian (1.0)': 1.0,
-    'Transition (1.3)': 1.3,
-    'Egalitarian (10.0)': 10.0
-    }
-    mse_actions = {'Rel_div_p' : -0.0212, 'Nonrel_div_p':  0.0177}
-    mse_prefs = {'Rel-Nonrel': 0.3457, 'Nonrel-Rel':  0.6543}
+    #####
+    mse = {'Bottom_25': 994,    
+             "Top_25": 990, 
+
+             "Exreme_Egal": 992,
+             "Extreme_Util": 999, 
+
+             "General_Support_75": 995, 
+             "General_Opposition_75": 996,
+
+             "General_Support_50": 997, 
+             "General_Opposition_50": 991,
+             "ESS_Data": 989}
+    #####
+
+    mse_data_path = "/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/means_and_salas_molina_ps/slm_consensus.csv"
+    mse_df = pd.read_csv(mse_data_path)
+    # Convert all columns other than 'p' in mse_df to float
+    for column in mse_df.columns:
+        if column != 'p' and column != 'series_name':
+            mse_df[column] = mse_df[column].astype(float)
+    print(mse_df)
 
     # Get all df's
     agent_data_dfs = {}
-    for hcva_name, hcva in hcvas.items():
-        temp_agent_data_df = get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_actions, mse_prefs)
+    for (hcva_name, hcva), (_, mse_value) in zip(hcvas.items(), mse.items()):
+        temp_agent_data_df = get_rankings(agent_data_df, consensus_data_df, hcva, hcva_name, mse_df, mse_value)
         agent_data_dfs[hcva_name] = temp_agent_data_df
 
     # Print Borda Counts and Rankings

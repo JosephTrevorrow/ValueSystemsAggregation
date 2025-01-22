@@ -6,7 +6,6 @@ from files import output_file, limit_output
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-import math
 import cvxpy as cp
 
 import juliapkg
@@ -14,168 +13,7 @@ juliapkg.require_julia("=1.10.3")
 juliapkg.resolve()
 from juliacall import Main as jl
 
-def shutdown_julia():
-    """
-    This method manually clears Julia memory by seting all values to None for garbage collection
-    """
-    try:
-        jl.seval("empty!(names(Main, all=true))")
-        #print("julia has been reset.")
-    except Exception as e:
-        pass
-        #print("error shutting down julia "+str(e))
-
 np.set_printoptions(edgeitems=1000, linewidth=1000, suppress=True, precision=4)
-
-def aggregate(P_list, 
-    J_list, 
-    w, 
-    country_dict, 
-    PP_list, 
-    PJ_list, 
-    Pw, 
-    Pcountry_dict, 
-    principle_data):
-    """
-    This function is used by the experiment_runner.py file for aggregation
-    """
-
-    ############################################
-    # Aggregate Principles and find HCVA point #
-    ############################################
-    A, b = FormalisationMatrix(PP_list, PJ_list, Pw, 1, True)
-    cons_1, _, ua = L1(A, b)
-    A, b = FormalisationMatrix(PP_list, PJ_list, Pw, np.inf, True)
-    cons_l, _, _, = Linf(A, b)
-    dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
-    dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
-    p = 1
-    #print('{:.2f} \t \t {:.4f}'.format(p, ua))
-    incr = 0.1
-    p_list = [1.0]
-    u_list = [ua]
-    cons_list = [cons_1]
-    dist_1p_list = [dist_1p]
-    dist_pl_list = [dist_pl]
-
-    while p <= 10.1:
-        p += incr
-        A, b = FormalisationMatrix(PP_list, PJ_list, Pw, p, True)
-        cons, _, ub = Lp(A, b, p)
-        p_list.append(p)
-        u_list.append(ub)
-        cons_list.append(cons)
-        dist_1p = np.linalg.norm(cons_1 - cons, p)
-        dist_pl = np.linalg.norm(cons_l - cons, p)
-        dist_1p_list.append(dist_1p)
-        dist_pl_list.append(dist_pl)
-        #print('{:.2f} \t \t {:.4f}'.format(p, ub))
-
-    # Finding cutoff point to stop bias to egalitarianism
-    cut_point = 10
-    incr = 0.1
-    j = 0
-    for i in np.arange(1 + incr, 10, incr):
-        cons = cons_list[j]
-        dist_1p = np.linalg.norm(cons_1 - cons, i)
-        dist_pl = np.linalg.norm(cons_l - cons, i)
-        j += 1
-        # Note: Hard Coded \epsilon value
-        if (abs(dist_1p - dist_pl) < 0.005):
-            cut_point = i
-            #print('Not improving anymore, stopping!')
-            break
-
-    cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-    print("DEBUG: cut_list length is: ", len(cut_list))
-    con_vals = [0, 0]
-    for j in range(2):
-        con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
-
-    hcva_point = 1.0 
-    best_dist = 999
-    for j in range(len(cons_list)):
-        dist = [abs(cons_list[j][1] - con_vals[0]), abs(cons_list[j][2] - con_vals[1])]
-        dist = sum(dist)
-        if dist < best_dist:
-            best_dist = dist
-            # to convert from ordinal list num to corresponding p
-            hcva_point = (j/10)+1
-
-
-    # Note because we are not interested in storing all value systems for HCVA we can re-use variable names for consistency
-
-    ###################################################
-    # Aggregate Preferences and find transition point #
-    ###################################################
-
-    A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
-    cons_1, _, ua = L1(A, b)
-    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
-    cons_l, _, _, = Linf(A, b)
-    dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
-    dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
-    p = 1
-    #print('{:.2f} \t \t {:.4f}'.format(p, ua))
-    incr = 0.1
-    p_list = [1.0]
-    u_list = [ua]
-    cons_list = [cons_1]
-    dist_1p_list = [dist_1p]
-    dist_pl_list = [dist_pl]
-    diff = np.inf
-
-    while p <= 10.1:
-        p += incr
-        A, b = FormalisationMatrix(P_list, J_list, w, p, True)
-        cons, _, ub = Lp(A, b, p)
-        p_list.append(p)
-        u_list.append(ub)
-        cons_list.append(cons)
-        dist_1p = np.linalg.norm(cons_1 - cons, p)
-        dist_pl = np.linalg.norm(cons_l - cons, p)
-        dist_1p_list.append(dist_1p)
-        dist_pl_list.append(dist_pl)
-        #print('{:.2f} \t \t {:.4f}'.format(p, ub))
-        # Calculating transition point
-        if abs(dist_1p - dist_pl) < diff:
-                diff = abs(dist_1p - dist_pl)
-                t_point = p
-    # store all cons_vals
-    preference_cons_vals = cons_list
-    
-    #####################
-    # Aggregate actions #
-    #####################
-
-    A, b = FormalisationMatrix(P_list, J_list, w, 1, False)
-    cons_1, _, ua = L1(A, b)
-    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, False)
-    cons_l, _, _, = Linf(A, b)
-    dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
-    dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
-    p = 1
-    #print('{:.2f} \t \t {:.4f}'.format(p, ua))
-    incr = 0.1
-    p_list = [1.0]
-    u_list = [ua]
-    cons_list = [cons_1]
-    dist_1p_list = [dist_1p]
-    dist_pl_list = [dist_pl]
-    while p < 10.1:
-        p += incr
-        A, b = FormalisationMatrix(P_list, J_list, w, p, False)
-        cons, _, ub = Lp(A, b, p)
-        p_list.append(p)
-        u_list.append(ub)
-        cons_list.append(cons)
-        dist_1p = np.linalg.norm(cons_1 - cons, p)
-        dist_pl = np.linalg.norm(cons_l - cons, p)
-        dist_1p_list.append(dist_1p)
-        dist_pl_list.append(dist_pl)
-    action_cons_vals = cons_list
-
-    return t_point, hcva_point, preference_cons_vals, action_cons_vals
 
 def aggregate_all_p(P_list, J_list, w):
     """
@@ -183,8 +21,14 @@ def aggregate_all_p(P_list, J_list, w):
     """
     A, b = FormalisationMatrix(P_list, J_list, w, 1, True)
     cons_1, _, ua = L1(A, b)
+    print(cons_1)
+    cons_1 = cons_1[1:3]
+    print(cons_1)
     A, b = FormalisationMatrix(P_list, J_list, w, np.inf, True)
     cons_l, _, _, = Linf(A, b)
+    print(cons_l)
+    cons_l = cons_l[1:3]
+    print(cons_l)
     dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
     dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
     p = 1
@@ -200,6 +44,7 @@ def aggregate_all_p(P_list, J_list, w):
         p += incr
         A, b = FormalisationMatrix(P_list, J_list, w, p, True)
         cons, _, ub = Lp(A, b, p)
+        cons = cons[1:3]
         p_list.append(p)
         u_list.append(ub)
         cons_list.append(cons)
@@ -216,77 +61,6 @@ def print_consensus(cons):
         print(cons.reshape((m, m)))
     else:
         print(cons.reshape((2 * m, m)))
-
-def make_decision(cons_prefs, cons_actions) -> str:
-    """
-    This function computes a simple decision based on the consensus value system
-    $(P[v_1,v_2]*a_{v_1}(i))+(P[v_2,v_1]*a_{v_2}(i))$
-
-    cons_prefs in format [rel-rel, rel-nonrel, nonrel-rel,nonrel-nonrel]
-    cons_actions in format [rel_adp_p, rel_div_p, nonrel_adp_p, nonrel_div_p]
-    """
-    # adp can be between -1 and 1, as cons_prefs can be between 0 and 1, and cons_actions can be between -1 and 1
-    adp = (cons_prefs[1] * cons_actions[0]) + (cons_prefs[2] * cons_actions[2])
-    div = (cons_prefs[1] * cons_actions[1]) + (cons_prefs[2] * cons_actions[3])
-    decision = [adp, div]
-    return decision
-
-def aggregate_principles(aggregation_type, filename, con_p=0.0, 
-                     P_list=None, 
-                     J_list=None, 
-                     w=None,
-                     principle_val=None):
-    """
-    We run aggregation of the action value matrices and store in a file
-    Used in the solve.py file for argument -pv (principle value aggregation)
-    """
-    consensus_vals = []
-
-    ## The same as in elif args.g
-    # Doing compute on 1 and np.inf allows for distance calc for P
-    A, b = FormalisationMatrix(P_list, J_list, w, 1, aggregation_type)
-    cons_1, _, ua = L1(A, b)
-    A, b = FormalisationMatrix(P_list, J_list, w, np.inf, aggregation_type)
-    cons_l, _, _, = Linf(A, b)
-    dist_1p = np.linalg.norm(cons_1 - cons_1, 1)
-    dist_pl = np.linalg.norm(cons_l - cons_1, np.inf)
-    
-    p = principle_val    
-    p_list = []
-    u_list = []
-    cons_list = []
-    dist_1p_list = []
-    dist_pl_list = []
-
-    A, b = FormalisationMatrix(P_list, J_list, w, p, aggregation_type)
-    cons, _, ub = Lp(A, b, p)
-    p_list.append(p)
-    u_list.append(ub)
-    cons_list.append(cons)
-    dist_1p = np.linalg.norm(cons_1 - cons, p)
-    dist_pl = np.linalg.norm(cons_l - cons, p)
-    dist_1p_list.append(dist_1p)
-    dist_pl_list.append(dist_pl)
-    #print('{:.2f} \t \t {:.4f}'.format(p, ub))
-    consensus_vals = [p, ub, cons, dist_1p, dist_pl]
-    
-    """
-    print("DEBUG: Saving to file, ", filename, " and returning cons list")
-    output_file(
-        p_list,
-        u_list,
-        cons_list,
-        dist_1p_list,
-        dist_pl_list,
-        aggregation_type,
-        filename)
-    """
-    
-    # Cut off n values, only interested in p values
-    # Note: n values (in action judgements) are the opposite of the p values
-    cons_list = cons_list[0][:4]
-    return cons_list
-
 
 def L1(A, b):
     """
@@ -397,7 +171,7 @@ def mLp(A, b, ps, λs, weight=True):
     x = cp.Variable(v)
     cost = cp.sum([wp * cp.pnorm(A @ x - b, p) for wp, p in zip(wps, ps)])
     prob = cp.Problem(cp.Minimize(cost))
-    prob.solve(solver="ECOS", verbose=False)
+    prob.solve(solver="ECOS", verbose=True)
     res = np.abs(A @ x.value - b)
     psi = np.var([wp * np.linalg.norm(res, p) for wp, p in zip(wps, ps)])
     return x.value, res, prob.value / sum(wps), psi
@@ -412,7 +186,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-f',
         type=str,
-        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/08-01-2025-agent-data.csv",
+        default="/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/22-01-2025-agent-data.csv",
         help='CSV file with personal data')
     parser.add_argument(
         '-w',
@@ -423,11 +197,11 @@ if __name__ == '__main__':
         '-i',
         type=str,
         help='computes equivalent p given an input consensus')
-    parser.add_argument('-o', type=str, help='write consensus to file', default="consensus_part2.csv")
+    parser.add_argument('-o', type=str, help='write consensus to file', default="consensus_args_o.csv")
     parser.add_argument(
         '-v',
         help='computes the preference aggregation',
-        default=True,
+        default=False,
         action='store_true')
     parser.add_argument('-l', help='compute the limit p', action='store_true', default=False)
     parser.add_argument(
@@ -439,16 +213,15 @@ if __name__ == '__main__':
     parser.add_argument(
         '-g',
         type=str,
-        #default='14-11-results-factor-2.5-5.0-prefs.csv',
-        #default='08-01-2025-actions.csv',
+        #default='test-prefs.csv',
         default='none',
         help='store results in csv')
     
     parser.add_argument(
         '-pf',
         type=str,
-        #default=None,
-        default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/16-01-2025-principles-ess.csv',
+        default=None,
+        #default='/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/principle_test_cases/16-01-2025-ESS-principles.csv',
         help='CSV file with principle data'
     )    
     parser.add_argument(
@@ -491,26 +264,49 @@ if __name__ == '__main__':
             print(f"Error: {file_path} is empty or not a valid CSV.")
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
+        print("DEBUG: df: ", df.head())
         consensus_df = pd.DataFrame()
         for series_name, series in df.items():
             print("DEBUG: series_name: ", series_name)
-            p = [1,10,5]
+            print("DEBUG: series: ", series)
+            p = series
             ps = np.atleast_1d(p)
             ps = np.where(ps == -1, np.inf, ps)
             λs = np.ones_like(ps)
             nλs = min(len(λs), len([]))
             λs[:nλs] = [][:nλs]
 
+            P_list, J_list, w, country_dict = FormalisationObjects(
+                filename=args.f, delimiter=',', weights=args.w)
             A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
-
             # w has weights equal to 1, shape needs to be equal
             w = np.repeat(w, A.shape[1])
 
-            cons, res, u, psi = mLp(A, b, ps, λs, not(True))
+            cons, res, u, psi = mLp(A, b, ps, λs, False)
+
+            P_list, J_list, w, country_dict = FormalisationObjects(
+                filename=args.f, delimiter=',', weights=args.w)
+            A_1, b_1 = FormalisationMatrix(P_list, J_list, w, 1, not(args.v))
+            # w has weights equal to 1, shape needs to be equal
+            w = np.repeat(w, A_1.shape[1])
+
+            cons_1, res, u, psi = mLp(A_1, b_1, ps, λs, False)
             # mLp returns: x.value, res, prob.value / sum(wps), psi
-            print('Consensus =', cons)
-            consensus_df[series_name] = cons
-        consensus_df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/means_and_salas_molina_ps/slm_consensus.csv', index=False)
+            # NOTE: COLUMN NAMES ARE ONLY ACCURATE WHEN ARGS.V = FALSE
+            consensus_df = consensus_df._append({
+                'series_name': series_name,
+                'Rel_div_p': cons[0],
+                'Nonrel_div_p': cons[1],
+                'Rel_div_n': cons[2],
+                'Nonrel_div_n': cons[3],
+                'Rel-Rel': cons_1[0],
+                'Rel-Nonrel': cons_1[1],
+                'Nonrel-Rel': cons_1[2],
+                'Nonrel-Nonrel': cons_1[3]
+            }, ignore_index=True)
+            print("len of cons: ", len(cons))
+            print("len of cons_1: ", len(cons_1))
+        consensus_df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/means_and_salas_molina_ps/test_cons.csv', index=False)
 
     elif args.l:
         print("In args.l, computing Limit")
@@ -586,14 +382,25 @@ if __name__ == '__main__':
     # Comptue the threshold P, and print transition point
     elif args.t:
         print("In args.t, computing Threshold")
+
+        # Join the two consensus lists of preferences and action judgements
+        #   to get a single consensus list for p=1 and p=\infty
         A, b = FormalisationMatrix(P_list, J_list, w, 1, args.v)
         cons_1, r_1, u_1 = L1(A, b)
-        print("cons_1", cons_1)
-        #cons_1 = [-0.027939325961567275,0.013170938317774624,0.027939325961567275,-0.013170938317774624]
+        cons_1 = cons_1[1:3]
+        A, b = FormalisationMatrix(P_list, J_list, w, 1, not(args.v))
+        cons_1_1, r_1_1, u_1_1 = L1(A, b)
+        cons_1_1 = cons_1_1[1:3]
+        cons_1 = np.concatenate((cons_1, cons_1_1))
         
         A, b = FormalisationMatrix(P_list, J_list, w, np.inf, args.v)
         cons_l, r_l, u_l = Linf(A, b)
-        #cons_l = [-0.052294976814419566,0.01052405695704031,0.052294976814419566,-0.01052405695704031]
+        cons_l = cons_l[1:3]
+        A, b = FormalisationMatrix(P_list, J_list, w, np.inf, not(args.v))
+        cons_l_1, r_l_1, u_l_1 = Linf(A, b)
+        cons_l_1 = cons_l_1[1:3]
+        cons_l = np.concatenate((cons_l, cons_l_1))
+
         diff = np.inf
         incr = 0.1
 
@@ -604,6 +411,13 @@ if __name__ == '__main__':
         for i in np.arange(1 + incr, p, incr):
             A, b = FormalisationMatrix(P_list, J_list, w, i, args.v)
             cons, r, u = Lp(A, b, i)
+            cons = cons[1:3]
+            A, b = FormalisationMatrix(P_list, J_list, w, i, not(args.v))
+            cons_cons, r_cons, u_cons = Lp(A, b, i)
+            cons_cons = cons_cons[1:3]
+            cons = np.concatenate((cons, cons_cons))
+            print('p: {:.2f}, cons: '.format(i), cons)
+
             dist_1p = np.linalg.norm(cons_1 - cons, i)
             dist_pl = np.linalg.norm(cons_l - cons, i)
             if (abs(dist_1p - dist_pl) < args.e):
@@ -668,6 +482,7 @@ if __name__ == '__main__':
         incr = 0.1
         j = 0
         epsilon = 0.005
+        print(cons_list)
         for i in np.arange(1 + incr, 10, incr):
             cons = cons_list[j]
             dist_1p = np.linalg.norm(cons_1 - cons, i)
@@ -676,26 +491,32 @@ if __name__ == '__main__':
             # Note: Hard Coded \epsilon value
             if (abs(dist_1p - dist_pl) < epsilon):
                 cut_point = i
-                # print('Not improving anymore, stopping!')
+                print('Not improving anymore, stopping!')
                 break
         print("DEBUG: Cut point is: ", cut_point)
         # Cut point defined, now cut from the list of consensus values, and find the mean of these
         cut_list = [cons_list[i] for i in range(len(cons_list)) if p_list[i] <= cut_point]
-        con_vals = [0, 0]
-        for j in range(2):
-            con_vals[j] = sum(i[j+1] for i in cut_list) / len(cut_list)
-        
-        # Find the nearest P value to the mean of the cut list (defined in con_vals)
+        con_vals = [sum(i[0] for i in cut_list) / len(cut_list), sum(i[1] for i in cut_list) / len(cut_list)]        
         con_p = 1.0 
         best_dist = 999
         for j in range(len(cut_list)):
-            dist = [abs(cut_list[j][1] - con_vals[0]), abs(cut_list[j][2] - con_vals[1])]
+            dist = [abs(cut_list[j][0] - con_vals[0]), abs(cut_list[j][1] - con_vals[1])]
             dist = sum(dist)
             if dist < best_dist:
                 best_dist = dist
                 # to convert from ordinal list num to corresponding p
                 con_p = (j/10)+1
         print("DEBUG: Nearest P to mean con_vals is: ", con_p)
+
+        ## Find the mean of all the P values
+        principle_df = pd.read_csv(args.pf)
+        principle_df = principle_df.drop(columns=['country'])
+        mean_values = principle_df.mean(axis=0)
+        print("Mean of each column in principle_df:")
+        print(mean_values)
+        egal = mean_values['rel'] / (mean_values['rel'] + mean_values['nonrel'])
+        principle = 1 + 9 * egal
+        print("Principle value via means is: ", principle)
     else:
         if p == 2:
             A, b = FormalisationMatrix(P_list, J_list, w, p, args.v)

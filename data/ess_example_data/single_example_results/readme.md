@@ -31,7 +31,8 @@ For the original data with no factoring, the following results are observed:
 - General Support: 1.1 (1.2 Cut Point) (50-pc)
 - General Opposition: 6.0 (10 cut point) (50-pc)
 
-##### ESS Data
+##### ESS Data 16th
 - HCVA: 2.5 (cut points=3.7)
+- Transition Point: 2.2 (22-01-2025-agent-data.csv)
 - Salas-Molina Actions: 
     - 

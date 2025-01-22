@@ -23,7 +23,6 @@ def process_action(element):
         if div_value > 4:
             raise BaseException
         div_support = -(div_value - 2.5) / 1.5
-
         # for the scheme
         adp_value = category_dic[element['basinc']]
         adp_support = -(adp_value - 2.5) / 1.5
@@ -157,13 +156,10 @@ def process_country(dataframe, country):
         'nonrel_sum': n_nonreligious,
         'rel' : normalised_religious,
         'nonrel' : normalised_nonreligious,
-        #'a_adp_rel': sum_a_adp_rel / n_rel_adp,
-        #'a_adp_nonrel': sum_a_adp_nonrel / n_nonrel_adp,
         'a_div_rel': sum_a_div_rel / n_rel_div,
         'a_div_nonrel': sum_a_div_nonrel / n_nonrel_div
     }
 
-# Unused, principles in single example are generated synthetically
 def principle_process_country(dataframe, country):
     """
     Process information for each country
@@ -199,9 +195,7 @@ if __name__ == '__main__':
     df = pd.read_spss("ESS8e02_3-subset.sav", convert_categoricals=False)
     # Subset here is 
     df = df.dropna(subset=['imptrad', 'ipgdtim', 'basinc'])
-
     print(df)
-
     # we create a temp dictionary to store the data per country
     dictionary = {}
     for country in list(df['cntry'].unique()):
@@ -220,6 +214,6 @@ if __name__ == '__main__':
     
     # we store the data in a file
     #with open('principle_processed_data_ess.csv', 'w', newline='') as csvfile:
-    with open('08-01-2025.csv', 'w', newline='') as csvfile:
+    with open('22-01-2025-agent-data.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
