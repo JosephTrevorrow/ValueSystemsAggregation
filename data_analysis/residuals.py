@@ -87,4 +87,4 @@ if __name__ == "__main__":
         print("DEBUG: CON DETAILS IS: ",con_details)
         temp_file = calculate_normalised_residual(agents, con_details)
         temp_df = pd.DataFrame(temp_file, columns=['residual'])
-        temp_df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/normalised_residuals/' + name + '.csv', index=False)
+        temp_df.to_csv('/home/ia23938/Documents/GitHub/ValueSystemsAggregation/data/ess_example_data/single_example_results/single_example/normalised_residuals/principles_included_' + name + '.csv', index=False)
